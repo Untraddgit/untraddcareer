@@ -1,6 +1,20 @@
 import  { useState } from 'react';
 import { BookOpen, Compass, Award, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, BarChart, MessageCircle, Zap } from 'lucide-react';
+import { createGlobalStyle } from 'styled-components';
 
+const GlobalStyle = createGlobalStyle`
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .animate-spin-slow {
+    animation: spin-slow 15s linear infinite;
+  }
+`;
 export default function StudentJourneyRoadmap() {
   const [activePhase, setActivePhase] = useState(1);
   
@@ -344,19 +358,8 @@ export default function StudentJourneyRoadmap() {
         </div>
       </footer>
       
-      <style jsx>{`
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 15s linear infinite;
-        }
-      `}</style>
+      <GlobalStyle />
+
     </div>
   );
 }
