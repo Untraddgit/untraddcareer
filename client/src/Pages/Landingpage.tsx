@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { BookOpen, Compass, Award, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, BarChart, MessageCircle, Zap } from 'lucide-react';
 
 export default function StudentJourneyRoadmap() {
