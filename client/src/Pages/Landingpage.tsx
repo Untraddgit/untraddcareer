@@ -113,7 +113,7 @@ export default function StudentJourneyRoadmap() {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <Compass className="text-blue-600 mr-2" size={32} />
-              <h1 className="text-2xl font-bold text-blue-700">CareerLaunch</h1>
+              <h1 className="text-2xl font-bold text-blue-700">UntraddCareer</h1>
             </div>
             <div className="text-right">
               <h2 className="text-lg font-medium">Training & Guaranteed Internship Program</h2>
