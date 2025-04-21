@@ -71,8 +71,8 @@ export default function StudentJourneyRoadmap() {
   useEffect(() => {
     const startCount = 1500;
     const endCount = 2300;
-    const duration = 3000; // 3 seconds
-    const stepTime = 50; // Update every 50ms
+    const duration = 3000;
+    const stepTime = 50;
     const steps = duration / stepTime;
     const increment = (endCount - startCount) / steps;
     
@@ -90,15 +90,16 @@ export default function StudentJourneyRoadmap() {
     return () => clearInterval(timer);
   }, []);
 
-  const scrollToPricing = () => {
-    document.getElementById('take-it-now')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const whatsappNumber = "+918789698369";
+  const whatsappNumber = "918789698369";
   
   const openWhatsApp = (message: string) => {
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+    try {
+      const encodedMessage = encodeURIComponent(message);
+      const url = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Error opening WhatsApp:', error);
+    }
   };
 
   const phases = [
@@ -219,7 +220,8 @@ export default function StudentJourneyRoadmap() {
       {/* Floating WhatsApp Button */}
       <button 
         onClick={() => openWhatsApp("Hi, I'd like to know more about UntraddCareer program.")}
-        className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all transform hover:scale-110 z-50 flex items-center gap-2"
+        className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all transform hover:scale-110 z-50 flex items-center gap-2 cursor-pointer"
+        aria-label="Chat on WhatsApp"
       >
         <MessageSquare size={24} />
         <span className="hidden md:inline">Chat with Us</span>
@@ -294,14 +296,16 @@ export default function StudentJourneyRoadmap() {
               <div className="flex gap-3 w-full max-w-xs">
                 <button 
                   onClick={() => openWhatsApp("Hi, I'm interested in enrolling as an individual in the UntraddCareer program.")}
-                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  aria-label="Enroll as Individual"
                 >
                   <MessageSquare size={16} />
                   I Want It
                 </button>
                 <button 
                   onClick={() => openWhatsApp("Hi, I'm interested in partnering with UntraddCareer for our college.")}
-                  className="flex-1 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  aria-label="Partner as College"
                 >
                   <MessageSquare size={16} />
                   College Invitation
@@ -1037,7 +1041,8 @@ export default function StudentJourneyRoadmap() {
               <div className="space-y-4">
                 <button 
                   onClick={() => openWhatsApp("Hi, I want to secure my future with UntraddCareer. Please help me get started!")}
-                  className="w-full bg-white text-blue-700 font-medium py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-white text-blue-700 font-medium py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  aria-label="Start Chat"
                 >
                   <MessageSquare size={18} />
                   Chat to Get Started
