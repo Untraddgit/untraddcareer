@@ -1,5 +1,5 @@
 import  { useState, useEffect } from 'react';
-import { BookOpen, Compass, Award,Rocket, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, MessageCircle, Zap, FileText, Settings, Mail, MessageSquare } from 'lucide-react';
+import { BookOpen, Compass, Award, Rocket, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, MessageCircle, Zap, FileText, Settings, Mail, MessageSquare, Shield } from 'lucide-react';
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
@@ -67,6 +67,7 @@ const GlobalStyle = createGlobalStyle`
 export default function StudentJourneyRoadmap() {
   const [activePhase, setActivePhase] = useState(1);
   const [count, setCount] = useState(1500);
+  const [activeTab, setActiveTab] = useState('individual');
 
   useEffect(() => {
     const startCount = 1500;
@@ -303,7 +304,7 @@ export default function StudentJourneyRoadmap() {
         {/* Take It Now Section */}
         <section id="take-it-now" className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <Star size={24} className="mr-2" />
               Choose Your Program Option
             </h2>
@@ -317,10 +318,45 @@ export default function StudentJourneyRoadmap() {
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-bold text-blue-700 mb-2">Join as Individual</h3>
-                <div className="text-3xl font-bold text-blue-800 mb-4">
+                <h3 className="text-xl font-bold text-blue-700 mb-2 text-center">Join as Individual</h3>
+                <div className="text-3xl font-bold text-blue-800 mb-4 text-center">
                   ₹16,999
                   <span className="text-sm font-normal text-blue-600 ml-2">one-time</span>
+                </div>
+                
+                <div className="mb-6 bg-blue-200/50 rounded-lg p-4">
+                  <h4 className="font-bold text-blue-700 text-center mb-3 text-base">Internship Outcomes</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                      <div className="text-2xl font-bold text-blue-700">80%+</div>
+                      <div className="text-sm text-slate-600">Internship-to-Job Conversion</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                      <div className="text-2xl font-bold text-blue-700">100%</div>
+                      <div className="text-sm text-slate-600">Career Confusion solution</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                      <div className="text-2xl font-bold text-blue-700">35%</div>
+                      <div className="text-sm text-slate-600">Start Own Ventures</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                      <div className="text-2xl font-bold text-blue-700">9/10</div>
+                      <div className="text-sm text-slate-600">Satisfaction Score</div>
+                    </div>
+                  </div>
+                </div>
+
+                
+                <div className="bg-green-100/50 rounded-lg p-4 mb-6">
+                  <h4 className="font-bold text-green-700 text-center mb-2">Your Career, Secured</h4>
+                  <p className="text-sm text-center text-slate-700 mb-2">
+                    With our training and guidance, you never stay unemployed
+                  </p>
+                  <div className="flex justify-center">
+                    <div className="text-sm text-center bg-white rounded-full px-2 py-1 text-green-700 mb-2 inline-block">
+                      <span className="font-bold">Beyond Employment:</span> You become a job creator
+                    </div>
+                  </div>
                 </div>
                 
                 <ul className="space-y-3 mb-6">
@@ -329,10 +365,12 @@ export default function StudentJourneyRoadmap() {
                     "1:1 mentorship",
                     "Flexible learning schedule",
                     "Direct internship placement",
-                    "Lifetime access to resources"
-                   ,"Access to alumini Network"
+                    "Lifetime access to resources",
+                    "Access to alumni network",
+                    "Entrepreneurship guidance",
+                    "Freelancing skill development"
                   ].map((benefit, idx) => (
-                    <li key={idx} className="flex items-center">
+                    <li key={idx} className="flex items-center justify-center">
                       <CheckCircle size={16} className="text-green-600 mr-2" />
                       <span>{benefit}</span>
                     </li>
@@ -362,8 +400,8 @@ export default function StudentJourneyRoadmap() {
                   <span className="text-sm font-normal text-green-600 ml-2">per student</span>
                 </div>
 
-                <div className="bg-white/60 rounded-lg p-4 mb-6">
-                  <h4 className="font-bold text-green-800 mb-3">Why Colleges Choose Us:</h4>
+                <div className="bg-white rounded-lg p-4 mb-6">
+                  <h4 className="font-bold text-green-800 mb-3 text-base text-center">Why Colleges Choose Us:</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center bg-white rounded-lg p-3 shadow-sm">
                       <div className="text-2xl font-bold text-green-700">85%</div>
@@ -384,8 +422,8 @@ export default function StudentJourneyRoadmap() {
                   </div>
                 </div>
                 
-                <div className="space-y-4 mb-6">
-                  <h4 className="font-bold text-green-800">College Benefits:</h4>
+                <div className="space-y-4 mb-6 text-center">
+                  <h4 className="font-bold text-xl text-green-800">College Benefits:</h4>
                   <ul className="space-y-3">
                     {[
                       {
@@ -413,12 +451,12 @@ export default function StudentJourneyRoadmap() {
                         desc: "Training programs for college professors"
                       }
                     ].map((benefit, idx) => (
-                      <li key={idx} className="flex items-start">
-                        <CheckCircle size={16} className="text-green-600 mr-2 mt-1" />
-                        <div>
+                      <li key={idx} className="flex flex-col items-center text-center">
+                        <div className="flex items-center justify-center mb-1">
+                          <CheckCircle size={16} className="text-green-600 mr-2" />
                           <div className="font-medium text-green-800">{benefit.title}</div>
-                          <div className="text-sm text-slate-600">{benefit.desc}</div>
                         </div>
+                        <div className="text-sm text-slate-600">{benefit.desc}</div>
                       </li>
                     ))}
                   </ul>
@@ -450,7 +488,7 @@ export default function StudentJourneyRoadmap() {
         {/* USP Section */}
         <section className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-8 flex items-center">
+            <h2 className="text-2xl font-bold text-blue-700 mb-8 flex items-center justify-center">
               <Award size={24} className="mr-2" />
               Why Choose UntraddCareer?
             </h2>
@@ -462,7 +500,7 @@ export default function StudentJourneyRoadmap() {
                   <Award size={32} className="text-blue-600" />
                 </div>
                 <h3 className="text-lg font-bold text-blue-700 mb-2">World-Class Faculty</h3>
-                <p className="text-slate-600">Learn from IIT, IIM, and Harvard alumni with extensive industry experience</p>
+                <p className="text-slate-600">Top 0.1% domain experts from IIT, IIM, Harvard, and leading tech companies</p>
               </div>
 
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
@@ -484,49 +522,104 @@ export default function StudentJourneyRoadmap() {
 
             {/* Expert Profiles */}
             <div className="mb-8">
-              <h3 className="text-xl font-bold text-blue-700 mb-6 flex items-center">
+              <h3 className="text-xl font-bold text-blue-700 mb-6 flex items-center justify-center">
                 <Users size={24} className="mr-2" />
                 Meet Our Expert Faculty
               </h3>
+              
+              <div className="bg-blue-50 rounded-lg p-4 mb-6 text-center">
+                <p className="text-blue-700 font-medium">
+                  Our instructors represent the <span className="font-bold text-blue-800">top 0.1%</span> of world geniuses in their respective domains
+                </p>
+              </div>
               
               <div className="relative">
                 <div className="overflow-x-auto pb-4 hide-scrollbar">
                   <div className="flex space-x-6" style={{ minWidth: 'max-content' }}>
                     {[
                       {
-                        name: "Dr. Rajesh Kumar",
-                        role: "AI & Machine Learning",
-                        credentials: "PhD, IIT Delhi",
-                        experience: "Ex-Google, 15+ years exp.",
-                        image: "https://randomuser.me/api/portraits/men/1.jpg"
+                        name: "Kaustav Choubey",
+                        role: "Analytics & Mathematics Expert",
+                        credentials: "MSc, University of Cambridge",
+                        experience: "Data Science, 6+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/male/46.jpg"
                       },
                       {
-                        name: "Prof. Sarah Williams",
+                        name: "Tarun Jain",
+                        role: "Full Stack Developer",
+                        credentials: "Senior Developer, SAP Labs",
+                        experience: "Vibe Coder, 5+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/male/52.jpg"
+                      },
+                      {
+                        name: "Chetan Verma",
+                        role: "AI/ML Enthusiast",
+                        credentials: "Microsoft",
+                        experience: "4+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/male/33.jpg"
+                      },
+                      {
+                        name: "Sai Krishnan",
+                        role: "AI/ML Expert",
+                        credentials: "MS, Northeastern University",
+                        experience: "Ex-IBM, 5+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/male/38.jpg"
+                      },
+                      {
+                        name: "Krishna Bajpai",
+                        role: "Business & Entrepreneurship",
+                        credentials: "Founder, Posterwa",
+                        experience: "7+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/male/41.jpg"
+                      },
+                      {
+                        name: "Smruti Kumari",
+                        role: "UI/UX Designer",
+                        credentials: "Freelance Design Consultant",
+                        experience: "5+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/female/25.jpg"
+                      },
+                      {
+                        name: "Bibhu Ranjan",
                         role: "Product Management",
-                        credentials: "Harvard Business School",
-                        experience: "Ex-Amazon, 12+ years exp.",
-                        image: "https://randomuser.me/api/portraits/women/2.jpg"
+                        credentials: "Ex Blackline, Ieltsappeal",
+                        experience: "5+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/male/35.jpg"
                       },
                       {
-                        name: "Dr. Amit Sharma",
-                        role: "Web Development",
-                        credentials: "MTech, IIT Bombay",
-                        experience: "Ex-Microsoft, 10+ years exp.",
-                        image: "https://randomuser.me/api/portraits/men/3.jpg"
+                        name: "Arju Swami",
+                        role: "Psychology and Biotechnology",
+                        credentials: "PhD, IIT BHU",
+                        experience: "4+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/female/32.jpg"
                       },
                       {
-                        name: "Prof. Priya Verma",
-                        role: "Data Science",
-                        credentials: "IIM Ahmedabad",
-                        experience: "Ex-IBM, 8+ years exp.",
-                        image: "https://randomuser.me/api/portraits/women/4.jpg"
+                        name: "Priya Sharma",
+                        role: "Cloud Architecture & DevOps",
+                        credentials: "MTech, IIT Delhi",
+                        experience: "Ex-Microsoft, 6+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/female/22.jpg"
                       },
                       {
-                        name: "Dr. Michael Chen",
-                        role: "Cloud Architecture",
-                        credentials: "Stanford University",
-                        experience: "Ex-AWS, 14+ years exp.",
-                        image: "https://randomuser.me/api/portraits/men/5.jpg"
+                        name: "Vikram Singh",
+                        role: "Cybersecurity Expert",
+                        credentials: "CISSP, CEH Certified",
+                        experience: "Ex-Deloitte, 8+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/male/56.jpg"
+                      },
+                      {
+                        name: "Neha Gupta",
+                        role: "UI/UX with AI",
+                        credentials: "Design Lead, Figma Expert",
+                        experience: "Ex-Adobe, 5+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/female/42.jpg"
+                      },
+                      {
+                        name: "Rahul Verma",
+                        role: "Digital Marketing",
+                        credentials: "MBA, IIM Ahmedabad",
+                        experience: "Marketing Director, 7+ years exp.",
+                        image: "https://xsgames.co/randomusers/assets/avatars/male/62.jpg"
                       }
                     ].map((expert, idx) => (
                       <div key={idx} className="bg-white rounded-lg shadow-lg p-6 flex-shrink-0" style={{ width: '300px' }}>
@@ -584,8 +677,8 @@ export default function StudentJourneyRoadmap() {
                   desc: "Connect with industry leaders"
                 }
               ].map((feature, idx) => (
-                <div key={idx} className="bg-slate-50 rounded-lg p-4 flex items-center">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                <div key={idx} className="bg-slate-50 rounded-lg p-4 flex flex-col items-center text-center">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mb-4">
                     <div className="text-blue-600">
                       {feature.icon}
                     </div>
@@ -603,7 +696,7 @@ export default function StudentJourneyRoadmap() {
         {/* Interactive Student Journey */}
         <section className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <Compass size={24} className="mr-2" />
               Student Journey Roadmap
             </h2>
@@ -737,7 +830,7 @@ export default function StudentJourneyRoadmap() {
         {/* Foundation Training */}
         <section className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <BookOpen size={24} className="mr-2" />
               Comprehensive Foundation Training
             </h2>
@@ -787,41 +880,12 @@ export default function StudentJourneyRoadmap() {
         
        
         
-        {/* Program Fee Structure */}
-        <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
-              <Briefcase size={24} className="mr-2" />
-              Program Fee Structure
-            </h2>
-            
-            <div className="bg-blue-50 rounded-lg p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-blue-700">₹13,000</h3>
-                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm">per student</span>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex items-center">
-                  <CheckCircle size={18} className="text-green-600 mr-2" />
-                  <span>Complete 6-month journey</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle size={18} className="text-green-600 mr-2" />
-                  <span>Guaranteed domain-specific internship</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle size={18} className="text-green-600 mr-2" />
-                  <span>All training materials, mentorship, and certification</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
+
 
         {/* Eligibility Section */}
         <section className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <Users size={24} className="mr-2" />
               Eligibility & Target Students
             </h2>
@@ -869,7 +933,7 @@ export default function StudentJourneyRoadmap() {
         {/* Program Delivery Mode */}
         <section className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <Zap size={24} className="mr-2" />
               Hybrid Program Delivery
             </h2>
@@ -925,7 +989,7 @@ export default function StudentJourneyRoadmap() {
         {/* Program Roadmap */}
         <section className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <TrendingUp size={24} className="mr-2" />
               Detailed Program Roadmap
             </h2>
@@ -957,52 +1021,161 @@ export default function StudentJourneyRoadmap() {
           
         </section>
 
-       
-
-       
+        {/* Career Assurance Section */}
+        <section className="mb-12">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-lg shadow-lg p-8 text-white">
+            <h2 className="text-2xl font-bold mb-4 text-center">Your Career, Our Commitment</h2>
+            
+            <div className="text-center mb-8">
+              <p className="text-xl font-bold italic bg-white/10 inline-block px-4 py-2 rounded-full">
+                "We don't just train you, we future-proof you."
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white/10 rounded-lg p-5 text-center hover:bg-white/20 transition-all">
+                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-white/20 flex items-center justify-center">
+                  <Compass size={28} className="text-white" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">Find Your Ikigai</h3>
+                <p className="text-sm">When passion meets purpose, AI can't compete. We'll help you find that sweet spot.</p>
+              </div>
+              
+              <div className="bg-white/10 rounded-lg p-5 text-center hover:bg-white/20 transition-all">
+                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-white/20 flex items-center justify-center">
+                  <Shield size={28} className="text-white" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">AI-Proof Career</h3>
+                <p className="text-sm">In a world where AI replaces jobs, be the irreplaceable human that directs the AI.</p>
+              </div>
+              
+              <div className="bg-white/10 rounded-lg p-5 text-center hover:bg-white/20 transition-all">
+                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-white/20 flex items-center justify-center">
+                  <Rocket size={28} className="text-white" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">Self-Sufficient</h3>
+                <p className="text-sm">We don't create employees. We create entrepreneurs of their own careers.</p>
+              </div>
+            </div>
+            
+            <div className="bg-white/10 rounded-lg p-5 text-center mt-6 max-w-2xl mx-auto">
+              <p className="font-medium">Once you're with us, your success is non-negotiable. Your career becomes our mission.</p>
+            </div>
+            
+            <div className="text-center mt-6">
+              <button 
+                onClick={() => openWhatsApp("Hi, I want to become future-proof with UntraddCareer. How can I get started?")}
+                className="bg-white text-blue-700 px-6 py-3 rounded-full font-medium hover:bg-blue-50 transition-all shadow-lg inline-flex items-center gap-2"
+              >
+                <MessageSquare size={18} />
+                Become Irreplaceable
+              </button>
+            </div>
+          </div>
+        </section>
 
         {/* Next Steps */}
         <section className="mb-12">
           <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-8 text-white">
-            <h2 className="text-2xl font-bold mb-6 flex items-center">
+            <h2 className="text-2xl font-bold mb-6 flex items-center justify-center">
               <TrendingUp size={24} className="mr-2" />
               Next Steps
             </h2>
+
+            {/* Tabs */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-white/10 rounded-full p-1">
+                <button 
+                  onClick={() => setActiveTab('individual')}
+                  className={`px-6 py-2 rounded-full transition-all ${
+                    activeTab === 'individual' 
+                      ? 'bg-white text-blue-700' 
+                      : 'text-white hover:bg-white/10'
+                  }`}
+                >
+                  For Individuals
+                </button>
+                <button 
+                  onClick={() => setActiveTab('college')}
+                  className={`px-6 py-2 rounded-full transition-all ${
+                    activeTab === 'college' 
+                      ? 'bg-white text-blue-700' 
+                      : 'text-white hover:bg-white/10'
+                  }`}
+                >
+                  For Colleges
+                </button>
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
+              {(activeTab === 'individual' ? [
+                {
+                  icon: <Calendar size={24} />,
+                  title: "Book Free Counseling",
+                  desc: "One-on-one session to discuss your career goals and opportunities"
+                },
                 {
                   icon: <Users size={24} />,
-                  title: "Schedule Presentation",
-                  desc: "Detailed presentation meeting with college leadership"
+                  title: "Career Assessment",
+                  desc: "Evaluate your strengths and choose the right domain"
                 },
                 {
                   icon: <FileText size={24} />,
-                  title: "MOU Review",
-                  desc: "Draft and review the Memorandum of Understanding"
-                },
-                {
-                  icon: <Calendar size={24} />,
-                  title: "Timeline Planning",
-                  desc: "Finalize students and implementation timeline"
-                },
-                {
-                  icon: <MessageCircle size={24} />,
-                  title: "Department Introduction",
-                  desc: "Coordinate sessions with department heads"
+                  title: "Enrollment Process",
+                  desc: "Simple documentation and program registration"
                 },
                 {
                   icon: <Settings size={24} />,
-                  title: "Setup Infrastructure",
-                  desc: "Set up registration and payment systems"
+                  title: "Program Access",
+                  desc: "Get access to learning platform and study materials"
+                },
+                {
+                  icon: <MessageCircle size={24} />,
+                  title: "Meet Your Mentor",
+                  desc: "Connect with your dedicated mentor and support team"
                 },
                 {
                   icon: <Mail size={24} />,
-                  title: "Contact Us",
-                  desc: "Email: contactuntradd@gmail.com"
+                  title: "Start Learning",
+                  desc: "Begin your journey to a successful career"
                 }
-              ].map((item, idx) => (
-                <div key={idx} className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+              ] : [
+                {
+                  icon: <Calendar size={24} />,
+                  title: "Schedule Presentation",
+                  desc: "Detailed walkthrough for college leadership and faculty"
+                },
+                {
+                  icon: <Users size={24} />,
+                  title: "Department Meeting",
+                  desc: "Coordinate with department heads and faculty members"
+                },
+                {
+                  icon: <FileText size={24} />,
+                  title: "MOU & Documentation",
+                  desc: "Review and finalize partnership agreement"
+                },
+                {
+                  icon: <Settings size={24} />,
+                  title: "Infrastructure Setup",
+                  desc: "Set up systems and processes for smooth implementation"
+                },
+                {
+                  icon: <MessageCircle size={24} />,
+                  title: "Faculty Orientation",
+                  desc: "Training session for college faculty and coordinators"
+                },
+                {
+                  icon: <Mail size={24} />,
+                  title: "Program Launch",
+                  desc: "Kickstart the program with your first batch"
+                }
+              ]).map((item, idx) => (
+                <div 
+                  key={idx} 
+                  className="bg-white/10 rounded-lg p-6 backdrop-blur-sm hover:bg-white/20 transition-all duration-300"
+                >
                   <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center mb-4">
                     {item.icon}
                   </div>
@@ -1010,6 +1183,13 @@ export default function StudentJourneyRoadmap() {
                   <p className="text-sm text-blue-100">{item.desc}</p>
                 </div>
               ))}
+            </div>
+
+            {/* Contact Information */}
+            <div className="mt-8 text-center">
+              <p className="text-blue-100">
+                Contact us: contactuntradd@gmail.com | WhatsApp available 24/7
+              </p>
             </div>
           </div>
         </section>
@@ -1040,17 +1220,7 @@ export default function StudentJourneyRoadmap() {
           </div>
         </section>
 
-        {/* Add CTA after student journey section */}
-        <div className="text-center my-8">
-          <h3 className="text-xl font-bold text-blue-700 mb-4">Ready to Start Your Journey?</h3>
-          <button 
-            onClick={() => openWhatsApp("Hi, I've reviewed the student journey and I'm interested in joining. Please guide me further.")}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
-          >
-            <MessageSquare size={18} />
-            Chat with Our Career Advisor
-          </button>
-        </div>
+       
       </main>
       
       {/* Footer */}
