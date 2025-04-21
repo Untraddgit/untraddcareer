@@ -1069,7 +1069,7 @@ export default function StudentJourneyRoadmap() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
               <Compass className="text-blue-400 mr-2" size={24} />
-              <span className="font-bold text-lg">CareerLaunch</span>
+              <span className="font-bold text-lg">UntraddCareer</span>
             </div>
             <div className="text-slate-400 text-sm">
               Training • Internships • Career Acceleration
