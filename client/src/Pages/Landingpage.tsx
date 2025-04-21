@@ -1,5 +1,5 @@
-import  { useState } from 'react';
-import { BookOpen, Compass, Award, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, BarChart, MessageCircle, Zap } from 'lucide-react';
+import  { useState, useEffect } from 'react';
+import { BookOpen, Compass, Award,Rocket, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, BarChart, MessageCircle, Zap, FileText, Settings, Mail, MessageSquare } from 'lucide-react';
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
@@ -14,66 +14,175 @@ const GlobalStyle = createGlobalStyle`
   .animate-spin-slow {
     animation: spin-slow 15s linear infinite;
   }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes count-up {
+    from {
+      content: "1500";
+    }
+    to {
+      content: "2300";
+    }
+  }
+  
+  .animate-count {
+    counter-reset: count 1500;
+    animation: count-up 3s forwards ease-out;
+  }
+  
+  .animate-count::after {
+    content: counter(count);
+  }
 `;
 export default function StudentJourneyRoadmap() {
   const [activePhase, setActivePhase] = useState(1);
+  const [count, setCount] = useState(1500);
+
+  useEffect(() => {
+    const startCount = 1500;
+    const endCount = 2300;
+    const duration = 3000; // 3 seconds
+    const stepTime = 50; // Update every 50ms
+    const steps = duration / stepTime;
+    const increment = (endCount - startCount) / steps;
+    
+    let currentCount = startCount;
+    const timer = setInterval(() => {
+      currentCount += increment;
+      if (currentCount >= endCount) {
+        setCount(endCount);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(currentCount));
+      }
+    }, stepTime);
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  const scrollToPricing = () => {
+    document.getElementById('take-it-now')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const whatsappNumber = "+918789698369";
   
+  const openWhatsApp = (message: string) => {
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+  };
+
   const phases = [
     {
       id: 1,
-      title: "Initial Orientation",
+      title: "Orientation & Consultation",
       icon: <Compass size={24} />,
-      description: "Students begin with a comprehensive overview of the program, career paths, and industry landscape.",
-      benefits: ["Career path exploration", "Program overview", "Industry insights"]
+      goal: "To understand the student's unique career path and passion to choose a secured career",
+      description: "Comprehensive assessment of background, goals, and skills to chart the perfect career path.",
+      benefits: [
+        "1:1 Orientation session",
+        "Personalized career consultation",
+        "AI-proof career domain selection"
+      ],
+      domains: [
+        "Product Management",
+        "Web Development with AI",
+        "Data Science with AI",
+        "DevOps with AI",
+        "AI/ML",
+        "UI/UX with AI",
+        "Cloud Architecture",
+        "Cybersecurity",
+        "Digital marketing",
+        "HR", "Operations", "Sales", "Finance"
+      ]
     },
     {
       id: 2,
-      title: "1:1 Consultation",
-      icon: <MessageCircle size={24} />,
-      description: "Personalized sessions with career advisors to assess skills, interests, and optimal career paths.",
-      benefits: ["Personalized guidance", "Skill assessment", "Career mapping"]
+      title: "Foundation Training",
+      icon: <BookOpen size={24} />,
+      goal: "Build professional competence with industry-ready practical skills",
+      description: "Common industry-ready modules that build professional competence and relevance.",
+      modules: [
+        { name: "Personality Development", desc: "Confidence, grooming, presentation skills" },
+        { name: "Work Ethics & Behavior", desc: "Professional mindset and discipline" },
+        { name: "English Communication", desc: "Business communication and presentation" },
+        { name: "Problem Solving & Aptitude", desc: "Logical reasoning and numerical skills" },
+        { name: "Prompt Engineering & AI Tools", desc: "ChatGPT, Copilot, practical AI use" },
+        { name: "Resume Building with AI", desc: "ATS-friendly resume and LinkedIn optimization" },
+        { name: "Coding Basics", desc: "Foundation for logic and modular learning" },
+        { name: "Mock Interviews", desc: "HR + Technical rounds practice" }
+      ],
+      perks: [
+        "Weekly Expert Talks",
+        "Industry Update Sessions",
+        "Progress Tracker Access"
+      ]
     },
     {
       id: 3,
-      title: "Course Selection",
-      icon: <Filter size={24} />,
-      description: "Students select their domain specialization based on consultation and interest (Web Dev, AI, DevOps, etc).",
-      benefits: ["Domain selection", "Specialization focus", "Personalized learning path"]
+      title: "Domain Projects",
+      icon: <Code size={24} />,
+      goal: "Apply learned skills in real-world projects",
+      description: "Based on chosen path, students dive deep into domain-specific learning through hands-on projects.",
+      benefits: [
+        "Training by industry experts",
+        "Hands-on live projects",
+        "Real-world assignments",
+        "Weekly reviews and feedback",
+        "Dedicated mentors & tech support",
+        "Weekly progress tracking"
+      ]
     },
     {
       id: 4,
-      title: "Domain Orientation",
-      icon: <BookOpen size={24} />,
-      description: "Focused introduction to their chosen specialization with roadmap and expectations.",
-      benefits: ["Domain introduction", "Technology stack overview", "Learning roadmap"]
-    },
-    {
-      id: 5,
-      title: "Foundation Training",
-      icon: <Code size={24} />,
-      description: "Core skills development across essential professional competencies.",
-      benefits: ["Soft skills", "Technical foundations", "Industry readiness"]
-    },
-    {
-      id: 6,
-      title: "Specialized Training",
-      icon: <Zap size={24} />,
-      description: "Intensive domain-specific training with live projects guided by industry experts.",
-      benefits: ["Hands-on experience", "Industry projects", "Expert mentorship"]
-    },
-    {
-      id: 7, 
-      title: "Internship Placement",
+      title: "Internship & Certification",
       icon: <Briefcase size={24} />,
-      description: "Guaranteed paid internship placement with partner companies beginning from month 4.",
-      benefits: ["Real work experience", "Industry networking", "Professional portfolio"]
-    },
-    {
-      id: 8,
-      title: "Certification",
-      icon: <Award size={24} />,
-      description: "Students receive 6-month industry certification validating their skills and experience.",
-      benefits: ["Industry recognition", "Resume enhancement", "Career advancement"]
+      goal: "Gain real industry experience and certification",
+      description: "Guaranteed internship placement starting from Month 4, with early access for achievers.",
+      details: [
+        "Interview prep from Month 3",
+        "Guaranteed internship assistance",
+        "60-70% paid internships",
+        "Placement assistance for all",
+        "Partner company placements",
+        "In-house projects & startups"
+      ],
+      benefits: [
+        "Certificate of Excellence (6 months validity)",
+        "Continued placement support",
+        "ATS-optimized resume refinement",
+        "Job application strategies"
+      ]
     }
   ];
   
@@ -106,7 +215,16 @@ export default function StudentJourneyRoadmap() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 text-slate-800 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 text-slate-800 font-sans relative">
+      {/* Floating WhatsApp Button */}
+      <button 
+        onClick={() => openWhatsApp("Hi, I'd like to know more about UntraddCareer program.")}
+        className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all transform hover:scale-110 z-50 flex items-center gap-2"
+      >
+        <MessageSquare size={24} />
+        <span className="hidden md:inline">Chat with Us</span>
+      </button>
+
       {/* Header */}
       <header className="bg-white shadow-md py-6">
         <div className="container mx-auto px-4">
@@ -115,43 +233,47 @@ export default function StudentJourneyRoadmap() {
               <Compass className="text-blue-600 mr-2" size={32} />
               <h1 className="text-2xl font-bold text-blue-700">UntraddCareer</h1>
             </div>
-            <div className="text-right">
-              <h2 className="text-lg font-medium">Training & Guaranteed Internship Program</h2>
-              <p className="text-slate-500 text-sm">Industry-Aligned Skill Development</p>
-            </div>
           </div>
         </div>
       </header>
       
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4">
         {/* Hero Section */}
-        <section className="bg-white rounded-lg shadow-lg p-8 mb-12">
+        <section className="bg-white rounded-lg shadow-lg p-4 mb-12">
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="md:w-1/2">
-              <h2 className="text-3xl font-bold text-blue-700 mb-4">
-                Bridging the Gap Between Education and Industry
+              <h1 className="text-3xl font-bold text-blue-700 mb-4">
+                Training with Guaranteed Internship Program
+              </h1>
+              <h2 className="text-2xl font-bold text-green-700 mb-2">
+                Grab a seat before it's too late
               </h2>
+              
               <p className="text-lg text-slate-600 mb-6">
                 Our comprehensive program transforms students into industry-ready professionals through structured training and guaranteed paid internships.
               </p>
               <div className="flex flex-wrap gap-4">
                 <div className="bg-blue-50 rounded-lg p-3 flex items-center">
                   <Calendar size={20} className="text-blue-600 mr-2" />
-                  <span className="font-medium">6-Month Program</span>
+                  <span className="font-medium">Career Counseling with Experts</span>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3 flex items-center">
                   <Briefcase size={20} className="text-blue-600 mr-2" />
-                  <span className="font-medium">Guaranteed Internship</span>
+                  <span className="font-medium">Guaranteed Internship (WFH + Remote)</span>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3 flex items-center">
                   <Award size={20} className="text-blue-600 mr-2" />
                   <span className="font-medium">Industry Certification</span>
                 </div>
+                <div className="bg-blue-50 rounded-lg p-3 flex items-center">
+                  <Rocket  size={20} className="text-blue-600 mr-2" />
+                  <span className="font-medium">AI Proof- Future Secured Jobs</span>
+                </div>
               </div>
             </div>
-            <div className="md:w-1/2 flex justify-center">
-              <div className="relative h-64 w-64 rounded-full bg-blue-100 flex items-center justify-center">
+            <div className="md:w-1/2 flex justify-center flex-col items-center">
+              <div className="relative h-64 w-64 rounded-full bg-blue-100 flex items-center justify-center mb-4">
                 <div className="absolute inset-0 border-4 border-dashed border-blue-300 rounded-full animate-spin-slow"></div>
                 <div className="bg-white h-48 w-48 rounded-full shadow-lg flex items-center justify-center p-4">
                   <div className="text-center">
@@ -161,6 +283,330 @@ export default function StudentJourneyRoadmap() {
                   </div>
                 </div>
               </div>
+              <div className="bg-blue-600 rounded-lg p-3 shadow-lg w-full max-w-xs transform hover:scale-105 transition-transform mb-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">
+                    {count}+
+                  </div>
+                  <p className="text-white text-sm font-medium">Internships Available - Claim Yours Now!</p>
+                </div>
+              </div>
+              <div className="flex gap-3 w-full max-w-xs">
+                <button 
+                  onClick={() => openWhatsApp("Hi, I'm interested in enrolling as an individual in the UntraddCareer program.")}
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={16} />
+                  I Want It
+                </button>
+                <button 
+                  onClick={() => openWhatsApp("Hi, I'm interested in partnering with UntraddCareer for our college.")}
+                  className="flex-1 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={16} />
+                  College Invitation
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Take It Now Section */}
+        <section id="take-it-now" className="mb-12">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+              <Star size={24} className="mr-2" />
+              Choose Your Program Option
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Individual Option */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 relative overflow-hidden pt-14">
+                <div className="absolute top-0 right-0 left-0 px-6 py-2 flex justify-end">
+                  <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm shadow-sm">
+                    Individual Plan
+                  </div>
+                </div>
+                
+                <h3 className="text-xl font-bold text-blue-700 mb-2">Join as Individual</h3>
+                <div className="text-3xl font-bold text-blue-800 mb-4">
+                  ₹16,999
+                  <span className="text-sm font-normal text-blue-600 ml-2">one-time</span>
+                </div>
+                
+                <ul className="space-y-3 mb-6">
+                  {[
+                    "Personal career counseling",
+                    "1:1 mentorship",
+                    "Flexible learning schedule",
+                    "Direct internship placement",
+                    "Lifetime access to resources"
+                   ,"Access to alumini Network"
+                  ].map((benefit, idx) => (
+                    <li key={idx} className="flex items-center">
+                      <CheckCircle size={16} className="text-green-600 mr-2" />
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button 
+                  onClick={() => openWhatsApp("Hi, I want to enroll in the Individual Plan (₹16,999). Please guide me through the process.")}
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={18} />
+                  Chat to Enroll Now
+                </button>
+              </div>
+
+              {/* College Option */}
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 relative overflow-hidden pt-14">
+                <div className="absolute top-0 right-0 left-0 px-6 py-2 flex justify-end">
+                  <div className="bg-green-600 text-white px-4 py-1 rounded-full text-sm shadow-sm">
+                    Recommended for Colleges
+                  </div>
+                </div>
+                
+                <h3 className="text-xl font-bold text-green-700 mb-2">Partner Through College</h3>
+                <div className="text-3xl font-bold text-green-800 mb-4">
+                  ₹12,999
+                  <span className="text-sm font-normal text-green-600 ml-2">per student</span>
+                </div>
+
+                <div className="bg-white/60 rounded-lg p-4 mb-6">
+                  <h4 className="font-bold text-green-800 mb-3">Why Colleges Choose Us:</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center bg-white rounded-lg p-3 shadow-sm">
+                      <div className="text-2xl font-bold text-green-700">85%</div>
+                      <div className="text-sm text-slate-600">Placement Rate Increase</div>
+                    </div>
+                    <div className="text-center bg-white rounded-lg p-3 shadow-sm">
+                      <div className="text-2xl font-bold text-green-700">40%</div>
+                      <div className="text-sm text-slate-600">Higher Package Offers</div>
+                    </div>
+                    <div className="text-center bg-white rounded-lg p-3 shadow-sm">
+                      <div className="text-2xl font-bold text-green-700">100%</div>
+                      <div className="text-sm text-slate-600">Risk-Free Implementation</div>
+                    </div>
+                    <div className="text-center bg-white rounded-lg p-3 shadow-sm">
+                      <div className="text-2xl font-bold text-green-700">3x</div>
+                      <div className="text-sm text-slate-600">Admission Inquiries</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 mb-6">
+                  <h4 className="font-bold text-green-800">College Benefits:</h4>
+                  <ul className="space-y-3">
+                    {[
+                      {
+                        title: "Enhanced Placement Metrics",
+                        desc: "85% increase in placement rates within first batch"
+                      },
+                      {
+                        title: "Zero Risk Implementation",
+                        desc: "No infrastructure cost, no faculty burden"
+                      },
+                      {
+                        title: "Trust Building",
+                        desc: "Improved reputation among parents & students"
+                      },
+                      {
+                        title: "Pioneer Status",
+                        desc: "Be recognized as an industry-integrated institution"
+                      },
+                      {
+                        title: "Data-Driven Insights",
+                        desc: "Access to placement analytics and industry trends"
+                      },
+                      {
+                        title: "Faculty Development",
+                        desc: "Training programs for college professors"
+                      }
+                    ].map((benefit, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <CheckCircle size={16} className="text-green-600 mr-2 mt-1" />
+                        <div>
+                          <div className="font-medium text-green-800">{benefit.title}</div>
+                          <div className="text-sm text-slate-600">{benefit.desc}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="bg-green-700/10 rounded-lg p-4 mb-6">
+                  <h4 className="font-bold text-green-800 mb-2">Trusted By Leading Institutions</h4>
+                  <div className="text-sm text-slate-600">
+                    Join our network of partner colleges achieving exceptional placement results
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => openWhatsApp("Hi, I want to explore the College Partnership Program (₹12,999/student). Please provide more details.")}
+                  className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={18} />
+                  Chat to Partner With Us
+                </button>
+                
+                <p className="text-center text-sm text-green-700 mt-3">
+                  Limited partnerships available for 2025 batch
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* USP Section */}
+        <section className="mb-12">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-blue-700 mb-8 flex items-center">
+              <Award size={24} className="mr-2" />
+              Why Choose UntraddCareer?
+            </h2>
+
+            {/* Key Benefits */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 text-center">
+                <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <Award size={32} className="text-blue-600" />
+                </div>
+                <h3 className="text-lg font-bold text-blue-700 mb-2">World-Class Faculty</h3>
+                <p className="text-slate-600">Learn from IIT, IIM, and Harvard alumni with extensive industry experience</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
+                <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <CheckCircle size={32} className="text-green-600" />
+                </div>
+                <h3 className="text-lg font-bold text-green-700 mb-2">100% Result Guarantee</h3>
+                <p className="text-slate-600">Complete refund if not satisfied with the program outcomes</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 text-center">
+                <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <TrendingUp size={32} className="text-purple-600" />
+                </div>
+                <h3 className="text-lg font-bold text-purple-700 mb-2">Career Assurance</h3>
+                <p className="text-slate-600">100% domain expertise guarantee with personalized mentorship to follow your passion</p>
+              </div>
+            </div>
+
+            {/* Expert Profiles */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-blue-700 mb-6 flex items-center">
+                <Users size={24} className="mr-2" />
+                Meet Our Expert Faculty
+              </h3>
+              
+              <div className="relative">
+                <div className="overflow-x-auto pb-4 hide-scrollbar">
+                  <div className="flex space-x-6" style={{ minWidth: 'max-content' }}>
+                    {[
+                      {
+                        name: "Dr. Rajesh Kumar",
+                        role: "AI & Machine Learning",
+                        credentials: "PhD, IIT Delhi",
+                        experience: "Ex-Google, 15+ years exp.",
+                        image: "https://randomuser.me/api/portraits/men/1.jpg"
+                      },
+                      {
+                        name: "Prof. Sarah Williams",
+                        role: "Product Management",
+                        credentials: "Harvard Business School",
+                        experience: "Ex-Amazon, 12+ years exp.",
+                        image: "https://randomuser.me/api/portraits/women/2.jpg"
+                      },
+                      {
+                        name: "Dr. Amit Sharma",
+                        role: "Web Development",
+                        credentials: "MTech, IIT Bombay",
+                        experience: "Ex-Microsoft, 10+ years exp.",
+                        image: "https://randomuser.me/api/portraits/men/3.jpg"
+                      },
+                      {
+                        name: "Prof. Priya Verma",
+                        role: "Data Science",
+                        credentials: "IIM Ahmedabad",
+                        experience: "Ex-IBM, 8+ years exp.",
+                        image: "https://randomuser.me/api/portraits/women/4.jpg"
+                      },
+                      {
+                        name: "Dr. Michael Chen",
+                        role: "Cloud Architecture",
+                        credentials: "Stanford University",
+                        experience: "Ex-AWS, 14+ years exp.",
+                        image: "https://randomuser.me/api/portraits/men/5.jpg"
+                      }
+                    ].map((expert, idx) => (
+                      <div key={idx} className="bg-white rounded-lg shadow-lg p-6 flex-shrink-0" style={{ width: '300px' }}>
+                        <div className="flex items-center mb-4">
+                          <img
+                            src={expert.image}
+                            alt={expert.name}
+                            className="w-16 h-16 rounded-full mr-4 object-cover"
+                          />
+                          <div>
+                            <h4 className="font-bold text-blue-700">{expert.name}</h4>
+                            <p className="text-sm text-blue-600">{expert.role}</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm text-slate-600 flex items-center">
+                            <Award size={16} className="mr-2" />
+                            {expert.credentials}
+                          </p>
+                          <p className="text-sm text-slate-600 flex items-center">
+                            <Briefcase size={16} className="mr-2" />
+                            {expert.experience}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-white to-transparent w-8 pointer-events-none"></div>
+                <div className="absolute right-0 top-0 bottom-0 bg-gradient-to-l from-white to-transparent w-8 pointer-events-none"></div>
+              </div>
+            </div>
+
+            {/* Additional Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  icon: <MessageCircle size={20} />,
+                  title: "1:1 Feedback",
+                  desc: "Personal attention & improvement tracking"
+                },
+                {
+                  icon: <Rocket size={20} />,
+                  title: "Industry Projects",
+                  desc: "Real-world project experience"
+                },
+                {
+                  icon: <Star size={20} />,
+                  title: "Premium Content",
+                  desc: "World-class curriculum & resources"
+                },
+                {
+                  icon: <Users size={20} />,
+                  title: "Expert Network",
+                  desc: "Connect with industry leaders"
+                }
+              ].map((feature, idx) => (
+                <div key={idx} className="bg-slate-50 rounded-lg p-4 flex items-center">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                    <div className="text-blue-600">
+                      {feature.icon}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-blue-700">{feature.title}</h4>
+                    <p className="text-sm text-slate-600">{feature.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -173,19 +619,27 @@ export default function StudentJourneyRoadmap() {
               Student Journey Roadmap
             </h2>
             
+            {/* Interactive Instruction */}
+            <div className="bg-blue-50 rounded-lg p-4 mb-8 flex items-center justify-center">
+              <Zap size={20} className="text-blue-600 mr-2 animate-pulse" />
+              <p className="text-blue-700 font-medium">Click on each phase below to explore detailed information</p>
+            </div>
+            
             {/* Timeline Navigation */}
             <div className="flex flex-wrap gap-2 mb-8 md:mb-12">
               {phases.map(phase => (
                 <button 
                   key={phase.id}
-                  className={`px-4 py-2 rounded-full flex items-center transition-all ${
+                  className={`px-4 py-2 rounded-full flex items-center transition-all transform hover:scale-105 ${
                     activePhase === phase.id 
-                      ? 'bg-blue-600 text-white shadow-md' 
+                      ? 'bg-blue-600 text-white shadow-md scale-105' 
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                   onClick={() => setActivePhase(phase.id)}
                 >
-                  <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center mr-2 text-xs font-bold text-blue-700">
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center mr-2 text-xs font-bold ${
+                    activePhase === phase.id ? 'bg-white text-blue-700' : 'bg-white text-slate-600'
+                  }`}>
                     {phase.id}
                   </span>
                   <span className="hidden md:inline">{phase.title}</span>
@@ -202,22 +656,87 @@ export default function StudentJourneyRoadmap() {
                     activePhase === phase.id ? 'opacity-100' : 'hidden opacity-0'
                   }`}
                 >
-                  <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                    <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center border-4 border-white shadow-md">
-                      <div className="text-blue-600">
-                        {phase.icon}
+                  <div className="flex flex-col md:flex-row items-start gap-6">
+                    <div className="md:w-1/3">
+                      <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center border-4 border-white shadow-md mb-4">
+                        <div className="text-blue-600">
+                          {phase.icon}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex-1">
                       <h3 className="text-xl font-bold text-blue-700 mb-2">{phase.title}</h3>
+                      <p className="text-blue-600 font-medium mb-4">{phase.goal}</p>
                       <p className="text-slate-600 mb-4">{phase.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {phase.benefits.map((benefit, idx) => (
-                          <span key={idx} className="bg-white px-3 py-1 rounded-full text-sm text-blue-600 shadow-sm">
-                            {benefit}
-                          </span>
-                        ))}
-                      </div>
+                    </div>
+                    
+                    <div className="md:w-2/3 bg-white rounded-lg p-6 shadow-sm">
+                      {phase.modules && (
+                        <div className="mb-6">
+                          <h4 className="font-bold text-blue-700 mb-4">Training Modules</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {phase.modules.map((module, idx) => (
+                              <div key={idx} className="bg-slate-50 rounded-lg p-3">
+                                <div className="font-medium text-blue-700">{module.name}</div>
+                                <div className="text-sm text-slate-600">{module.desc}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {phase.domains && (
+                        <div className="mb-6">
+                          <h4 className="font-bold text-blue-700 mb-4">AI-Proof Career Domains</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {phase.domains.map((domain, idx) => (
+                              <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                {domain}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {phase.benefits && (
+                        <div className="mb-6">
+                          <h4 className="font-bold text-blue-700 mb-4">Key Benefits</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {phase.benefits.map((benefit, idx) => (
+                              <div key={idx} className="flex items-center">
+                                <CheckCircle size={16} className="text-green-600 mr-2" />
+                                <span className="text-slate-600">{benefit}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {phase.perks && (
+                        <div>
+                          <h4 className="font-bold text-blue-700 mb-4">Additional Perks</h4>
+                          <div className="flex flex-wrap gap-3">
+                            {phase.perks.map((perk, idx) => (
+                              <div key={idx} className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm flex items-center">
+                                <Star size={14} className="mr-1" />
+                                {perk}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {phase.details && (
+                        <div className="mb-6">
+                          <h4 className="font-bold text-blue-700 mb-4">Program Details</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {phase.details.map((detail, idx) => (
+                              <div key={idx} className="flex items-center">
+                                <CheckCircle size={16} className="text-green-600 mr-2" />
+                                <span className="text-slate-600">{detail}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -252,7 +771,7 @@ export default function StudentJourneyRoadmap() {
         </section>
         
         {/* Weekly Add-ons */}
-        <section className="mb-12">
+        {/* <section className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
               <Calendar size={24} className="mr-2" />
@@ -275,72 +794,273 @@ export default function StudentJourneyRoadmap() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
         
-        {/* College Benefits */}
+       
+        
+        {/* Program Fee Structure */}
         <section className="mb-12">
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
-              <Award size={24} className="mr-2" />
-              Benefits for Your College
+              <Briefcase size={24} className="mr-2" />
+              Program Fee Structure
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {collegeAdvantages.map((benefit, idx) => (
-                <div key={idx} className="bg-green-50 rounded-lg p-4 flex items-center">
+            <div className="bg-blue-50 rounded-lg p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-blue-700">₹13,000</h3>
+                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm">per student</span>
+              </div>
+              <ul className="space-y-3">
+                <li className="flex items-center">
                   <CheckCircle size={18} className="text-green-600 mr-2" />
-                  <span className="text-slate-700">{benefit}</span>
+                  <span>Complete 6-month journey</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle size={18} className="text-green-600 mr-2" />
+                  <span>Guaranteed domain-specific internship</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle size={18} className="text-green-600 mr-2" />
+                  <span>All training materials, mentorship, and certification</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Eligibility Section */}
+        <section className="mb-12">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+              <Users size={24} className="mr-2" />
+              Eligibility & Target Students
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-blue-700 mb-4">Target Departments (Pilot Phase)</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-center">
+                    <CheckCircle size={18} className="text-green-600 mr-2" />
+                    <span>BCA</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle size={18} className="text-green-600 mr-2" />
+                    <span>MCA</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle size={18} className="text-green-600 mr-2" />
+                    <span>B.Com</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-blue-700 mb-4">Student Benefits by Year</h3>
+                <div className="space-y-4">
+                  <div className="border-l-4 border-blue-600 pl-4">
+                    <h4 className="font-medium text-blue-700">First/Second Year</h4>
+                    <p className="text-sm text-slate-600">Early career clarity, longer internship duration, earning while studying</p>
+                  </div>
+                  <div className="border-l-4 border-blue-600 pl-4">
+                    <h4 className="font-medium text-blue-700">Pre-Final Year</h4>
+                    <p className="text-sm text-slate-600">Strategic advantage in placements, industry-readiness</p>
+                  </div>
+                  <div className="border-l-4 border-blue-600 pl-4">
+                    <h4 className="font-medium text-blue-700">Final Year/Last Semester</h4>
+                    <p className="text-sm text-slate-600">Accelerated internship placement, immediate industry integration</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Program Delivery Mode */}
+        <section className="mb-12">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+              <Zap size={24} className="mr-2" />
+              Hybrid Program Delivery
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-blue-700 mb-4 flex items-center">
+                  <Code size={20} className="mr-2" />
+                  Online Components
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    "Live online training sessions by industry experts",
+                    "1:1 Career Consultation with every student",
+                    "Domain-specific technical training",
+                    "Weekly industry expert talks",
+                    "Career consultation and orientation",
+                    "Progress tracking via proprietary application"
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <CheckCircle size={18} className="text-green-600 mr-2 mt-1 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-blue-700 mb-4 flex items-center">
+                  <Users size={20} className="mr-2" />
+                  Offline/College Components
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    "1 Month in Office Internship",
+                    "Faculty supervision and mentoring",
+                    "Selected foundation modules by college professors",
+                    "Weekly progress reviews",
+                    "Physical space for group projects",
+                    "Computer lab sessions for practical exercises"
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <CheckCircle size={18} className="text-green-600 mr-2 mt-1 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Program Roadmap */}
+        <section className="mb-12">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+              <TrendingUp size={24} className="mr-2" />
+              Detailed Program Roadmap
+            </h2>
+            
+    
+
+
+
+              {/* Monthly Timeline */}
+              <div className="bg-gradient-to-r from-blue-50 to-slate-50 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-blue-700 mb-4">Monthly Timeline</h3>
+                <div className="space-y-4">
+                  {[
+                    { month: "Month 1", desc: "Orientation & Foundation Training", color: "bg-green-100 text-green-700" },
+                    { month: "Month 2", desc: "Domain Selection & Live Training", color: "bg-yellow-100 text-yellow-700" },
+                    { month: "Month 3", desc: "Advanced Training & Interview Prep", color: "bg-orange-100 text-orange-700" },
+                    { month: "Month 4", desc: "Internship Placement Begins", color: "bg-red-100 text-red-700" },
+                    { month: "Month 5", desc: "Internship & Job Support", color: "bg-purple-100 text-purple-700" },
+                    { month: "Month 6", desc: "Certification & Portfolio", color: "bg-blue-100 text-blue-700" }
+                  ].map((item, idx) => (
+                    <div key={idx} className={`flex items-center ${item.color} rounded-lg p-3`}>
+                      <span className="font-bold mr-4">{item.month}</span>
+                      <span>{item.desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          
+        </section>
+
+       
+
+       
+
+        {/* Next Steps */}
+        <section className="mb-12">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-8 text-white">
+            <h2 className="text-2xl font-bold mb-6 flex items-center">
+              <TrendingUp size={24} className="mr-2" />
+              Next Steps
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: <Users size={24} />,
+                  title: "Schedule Presentation",
+                  desc: "Detailed presentation meeting with college leadership"
+                },
+                {
+                  icon: <FileText size={24} />,
+                  title: "MOU Review",
+                  desc: "Draft and review the Memorandum of Understanding"
+                },
+                {
+                  icon: <Calendar size={24} />,
+                  title: "Timeline Planning",
+                  desc: "Finalize students and implementation timeline"
+                },
+                {
+                  icon: <MessageCircle size={24} />,
+                  title: "Department Introduction",
+                  desc: "Coordinate sessions with department heads"
+                },
+                {
+                  icon: <Settings size={24} />,
+                  title: "Setup Infrastructure",
+                  desc: "Set up registration and payment systems"
+                },
+                {
+                  icon: <Mail size={24} />,
+                  title: "Contact Us",
+                  desc: "Email: contactuntradd@gmail.com"
+                }
+              ].map((item, idx) => (
+                <div key={idx} className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+                  <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                    {item.icon}
+                  </div>
+                  <h3 className="font-bold mb-2">{item.title}</h3>
+                  <p className="text-sm text-blue-100">{item.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
-        
+
         {/* Call to Action */}
         <section>
           <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-8 text-white">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold mb-2">Ready to Transform Student Outcomes?</h2>
-              <p className="text-blue-100">Partner with us to provide industry-aligned training and guaranteed internships</p>
+              <h2 className="text-2xl font-bold mb-2">Ready to Transform Your Outcomes?</h2>
+              <p className="text-blue-100">We have the only course which has comprehensive training and guaranteed internship for a future proof career</p>
             </div>
             
-            <div className="max-w-md mx-auto bg-white/10 rounded-lg p-6 backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center mr-3">
-                    <Briefcase size={24} className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold">Partnership Model</h3>
-                    <p className="text-xs text-blue-100">Revenue-sharing opportunity</p>
-                  </div>
-                </div>
-                <div className="bg-white text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                  Win-Win
-                </div>
+            <div className="max-w-md mx-auto">
+              <div className="space-y-4">
+                <button 
+                  onClick={() => openWhatsApp("Hi, I want to secure my future with UntraddCareer. Please help me get started!")}
+                  className="w-full bg-white text-blue-700 font-medium py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={18} />
+                  Chat to Get Started
+                </button>
+                <p className="text-center text-sm text-blue-200">
+                  Our career advisors typically respond within 5 minutes
+                </p>
               </div>
-              
-              <ul className="space-y-2 mb-4">
-                <li className="flex items-center">
-                  <CheckCircle size={16} className="text-green-300 mr-2" />
-                  <span className="text-sm">No implementation costs for the college</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle size={16} className="text-green-300 mr-2" />
-                  <span className="text-sm">Fixed % revenue share on each enrollment</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle size={16} className="text-green-300 mr-2" />
-                  <span className="text-sm">Enhanced placement metrics</span>
-                </li>
-              </ul>
-              
-              <button className="w-full bg-white text-blue-700 font-medium py-3 rounded-lg hover:bg-blue-50 transition-colors">
-                Schedule a Detailed Presentation
-              </button>
             </div>
           </div>
         </section>
+
+        {/* Add CTA after student journey section */}
+        <div className="text-center my-8">
+          <h3 className="text-xl font-bold text-blue-700 mb-4">Ready to Start Your Journey?</h3>
+          <button 
+            onClick={() => openWhatsApp("Hi, I've reviewed the student journey and I'm interested in joining. Please guide me further.")}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+          >
+            <MessageSquare size={18} />
+            Chat with Our Career Advisor
+          </button>
+        </div>
       </main>
       
       {/* Footer */}
