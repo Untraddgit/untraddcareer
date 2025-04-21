@@ -1,5 +1,5 @@
 import  { useState, useEffect } from 'react';
-import { BookOpen, Compass, Award,Rocket, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, BarChart, MessageCircle, Zap, FileText, Settings, Mail, MessageSquare } from 'lucide-react';
+import { BookOpen, Compass, Award,Rocket, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, MessageCircle, Zap, FileText, Settings, Mail, MessageSquare } from 'lucide-react';
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
