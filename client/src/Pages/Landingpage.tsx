@@ -198,22 +198,7 @@ export default function StudentJourneyRoadmap() {
     { name: "Spider Leg Management", icon: <TrendingUp size={20} /> }
   ];
   
-  const weeklyAddons = [
-    { name: "Expert Speaker Sessions", icon: <Users size={20} /> },
-    { name: "Industry Updates Live", icon: <TrendingUp size={20} /> },
-    { name: "Progress Tracking Dashboard", icon: <BarChart size={20} /> },
-    { name: "Mock Interviews", icon: <MessageCircle size={20} /> }
-  ];
-  
-  const collegeAdvantages = [
-    "Enhanced placement rates",
-    "Increased student satisfaction",
-    "Industry-aligned curriculum",
-    "Pioneer in placement-driven education",
-    "No implementation effort required",
-    "Revenue sharing opportunities",
-    "Improved college reputation"
-  ];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 text-slate-800 font-sans relative">
