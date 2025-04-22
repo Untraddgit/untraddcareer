@@ -130,7 +130,7 @@ export default function StudentJourneyRoadmap() {
   useEffect(() => {
     const startCount = 1500;
     const endCount = 2300;
-    const duration = 3000;
+    const duration = 12000;
     const stepTime = 50;
     const steps = duration / stepTime;
     const increment = (endCount - startCount) / steps;
