@@ -73,7 +73,11 @@ const GlobalStyle = createGlobalStyle`
   }
   
   .animate-auto-scroll {
-    animation: autoScroll 45s linear infinite;
+    animation: autoScroll 15s linear infinite;
+  }
+  
+  .animate-scroll-slow {
+    animation: autoScroll 30s linear infinite;
   }
   
   @keyframes pulse {
@@ -497,141 +501,143 @@ export default function StudentJourneyRoadmap() {
               </div>
               
               <div className="relative overflow-hidden">
-                <div className="flex animate-auto-scroll hide-scrollbar">
-                  {/* Faculty profiles */}
-                  {[
-                    {
-                      name: "Kaustav Choubey",
-                      role: "Analytics & Mathematics Expert",
-                      credentials: "MSc, University of Cambridge",
-                      experience: "Data Science, 6+ years exp.",
-                      image: "https://randomuser.me/api/portraits/men/77.jpg"
-                    },
-                    {
-                      name: "Tarun Jain",
-                      role: "Full Stack Developer",
-                      credentials: "Senior Developer, SAP Labs",
-                      experience: "Vibe Coder, 5+ years exp.",
-                      image: tarunImage
-                    },
-                    {
-                      name: "Chetan Verma",
-                      role: "AI/ML Enthusiast",
-                      credentials: "Microsoft",
-                      experience: "4+ years exp.",
-                      image: chetanImage
-                    },
-                    {
-                      name: "Sai Krishnan",
-                      role: "AI/ML Expert",
-                      credentials: "MS, Northeastern University",
-                      experience: "Ex-IBM, 5+ years exp.",
-                      useIcon: true
-                    },
-                    {
-                      name: "Krishna Bajpai",
-                      role: "Business & Entrepreneurship",
-                      credentials: "Founder, Posterwa",
-                      experience: "7+ years exp.",
-                      image: maleImage,
-                      filter: "grayscale"
-                    },
-                    {
-                      name: "Smruti Kumari",
-                      role: "UI/UX Designer",
-                      credentials: "Freelance Design Consultant",
-                      experience: "5+ years exp.",
-                      image: nehaImage
-                    },
-                    {
-                      name: "Bibhu Ranjan",
-                      role: "Product Management",
-                      credentials: "Ex Blackline, Ieltsappeal",
-                      experience: "5+ years exp.",
-                      image: bibhuImage
-                    },
-                    {
-                      name: "Arju Swami",
-                      role: "Psychology and Biotechnology",
-                      credentials: "PhD, IIT BHU",
-                      experience: "4+ years exp.",
-                      image: arjuImage
-                    },
-                    {
-                      name: "Priya Sharma",
-                      role: "Cloud Architecture & DevOps",
-                      credentials: "MTech, IIT Delhi",
-                      experience: "Ex-Microsoft, 6+ years exp.",
-                      image: priyaImage
-                    },
-                    {
-                      name: "Vikram Singh",
-                      role: "Cybersecurity Expert",
-                      credentials: "CISSP, CEH Certified",
-                      experience: "Ex-Deloitte, 8+ years exp.",
-                      image: vikramImage
-                    },
-                    {
-                      name: "Neha Gupta",
-                      role: "UI/UX with AI",
-                      credentials: "Design Lead, Figma Expert",
-                      experience: "Ex-Adobe, 5+ years exp.",
-                      image: nehaGuptaImage
-                    },
-                    {
-                      name: "Rahul Verma",
-                      role: "Digital Marketing",
-                      credentials: "MBA, IIM Ahmedabad",
-                      experience: "Marketing Director, 7+ years exp.",
-                      image: rahulImage
-                    }
-                  ].map((expert, idx) => (
-                    <div key={idx} className="bg-white rounded-lg shadow-lg p-6 flex-shrink-0" style={{ width: '300px' }}>
-                      <div className="flex items-center mb-4">
-                        {expert.useIcon ? (
-                          <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mr-4">
-                            <User size={30} className="text-blue-600" />
+                <div className="overflow-x-hidden">
+                  <div className="flex space-x-6 animate-scroll-slow" style={{ minWidth: 'max-content' }}>
+                    {/* Faculty profiles */}
+                    {[
+                      {
+                        name: "Kaustav Choubey",
+                        role: "Analytics & Mathematics Expert",
+                        credentials: "MSc, University of Cambridge",
+                        experience: "Data Science, 6+ years exp.",
+                        image: "https://randomuser.me/api/portraits/men/77.jpg"
+                      },
+                      {
+                        name: "Tarun Jain",
+                        role: "Full Stack Developer",
+                        credentials: "Senior Developer, SAP Labs",
+                        experience: "Vibe Coder, 5+ years exp.",
+                        image: tarunImage
+                      },
+                      {
+                        name: "Chetan Verma",
+                        role: "AI/ML Enthusiast",
+                        credentials: "Microsoft",
+                        experience: "4+ years exp.",
+                        image: chetanImage
+                      },
+                      {
+                        name: "Sai Krishnan",
+                        role: "AI/ML Expert",
+                        credentials: "MS, Northeastern University",
+                        experience: "Ex-IBM, 5+ years exp.",
+                        useIcon: true
+                      },
+                      {
+                        name: "Krishna Bajpai",
+                        role: "Business & Entrepreneurship",
+                        credentials: "Founder, Posterwa",
+                        experience: "7+ years exp.",
+                        image: maleImage,
+                        filter: "grayscale"
+                      },
+                      {
+                        name: "Smruti Kumari",
+                        role: "UI/UX Designer",
+                        credentials: "Freelance Design Consultant",
+                        experience: "5+ years exp.",
+                        image: nehaImage
+                      },
+                      {
+                        name: "Bibhu Ranjan",
+                        role: "Product Management",
+                        credentials: "Ex Blackline, Ieltsappeal",
+                        experience: "5+ years exp.",
+                        image: bibhuImage
+                      },
+                      {
+                        name: "Arju Swami",
+                        role: "Psychology and Biotechnology",
+                        credentials: "PhD, IIT BHU",
+                        experience: "4+ years exp.",
+                        image: arjuImage
+                      },
+                      {
+                        name: "Priya Sharma",
+                        role: "Cloud Architecture & DevOps",
+                        credentials: "MTech, IIT Delhi",
+                        experience: "Ex-Microsoft, 6+ years exp.",
+                        image: priyaImage
+                      },
+                      {
+                        name: "Vikram Singh",
+                        role: "Cybersecurity Expert",
+                        credentials: "CISSP, CEH Certified",
+                        experience: "Ex-Deloitte, 8+ years exp.",
+                        image: vikramImage
+                      },
+                      {
+                        name: "Neha Gupta",
+                        role: "UI/UX with AI",
+                        credentials: "Design Lead, Figma Expert",
+                        experience: "Ex-Adobe, 5+ years exp.",
+                        image: nehaGuptaImage
+                      },
+                      {
+                        name: "Rahul Verma",
+                        role: "Digital Marketing",
+                        credentials: "MBA, IIM Ahmedabad",
+                        experience: "Marketing Director, 7+ years exp.",
+                        image: rahulImage
+                      }
+                    ].map((expert, idx) => (
+                      <div key={idx} className="bg-white rounded-lg shadow-lg p-6 flex-shrink-0" style={{ width: '280px' }}>
+                        <div className="flex items-center mb-4">
+                          {expert.useIcon ? (
+                            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                              <User size={30} className="text-blue-600" />
+                            </div>
+                          ) : (
+                              <img
+                                src={expert.image}
+                                alt={expert.name}
+                                className="w-16 h-16 rounded-full mr-4 object-cover"
+                                style={{ filter: expert.filter ? "grayscale(100%)" : "none" }}
+                              />
+                          )}
+                          <div>
+                            <h4 className="font-bold text-blue-700">{expert.name}</h4>
+                            <p className="text-sm text-blue-600">{expert.role}</p>
                           </div>
-                        ) : (
-                            <img
-                              src={expert.image}
-                              alt={expert.name}
-                              className="w-16 h-16 rounded-full mr-4 object-cover"
-                              style={{ filter: expert.filter ? "grayscale(100%)" : "none" }}
-                            />
-                        )}
-                        <div>
-                          <h4 className="font-bold text-blue-700">{expert.name}</h4>
-                          <p className="text-sm text-blue-600">{expert.role}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm text-slate-600 flex items-center">
+                            <Award size={16} className="mr-2" />
+                            {expert.credentials}
+                          </p>
+                          <p className="text-sm text-slate-600 flex items-center">
+                            <Briefcase size={16} className="mr-2" />
+                            {expert.experience}
+                          </p>
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-sm text-slate-600 flex items-center">
-                          <Award size={16} className="mr-2" />
-                          {expert.credentials}
-                        </p>
-                        <p className="text-sm text-slate-600 flex items-center">
-                          <Briefcase size={16} className="mr-2" />
-                          {expert.experience}
-                        </p>
+                    ))}
+
+                    {/* More Experts Indicator */}
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 flex-shrink-0 flex flex-col items-center justify-center" style={{ width: '280px' }}>
+                      <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center mb-4 shadow-md">
+                        <Users size={30} className="text-blue-600" />
                       </div>
+                      <h4 className="font-bold text-blue-700 text-center mb-1">And Many More...</h4>
+                      <p className="text-sm text-slate-600 text-center">
+                        Our faculty includes 40+ industry experts across all domains
+                      </p>
                     </div>
-                  ))}
-                  
-                  {/* More Experts Indicator */}
-                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 flex-shrink-0 flex flex-col items-center justify-center" style={{ width: '300px' }}>
-                    <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center mb-4 shadow-md">
-                      <Users size={30} className="text-blue-600" />
-                    </div>
-                    <h4 className="font-bold text-blue-700 text-center mb-1">And Many More...</h4>
-                    <p className="text-sm text-slate-600 text-center">
-                      Our faculty includes 40+ industry experts across all domains
-                    </p>
                   </div>
                 </div>
+                <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-white to-transparent w-12 pointer-events-none"></div>
+                <div className="absolute right-0 top-0 bottom-0 bg-gradient-to-l from-white to-transparent w-12 pointer-events-none"></div>
               </div>
-              <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-white to-transparent w-8 pointer-events-none"></div>
-              <div className="absolute right-0 top-0 bottom-0 bg-gradient-to-l from-white to-transparent w-8 pointer-events-none"></div>
             </div>
 
             {/* Additional Features */}
