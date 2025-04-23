@@ -8,7 +8,7 @@ interface ProgramOptionsProps {
 const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
   return (
     <section id="take-it-now" className="mb-12">
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="bg-white rounded-lg shadow-lg py-8 px-4">
         <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
           <Star size={24} className="mr-2" />
           Choose Your Program Option

@@ -454,7 +454,7 @@ export default function StudentJourneyRoadmap() {
         
         {/* USP Section */}
         <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-lg shadow-lg py-8 px-4">
             <h2 className="text-2xl font-bold text-blue-700 mb-8 flex items-center justify-center">
               <Award size={24} className="mr-2" />
               Why Choose UntraddCareer?
@@ -682,7 +682,7 @@ export default function StudentJourneyRoadmap() {
         
         {/* Testimonials Section */}
         <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-lg shadow-lg py-8 px-4">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <MessageCircle size={24} className="mr-2" />
               Success Stories from Our Students
@@ -777,7 +777,7 @@ export default function StudentJourneyRoadmap() {
         
         {/* Interactive Student Journey */}
         <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-lg shadow-lg py-8 px-4">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <Compass size={24} className="mr-2" />
               Student Journey Roadmap
@@ -911,7 +911,7 @@ export default function StudentJourneyRoadmap() {
         
         {/* Foundation Training */}
         <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-lg shadow-lg py-8 px-4">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <BookOpen size={24} className="mr-2" />
               Comprehensive Foundation Training
@@ -1035,8 +1035,8 @@ export default function StudentJourneyRoadmap() {
 
 
         {/* Eligibility Section */}
-        <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+        <section className="mb-8">
+          <div className="bg-white rounded-lg shadow-lg py-4 px-4">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <Users size={24} className="mr-2" />
               Eligibility & Target Students
@@ -1072,7 +1072,7 @@ export default function StudentJourneyRoadmap() {
                 </div>
               </div>
               
-              <div className="bg-slate-50 rounded-lg p-6">
+              <div className="bg-slate-50 rounded-lg p-3">
                 <h3 className="text-lg font-bold text-blue-700 mb-4">Student Benefits by Year</h3>
                 <div className="space-y-4">
                   <div className="border-l-4 border-blue-600 pl-4">
@@ -1095,7 +1095,7 @@ export default function StudentJourneyRoadmap() {
 
         {/* Program Delivery Mode */}
         <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-lg shadow-lg py-8 px-4">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <Zap size={24} className="mr-2" />
               Hybrid Program Delivery
@@ -1151,7 +1151,7 @@ export default function StudentJourneyRoadmap() {
         
         {/* Program Roadmap */}
         <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-lg shadow-lg py-8 px-4">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <TrendingUp size={24} className="mr-2" />
               Detailed Program Roadmap
@@ -1186,7 +1186,7 @@ export default function StudentJourneyRoadmap() {
 
         {/* Career Assurance Section */}
         <section className="mb-12">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-lg shadow-lg p-8 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-lg shadow-lg py-8 px-4 text-white">
             <h2 className="text-2xl font-bold mb-4 text-center">Your Career, Our Commitment</h2>
             
             <div className="text-center mb-8">
@@ -1239,7 +1239,7 @@ export default function StudentJourneyRoadmap() {
 
         {/* Next Steps */}
         <section className="mb-12">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-8 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg py-8 px-4 text-white">
             <h2 className="text-2xl font-bold mb-6 flex items-center justify-center">
               <TrendingUp size={24} className="mr-2" />
               Next Steps
@@ -1359,7 +1359,7 @@ export default function StudentJourneyRoadmap() {
 
         {/* Call to Action */}
         <section>
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-8 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg py-8 px-4 text-white">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-3">Secure Your Future Today</h2>
               <p className="text-blue-100 max-w-2xl mx-auto">
@@ -1416,8 +1416,8 @@ export default function StudentJourneyRoadmap() {
         </section>
 
         {/* FAQ Section */}
-        <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+        <section className="mb-1">
+          <div className="bg-white rounded-lg shadow-lg py-8 px-4 ">
             <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center justify-center">
               <MessageCircle size={24} className="mr-2" />
               Frequently Asked Questions
@@ -1579,7 +1579,7 @@ export default function StudentJourneyRoadmap() {
       </main>
       
       {/* Footer */}
-      <footer className="bg-slate-800 text-white py-6 mt-12">
+      <footer className="bg-slate-800 text-white py-6 mt-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
