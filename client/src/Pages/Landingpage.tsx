@@ -707,7 +707,7 @@ export default function StudentJourneyRoadmap() {
                       quote: "Coming from a tier-3 college, I had minimal exposure to industry trends. UntraddCareer helped me build practical marketing skills that employers actually want. Within 3 months of completing the program, I secured a role at Cosmos Digital with a package I couldn't have imagined before."
                     },
                     {
-                      name: "Prajwal",
+                      name: "Parakram",
                       role: "AI & Full Stack Developer",
                       company: "Cosmos Innovation",
                       background: "Non-CS Background",
