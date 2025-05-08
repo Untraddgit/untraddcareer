@@ -1,11 +1,22 @@
 import React from 'react';
 import { Star, CheckCircle, MessageSquare } from 'lucide-react';
+import { SignInButton, useAuth } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ProgramOptionsProps {
   openWhatsApp: (message: string) => void;
 }
 
 const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
+  const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGetIt = () => {
+    if (isSignedIn) {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <section id="take-it-now" className="mb-12">
       <div className="bg-white rounded-lg shadow-lg py-8 px-4">
@@ -82,13 +93,30 @@ const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
               ))}
             </ul>
 
-            <button 
-              onClick={() => openWhatsApp("Hi, I want to enroll in the Individual Plan (₹16,999). Please guide me through the process.")}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <MessageSquare size={18} />
-              Chat to Enroll Now
-            </button>
+            <div className="space-y-3">
+              <button 
+                onClick={() => openWhatsApp("Hi, I want to enroll in the Individual Plan (₹16,999). Please guide me through the process.")}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 cursor-pointer mb-3"
+              >
+                <MessageSquare size={18} />
+                Chat to Enroll Now
+              </button>
+
+              {isSignedIn ? (
+                <button
+                  onClick={handleGetIt}
+                  className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Get Scholarship
+                </button>
+              ) : (
+                <SignInButton>
+                  <button className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                    Get Scholarship
+                  </button>
+                </SignInButton>
+              )}
+            </div>
           </div>
 
           {/* College Option */}
