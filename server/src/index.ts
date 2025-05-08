@@ -11,18 +11,48 @@ dotenv.config();
 
 const app = express();
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI!)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((error) => console.error('MongoDB connection error:', error));
+// MongoDB connection with better error handling
+const connectDB = async () => {
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined in environment variables');
+    }
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('Connected to MongoDB Atlas');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1); // Exit if cannot connect to database
+  }
+};
 
-// Middleware
+connectDB();
+
+// CORS configuration
+const allowedOrigins = [
+  'http://localhost:5174',
+  'http://localhost:5173',
+  'http://127.0.0.1:5174',
+  'http://127.0.0.1:5173',
+  'https://untraddcareer.vercel.app', // Add your Vercel frontend URL
+  'https://untraddcareer.com' // Add your custom domain if you have one
+];
+
 app.use(cors({
-  origin: ['http://localhost:5174', 'http://localhost:5173', 'http://127.0.0.1:5174', 'http://127.0.0.1:5173'], // Vite ports
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(morgan('dev'));
 app.use(express.json());
 
@@ -46,6 +76,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Welcome to UntraddCareer API',
+    status: 'running',
+    version: '1.0.0'
+  });
+});
+
 // Debug 404 handler
 app.use((req, res) => {
   console.log('404 Not Found:', req.method, req.path);
@@ -66,7 +105,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+const PORT = parseInt(process.env.PORT || '10000', 10);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
 }); 
