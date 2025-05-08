@@ -1,0 +1,9 @@
+# Ignore server build artifacts
+server/node_modules/
+server/dist/
+server/.next/
+
+# Ignore general
+*.log
+.DS_Store
+.env
