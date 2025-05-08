@@ -145,7 +145,52 @@ const Dashboard = () => {
     if (!isLoaded || !user) return;
     fetchUserProfile();
     checkTestStatus();
+    fetchTestHistory();
   }, [isLoaded, user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = isLoaded ? await getToken() : null;
+      const response = await api.get('/api/user-profile', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        params: { userId: user?.id }
+      });
+      setUserProfile(response.data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      
+      // If profile not found, create a default one
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        try {
+          const token = isLoaded ? await getToken() : null;
+          const response = await api.post('/api/user-profile', {
+            userId: user?.id,
+            branch: 'BCA', // Default branch
+            collegeName: 'Default College',
+            principalName: 'Default Principal'
+          }, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          });
+          setUserProfile(response.data);
+        } catch (createError) {
+          console.error('Error creating default profile:', createError);
+        }
+      }
+    }
+  };
+
+  const fetchTestHistory = async () => {
+    try {
+      const token = isLoaded ? await getToken() : null;
+      const response = await api.get('/api/quiz-results', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        params: { userId: user?.id }
+      });
+      setTestHistory(response.data);
+    } catch (error) {
+      console.error('Error fetching test history:', error);
+    }
+  };
 
   // Auto-scroll effect for internship listings
   useEffect(() => {
@@ -195,51 +240,6 @@ const Dashboard = () => {
     };
   }, []);
 
-  const fetchUserProfile = async () => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      const response = await api.get('/api/user-profile', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        params: { userId: user?.id }
-      });
-      setUserProfile(response.data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      
-      // If profile not found, create a default one
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        try {
-          console.log('Creating default profile for user');
-          const token = isLoaded ? await getToken() : null;
-          const response = await api.post('/api/user-profile', {
-            userId: user?.id,
-            branch: 'BCA', // Default branch
-            collegeName: 'Default College',
-            principalName: 'Default Principal'
-          }, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {}
-          });
-          setUserProfile(response.data);
-        } catch (createError) {
-          console.error('Error creating default profile:', createError);
-        }
-      }
-    }
-  };
-
-  const fetchTestHistory = async () => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      const response = await api.get('/api/quiz-results', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        params: { userId: user?.id }
-      });
-      setTestHistory(response.data);
-    } catch (error) {
-      console.error('Error fetching test history:', error);
-    }
-  };
-
   const checkTestStatus = async () => {
     try {
       const token = isLoaded ? await getToken() : null;
@@ -248,8 +248,8 @@ const Dashboard = () => {
         params: { userId: user?.id }
       });
       setHasAttemptedTest(response.data.hasAttempted);
-      if (response.data.result) {
-        setTestResult(response.data.result);
+      if (response.data.hasAttempted) {
+        setTestResult(response.data.latestResult);
       }
     } catch (error) {
       console.error('Error checking test status:', error);
@@ -310,7 +310,9 @@ const Dashboard = () => {
               <div className="flex justify-between items-start">
               <div>
                   <h1 className="text-2xl sm:text-3xl font-bold mb-1">Welcome, {user?.firstName}! 👋</h1>
-                  <p className="text-blue-100">Your journey to success begins here at UntraddCareer</p>
+                  <p className="text-blue-100">
+                    {userProfile ? `Your ${userProfile.branch} journey begins here at UntraddCareer` : 'Your journey begins here at UntraddCareer'}
+                  </p>
               </div>
                 
                 {showNotification && (
@@ -470,6 +472,11 @@ const Dashboard = () => {
                     Our scholarship test assesses your aptitude and knowledge. Based on your performance, 
                     you may qualify for tuition discounts up to 15%.
                   </p>
+                  {testHistory.length > 0 && (
+                    <p className="text-sm text-gray-500 mb-4">
+                      You have taken {testHistory.length} test{testHistory.length > 1 ? 's' : ''} so far.
+                    </p>
+                  )}
                 </div>
 
                 {hasAttemptedTest ? (
