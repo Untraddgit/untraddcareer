@@ -29,12 +29,24 @@ connectDB();
 
 // CORS configuration
 const allowedOrigins = [
-  'http://localhost:5174',
+  // Development
   'http://localhost:5173',
-  'http://127.0.0.1:5174',
+  'http://localhost:5174', 
   'http://127.0.0.1:5173',
-  'https://untraddcareer.vercel.app', // Add your Vercel frontend URL
-  'https://untraddcareer.com' // Add your custom domain if you have one
+  'http://127.0.0.1:5174',
+  
+  // Production - Vercel
+  'https://untraddcareer.vercel.app',
+  'https://www.untraddcareer.vercel.app',
+  
+  // Production - Render 
+  'https://untraddcollege.onrender.com',
+  
+  // Custom domains (add your actual domains here)
+  'https://untraddcareer.com',
+  'https://www.untraddcareer.com',
+  'https://untraddcollege.com',
+  'https://www.untraddcollege.com'
 ];
 
 app.use(cors({

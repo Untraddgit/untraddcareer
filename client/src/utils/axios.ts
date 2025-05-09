@@ -22,18 +22,28 @@ const api = axios.create({
 // Attach auth token before each request
 api.interceptors.request.use(
   async (config) => {
-    console.log('Making request to:', config.url);
     try {
-      const token = await window.Clerk?.session?.getToken();
+      if (!window.Clerk?.session) {
+        console.error('Clerk session not initialized');
+        throw new Error('Authentication not initialized');
+      }
+
+      const token = await window.Clerk.session.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.warn('No auth token available');
       }
     } catch (error) {
-      console.error('Error fetching auth token:', error);
+      console.error('Auth error:', error);
+      // Redirect to login if authentication fails
+      window.location.href = '/sign-in';
+      return Promise.reject(error);
     }
     return config;
   },
   (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -46,6 +56,10 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       console.error('Server Error:', error.response.data);
+      // Handle 401 Unauthorized
+      if (error.response.status === 401) {
+        window.location.href = '/sign-in';
+      }
     } else if (error.request) {
       console.error('Network Error:', error.message);
     } else {
