@@ -6,4 +6,9 @@ server/.next/
 # Ignore general
 *.log
 .DS_Store
-.env
+
+# Environment files
+.env.local
+.env.*.local
+.env.production
+.env.development

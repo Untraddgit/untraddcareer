@@ -206,7 +206,7 @@ const ScholarshipTest = () => {
       console.log('Submitting test with token:', !!token);
       
       await api.post('/api/quiz-results', {
-        quizId: quiz.title,
+        quizId: quiz._id,
         userId: user?.id,
         score: finalScore,
         answers: formattedAnswers,

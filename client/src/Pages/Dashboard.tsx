@@ -247,9 +247,11 @@ const Dashboard = () => {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         params: { userId: user?.id }
       });
+      console.log('Test status response:', response.data);
       setHasAttemptedTest(response.data.hasAttempted);
-      if (response.data.hasAttempted) {
-        setTestResult(response.data.latestResult);
+      if (response.data.hasAttempted && response.data.result) {
+        console.log('Setting test result:', response.data.result);
+        setTestResult(response.data.result);
       }
     } catch (error) {
       console.error('Error checking test status:', error);
@@ -407,21 +409,41 @@ const Dashboard = () => {
                     </p>
                     <div className="mt-2">
                       {hasAttemptedTest ? (
-                        <div className="flex items-center text-green-600">
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          <span className="text-sm font-medium">Completed</span>
+                        <div className="space-y-2">
+                          <div className="flex items-center text-green-600">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            <span className="text-sm font-medium">Completed</span>
+                          </div>
+                          {testResult && (
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-xs text-gray-500">Your Score</p>
+                                  <p className="text-lg font-bold text-blue-600">{testResult.score}%</p>
+                                </div>
+                                <div className="bg-blue-100 p-2 rounded-full">
+                                  <Award className="h-5 w-5 text-blue-600" />
+                                </div>
+                              </div>
+                              {testResult.score >= 60 && (
+                                <p className="text-xs text-green-600 mt-1">
+                                  Eligible for {getScholarshipDiscount(testResult.score)}% scholarship
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ) : (
-            <button
+                        <button
                           onClick={handleStartTest}
                           className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center"
-            >
+                        >
                           Start Test
                           <ArrowRight className="ml-2 h-4 w-4" />
-            </button>
+                        </button>
                       )}
-          </div>
-        </div>
+                    </div>
+                  </div>
                   
                   <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
                     <div className="flex items-center mb-3">
