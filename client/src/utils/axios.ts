@@ -12,11 +12,17 @@ declare global {
 
 // Create axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:10000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true, // Important for CORS
+});
+
+// Debug log for API configuration
+console.log('API Configuration:', {
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
+  withCredentials: true
 });
 
 // Attach auth token before each request
@@ -31,6 +37,7 @@ api.interceptors.request.use(
       const token = await window.Clerk.session.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log('Request headers:', config.headers);
       } else {
         console.warn('No auth token available');
       }
@@ -51,11 +58,21 @@ api.interceptors.request.use(
 // Debug interceptor for responses
 api.interceptors.response.use(
   (response) => {
+    console.log('API Response:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data
+    });
     return response;
   },
   (error) => {
     if (error.response) {
-      console.error('Server Error:', error.response.data);
+      console.error('Server Error:', {
+        url: error.config.url,
+        status: error.response.status,
+        data: error.response.data,
+        headers: error.response.headers
+      });
       // Handle 401 Unauthorized
       if (error.response.status === 401) {
         window.location.href = '/sign-in';

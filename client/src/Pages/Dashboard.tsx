@@ -182,13 +182,23 @@ const Dashboard = () => {
   const fetchTestHistory = async () => {
     try {
       const token = isLoaded ? await getToken() : null;
+      console.log('Fetching test history with token:', !!token);
+      
       const response = await api.get('/api/quiz-results', {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         params: { userId: user?.id }
       });
+      console.log('Test history response:', response.data);
       setTestHistory(response.data);
     } catch (error) {
       console.error('Error fetching test history:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          headers: error.response?.headers
+        });
+      }
     }
   };
 
@@ -243,18 +253,31 @@ const Dashboard = () => {
   const checkTestStatus = async () => {
     try {
       const token = isLoaded ? await getToken() : null;
+      console.log('Checking test status with token:', !!token);
+      console.log('User ID:', user?.id);
+      
       const response = await api.get('/api/quiz-results/check-test-status', {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         params: { userId: user?.id }
       });
       console.log('Test status response:', response.data);
+      
       setHasAttemptedTest(response.data.hasAttempted);
       if (response.data.hasAttempted && response.data.result) {
         console.log('Setting test result:', response.data.result);
         setTestResult(response.data.result);
+      } else {
+        console.log('No test result found in response');
       }
     } catch (error) {
       console.error('Error checking test status:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          headers: error.response?.headers
+        });
+      }
     }
   };
 

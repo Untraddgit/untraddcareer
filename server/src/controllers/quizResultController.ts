@@ -4,7 +4,16 @@ import QuizResult from '../models/QuizResult';
 // Get all quiz results
 export const getQuizResults = async (req: Request, res: Response) => {
   try {
-    const results = await QuizResult.find();
+    const userId = req.query.userId as string;
+    console.log('Getting quiz results for userId:', userId);
+
+    if (!userId) {
+      return res.status(400).json({ message: 'Missing userId parameter' });
+    }
+
+    const results = await QuizResult.find({ userId }).sort({ completedAt: -1 });
+    console.log('Found quiz results:', results);
+    
     res.json(results);
   } catch (error: any) {
     console.error('Error fetching quiz results:', error);

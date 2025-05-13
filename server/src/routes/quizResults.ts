@@ -32,14 +32,22 @@ router.post('/', async (req: AuthRequest, res) => {
   try {
     // Get userId from body or from auth token
     const userId = req.body.userId || req.user?.id;
-    console.log('Submitting quiz result for user:', userId, req.body);
+    console.log('Submitting quiz result:', {
+      userId,
+      quizId: req.body.quizId,
+      score: req.body.score,
+      timeSpent: req.body.timeSpent,
+      answersCount: req.body.answers?.length
+    });
     
     const { quizId, score, answers, timeSpent, completedAt } = req.body;
     
     if (!userId) {
+      console.error('Missing userId in request');
       return res.status(401).json({ message: 'Unauthorized: Missing userId' });
     }
     if (!quizId || score === undefined || !answers || timeSpent === undefined) {
+      console.error('Missing required fields:', { quizId, score, answers, timeSpent });
       return res.status(400).json({ 
         message: 'Missing required fields',
         required: ['quizId', 'score', 'answers', 'timeSpent']
@@ -49,6 +57,7 @@ router.post('/', async (req: AuthRequest, res) => {
     // Check if user has already taken the test
     const existingResult = await QuizResult.findOne({ userId });
     if (existingResult) {
+      console.log('User has already taken the test:', existingResult);
       return res.status(400).json({ 
         message: 'You have already taken the test',
         result: existingResult
@@ -66,7 +75,7 @@ router.post('/', async (req: AuthRequest, res) => {
     });
 
     const savedResult = await result.save();
-    console.log('Saved quiz result:', savedResult);
+    console.log('Successfully saved quiz result:', savedResult);
     
     res.status(201).json(savedResult);
   } catch (error: any) {
@@ -79,11 +88,16 @@ router.post('/', async (req: AuthRequest, res) => {
 router.get('/check-test-status', async (req: AuthRequest, res) => {
   try {
     const userId = req.query.userId as string || req.user?.id;
+    console.log('Checking test status for userId:', userId);
+
     if (!userId) {
+      console.error('Missing userId in request');
       return res.status(401).json({ message: 'Unauthorized: Missing userId' });
     }
 
     const existingResult = await QuizResult.findOne({ userId });
+    console.log('Found test result:', existingResult);
+
     res.json({ 
       hasAttempted: !!existingResult,
       result: existingResult
