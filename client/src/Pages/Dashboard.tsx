@@ -642,23 +642,23 @@ const Dashboard = () => {
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
                           <GraduationCap className="h-5 w-5 text-blue-600 mr-2" />
-                          <p className="font-medium text-gray-900">5,000+</p>
+                          <p className="font-medium text-gray-900">100+</p>
               </div>
                         <p className="text-sm text-gray-600">Students received scholarships</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
                           <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
-                          <p className="font-medium text-gray-900">92%</p>
+                          <p className="font-medium text-gray-900">96%</p>
                         </div>
                         <p className="text-sm text-gray-600">Placement success rate</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
                           <Briefcase className="h-5 w-5 text-purple-600 mr-2" />
-                          <p className="font-medium text-gray-900">₹5L - ₹12L</p>
+                          <p className="font-medium text-gray-900">₹3T - ₹25T</p>
                         </div>
-                        <p className="text-sm text-gray-600">Annual package range</p>
+                        <p className="text-sm text-gray-600">Monthly Stipend Range</p>
                       </div>
                     </div>
                   </div>
