@@ -16,7 +16,7 @@ import nehaGuptaImage from '../assets/nehagupta.jpeg';
 import rahulImage from '../assets/rahul.jpeg';
 import vikramImage from '../assets/vikram.jpg';
 import arjuImage from '../assets/arju swami.webp';
-import priyaImage from '../assets/priya.jpeg';
+// import priyaImage from '../assets/priya.jpeg';
 import chetanImage from '../assets/chetan.jpeg';
 import tarunImage from '../assets/tarun.jpeg';
 import bibhuImage from '../assets/bibhu.jpeg';
