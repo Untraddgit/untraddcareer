@@ -555,13 +555,13 @@ export default function StudentJourneyRoadmap() {
                         experience: "5+ years exp.",
                         image: bibhuImage
                       },
-                      {
-                        name: "Arju Swami",
-                        role: "Psychology and Biotechnology",
-                        credentials: "PhD, IIT BHU",
-                        experience: "4+ years exp.",
-                        image: arjuImage
-                      },
+                      // {
+                      //   name: "Arju Swami",
+                      //   role: "Psychology and Biotechnology",
+                      //   credentials: "PhD, IIT BHU",
+                      //   experience: "4+ years exp.",
+                      //   image: arjuImage
+                      // },
                       {
                         name: "Priya Sharma",
                         role: "Cloud Architecture & DevOps",
