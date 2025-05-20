@@ -542,7 +542,7 @@ export default function StudentJourneyRoadmap() {
                         filter: "grayscale"
                       },
                       {
-                        name: "Neha Singh",
+                        name: "Neha Kumari",
                         role: "UI/UX Designer",
                         credentials: "Freelance Design Consultant",
                         experience: "5+ years exp.",
