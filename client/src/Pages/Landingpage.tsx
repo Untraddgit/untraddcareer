@@ -18,7 +18,7 @@ import vikramImage from '../assets/vikram.jpg';
 // import arjuImage from '../assets/arju swami.webp';
 import priyaImage from '../assets/priya.jpeg';
 import chetanImage from '../assets/chetan.jpeg';
-import tarunImage from '../assets/tarun.jpeg';
+// import tarunImage from '../assets/tarun.jpeg';
 import bibhuImage from '../assets/bibhu.jpeg';
 
 
@@ -512,13 +512,13 @@ export default function StudentJourneyRoadmap() {
                         experience: "Data Science, 6+ years exp.",
                         image: "https://randomuser.me/api/portraits/men/77.jpg"
                       },
-                      {
-                        name: "Tarun Jain",
-                        role: "Full Stack Developer",
-                        credentials: "Senior Developer, SAP Labs",
-                        experience: "Vibe Coder, 5+ years exp.",
-                        image: tarunImage
-                      },
+                      // {
+                      //   name: "Tarun Jain",
+                      //   role: "Full Stack Developer",
+                      //   credentials: "Senior Developer, SAP Labs",
+                      //   experience: "Vibe Coder, 5+ years exp.",
+                      //   image: tarunImage
+                      // },
                       {
                         name: "Chetan Verma",
                         role: "AI/ML Enthusiast",
@@ -541,13 +541,13 @@ export default function StudentJourneyRoadmap() {
                         image: maleImage,
                         filter: "grayscale"
                       },
-                      // {
-                      //   name: "Smruti Kumari",
-                      //   role: "UI/UX Designer",
-                      //   credentials: "Freelance Design Consultant",
-                      //   experience: "5+ years exp.",
-                      //   image: nehaImage
-                      // },
+                      {
+                        name: "Neha Singh",
+                        role: "UI/UX Designer",
+                        credentials: "Freelance Design Consultant",
+                        experience: "5+ years exp.",
+                        image: nehaImage
+                      },
                       {
                         name: "Bibhu Ranjan",
                         role: "Product Management",
