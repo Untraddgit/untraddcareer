@@ -541,13 +541,13 @@ export default function StudentJourneyRoadmap() {
                         image: maleImage,
                         filter: "grayscale"
                       },
-                      {
-                        name: "Smruti Kumari",
-                        role: "UI/UX Designer",
-                        credentials: "Freelance Design Consultant",
-                        experience: "5+ years exp.",
-                        image: nehaImage
-                      },
+                      // {
+                      //   name: "Smruti Kumari",
+                      //   role: "UI/UX Designer",
+                      //   credentials: "Freelance Design Consultant",
+                      //   experience: "5+ years exp.",
+                      //   image: nehaImage
+                      // },
                       {
                         name: "Bibhu Ranjan",
                         role: "Product Management",
