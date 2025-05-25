@@ -1,9 +1,7 @@
 import express from 'express';
 import {
   createOrUpdateUser,
-  getUserByClerkId,
-  updateUserType,
-  getAllUsers,
+  getUserByClerkId
 } from '../controllers/userController';
 import { clerkClient } from '@clerk/clerk-sdk-node';
 import { verifyAuth } from '../middleware/auth';
@@ -35,11 +33,5 @@ router.post('/', verifyClerkSession, createOrUpdateUser);
 
 // Get user by Clerk ID
 router.get('/:clerkId', verifyAuth, getUserByClerkId);
-
-// Update user type (admin only)
-router.patch('/:clerkId/type', verifyClerkSession, updateUserType);
-
-// Get all users (admin only)
-router.get('/', verifyClerkSession, getAllUsers);
 
 export default router; 

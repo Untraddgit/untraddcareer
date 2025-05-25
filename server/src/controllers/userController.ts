@@ -31,8 +31,7 @@ export const createOrUpdateUser = async (req: Request, res: Response) => {
         clerkId,
         email,
         firstName,
-        lastName,
-        userType: 'student', // Default to student
+        lastName
       });
       console.log('New user created successfully:', user);
     }

@@ -83,8 +83,7 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
             clerkId: id,
             email: primaryEmail.email_address,
             firstName: first_name,
-            lastName: last_name,
-            userType: 'student', // Default to student
+            lastName: last_name
           },
           { upsert: true, new: true }
         );
@@ -103,12 +102,10 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
       console.log('User deleted successfully');
     }
 
-    console.log('=== WEBHOOK PROCESSING COMPLETE ===');
-    res.status(200).json({ message: 'Webhook processed successfully' });
-  } catch (err) {
-    console.error('Webhook error:', err);
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    res.status(400).json({ message: 'Webhook error', error: errorMessage });
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(400).json({ error: 'Webhook error' });
   }
 });
 

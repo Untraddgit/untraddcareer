@@ -5,7 +5,6 @@ export interface IUser extends Document {
   email: string;
   firstName: string;
   lastName: string;
-  userType: 'student' | 'admin';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,12 +27,7 @@ const UserSchema = new Schema<IUser>({
   lastName: {
     type: String,
     required: true,
-  },
-  userType: {
-    type: String,
-    enum: ['student', 'admin'],
-    default: 'student',
-  },
+  }
 }, {
   timestamps: true,
 });
@@ -41,6 +35,5 @@ const UserSchema = new Schema<IUser>({
 // Create indexes for better query performance
 UserSchema.index({ clerkId: 1 });
 UserSchema.index({ email: 1 });
-UserSchema.index({ userType: 1 });
 
 export default mongoose.model<IUser>('User', UserSchema); 
