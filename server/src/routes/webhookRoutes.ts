@@ -58,8 +58,14 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
 
     // Handle user creation/update
     if (evt.type === 'user.created' || evt.type === 'user.updated') {
-      const { id, email_addresses, first_name, last_name } = evt.data;
-      console.log('User data from webhook:', { id, email_addresses, first_name, last_name });
+      const { id, email_addresses, first_name, last_name, username } = evt.data;
+      console.log('User data from webhook:', { 
+        id, 
+        email_addresses, 
+        first_name, 
+        last_name,
+        username 
+      });
 
       // Get primary email
       const primaryEmail = email_addresses.find(email => email.id === evt.data.primary_email_address_id);
@@ -71,8 +77,8 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
       console.log('Creating/updating user in database:', {
         clerkId: id,
         email: primaryEmail.email_address,
-        firstName: first_name,
-        lastName: last_name
+        firstName: first_name || username || 'User', // Use username as fallback if first_name is not available
+        lastName: last_name || ''
       });
 
       try {
@@ -82,10 +88,14 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
           {
             clerkId: id,
             email: primaryEmail.email_address,
-            firstName: first_name,
-            lastName: last_name
+            firstName: first_name || username || 'User', // Use username as fallback
+            lastName: last_name || ''
           },
-          { upsert: true, new: true }
+          { 
+            upsert: true, 
+            new: true,
+            setDefaultsOnInsert: true 
+          }
         );
 
         console.log('User saved to database successfully:', user);
