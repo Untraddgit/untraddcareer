@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 
 interface User {
@@ -14,6 +14,7 @@ interface User {
 
 const AdminDashboard: React.FC = () => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,9 +22,10 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        const token = await getToken();
         const response = await axios.get('/api/users', {
           headers: {
-            Authorization: `Bearer ${await user?.getToken()}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         setUsers(response.data);
@@ -37,16 +39,17 @@ const AdminDashboard: React.FC = () => {
     if (user) {
       fetchUsers();
     }
-  }, [user]);
+  }, [user, getToken]);
 
   const handleUserTypeChange = async (clerkId: string, newType: 'student' | 'admin') => {
     try {
+      const token = await getToken();
       await axios.patch(
         `/api/users/${clerkId}/type`,
         { userType: newType },
         {
           headers: {
-            Authorization: `Bearer ${await user?.getToken()}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
