@@ -23,6 +23,9 @@ const AdminDashboard: React.FC = () => {
     const fetchUsers = async () => {
       try {
         const token = await getToken();
+        if (!token) {
+          throw new Error('No authentication token available');
+        }
         const response = await axios.get('/api/users', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -44,6 +47,9 @@ const AdminDashboard: React.FC = () => {
   const handleUserTypeChange = async (clerkId: string, newType: 'student' | 'admin') => {
     try {
       const token = await getToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
       await axios.patch(
         `/api/users/${clerkId}/type`,
         { userType: newType },
