@@ -21,6 +21,7 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
+      if (!getToken) return;
       try {
         const token = await getToken();
         if (!token) {
@@ -45,6 +46,7 @@ const AdminDashboard: React.FC = () => {
   }, [user, getToken]);
 
   const handleUserTypeChange = async (clerkId: string, newType: 'student' | 'admin') => {
+    if (!getToken) return;
     try {
       const token = await getToken();
       if (!token) {
