@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import userProfileRouter from './routes/userProfile';
 import quizResultsRouter from './routes/quizResults';
 import quizRouter from './routes/quizRoutes';
+import webhookRouter from './routes/webhookRoutes';
 
 dotenv.config();
 
@@ -82,7 +83,10 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(morgan('dev'));
+// Important: Webhook routes must be registered BEFORE express.json() middleware
+// because Clerk sends raw JSON in the request body
+app.use('/api/webhooks', webhookRouter);
+
 app.use(express.json());
 
 // Debug middleware to log all requests

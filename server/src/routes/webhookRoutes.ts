@@ -8,13 +8,15 @@ const router = express.Router();
 // Verify webhook signature
 const verifyWebhook = (req: express.Request) => {
   console.log('=== WEBHOOK VERIFICATION START ===');
-  console.log('Request headers:', req.headers);
+  console.log('Request headers:', JSON.stringify(req.headers, null, 2));
   
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
   if (!WEBHOOK_SECRET) {
     console.error('CLERK_WEBHOOK_SECRET is not set');
     throw new Error('Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env');
   }
+
+  console.log('Webhook secret exists:', !!WEBHOOK_SECRET);
 
   const svix_id = req.headers['svix-id'] as string;
   const svix_timestamp = req.headers['svix-timestamp'] as string;
@@ -55,6 +57,7 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
     
     const evt = verifyWebhook(req);
     console.log('Processing webhook event:', evt.type);
+    console.log('Full event data:', JSON.stringify(evt.data, null, 2));
 
     // Handle user creation/update
     if (evt.type === 'user.created' || evt.type === 'user.updated') {
@@ -74,23 +77,20 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
         throw new Error('No primary email found');
       }
 
-      console.log('Creating/updating user in database:', {
+      const userData = {
         clerkId: id,
         email: primaryEmail.email_address,
-        firstName: first_name || username || 'User', // Use username as fallback if first_name is not available
+        firstName: first_name || username || 'User',
         lastName: last_name || ''
-      });
+      };
+
+      console.log('Attempting to save user data:', userData);
 
       try {
         // Create or update user in our database
         const user = await User.findOneAndUpdate(
           { clerkId: id },
-          {
-            clerkId: id,
-            email: primaryEmail.email_address,
-            firstName: first_name || username || 'User', // Use username as fallback
-            lastName: last_name || ''
-          },
+          userData,
           { 
             upsert: true, 
             new: true,
@@ -98,7 +98,7 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
           }
         );
 
-        console.log('User saved to database successfully:', user);
+        console.log('User saved to database successfully:', JSON.stringify(user, null, 2));
       } catch (dbError) {
         console.error('Database error:', dbError);
         throw dbError;
@@ -112,10 +112,10 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
       console.log('User deleted successfully');
     }
 
-    res.json({ received: true });
+    res.json({ received: true, message: 'Webhook processed successfully' });
   } catch (error) {
     console.error('Error processing webhook:', error);
-    res.status(400).json({ error: 'Webhook error' });
+    res.status(400).json({ error: 'Webhook error', details: error.message });
   }
 });
 
