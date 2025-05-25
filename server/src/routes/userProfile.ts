@@ -39,23 +39,24 @@ router.post('/', async (req: AuthRequest, res) => {
     console.log('Received profile data:', req.body);
     // Get userId from body or from auth token
     const userId = req.body.userId || req.user?.id;
-    const { branch, collegeName, principalName } = req.body;
+    const { branch, collegeName, principalName, studentName } = req.body;
     
     if (!userId) {
       return res.status(400).json({ message: 'Missing userId' });
     }
     
-    if (!branch || !collegeName || !principalName) {
-      return res.status(400).json({ message: 'Missing required fields: branch, collegeName, principalName' });
+    if (!branch || !collegeName || !principalName || !studentName) {
+      return res.status(400).json({ message: 'Missing required fields: branch, collegeName, principalName, studentName' });
     }
 
     let profile = await UserProfile.findOne({ userId });
     if (profile) {
+      profile.studentName = studentName;
       profile.branch = branch;
       profile.collegeName = collegeName;
       profile.principalName = principalName;
     } else {
-      profile = new UserProfile({ userId, branch, collegeName, principalName });
+      profile = new UserProfile({ userId, studentName, branch, collegeName, principalName });
     }
 
     const savedProfile = await profile.save();

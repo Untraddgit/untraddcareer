@@ -5,6 +5,10 @@ const QuizResultSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  studentName: {
+    type: String,
+    required: true,
+  },
   quizId: {
     type: String,
     required: true,

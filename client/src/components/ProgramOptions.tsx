@@ -110,7 +110,7 @@ const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
                   Get Scholarship
                 </button>
               ) : (
-                <SignInButton>
+                <SignInButton mode="modal">
                   <button className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer">
                     Get Scholarship
                   </button>
@@ -203,11 +203,11 @@ const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
             </div>
 
             <button 
-              onClick={() => openWhatsApp("Hi, I want to explore the College Partnership Program (₹12,999/student). Please provide more details.")}
+              onClick={() => openWhatsApp("Hi, I'm interested in partnering with UntraddCareer for our college.")}
               className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <MessageSquare size={18} />
-              Chat to Partner With Us
+              Contact for College Partnership
             </button>
             
             <p className="text-center text-sm text-green-700 mt-3">

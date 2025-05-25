@@ -17,7 +17,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
 // Create or update user profile
 export const createOrUpdateUserProfile = async (req: Request, res: Response) => {
   try {
-    const { branch, collegeName, principalName } = req.body;
+    const { branch, collegeName, principalName, studentName } = req.body;
     const userId = req.auth?.userId;
 
     if (!userId) {
@@ -28,6 +28,7 @@ export const createOrUpdateUserProfile = async (req: Request, res: Response) => 
       { userId },
       {
         userId,
+        studentName,
         branch,
         collegeName,
         principalName,

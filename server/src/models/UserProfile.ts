@@ -6,6 +6,10 @@ const UserProfileSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  studentName: {
+    type: String,
+    required: true,
+  },
   branch: {
     type: String,
     required: true,

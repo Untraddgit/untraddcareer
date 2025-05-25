@@ -59,6 +59,7 @@ const ScholarshipTest = () => {
   const [collegeName, setCollegeName] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('');
   const [testCode, setTestCode] = useState('');
+  const [studentName, setStudentName] = useState('');
   const [codeError, setCodeError] = useState(false);
   const [formError, setFormError] = useState(false);
 
@@ -205,9 +206,22 @@ const ScholarshipTest = () => {
       const token = await getToken();
       console.log('Submitting test with token:', !!token);
       
+      // First save the user profile with all the form data
+      await api.post('/api/user-profile', {
+        userId: user?.id,
+        branch: selectedBranch,
+        collegeName: collegeName,
+        studentName: studentName,
+        principalName: 'Default Principal'
+      }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+
+      // Then submit the quiz results with the student's name
       await api.post('/api/quiz-results', {
         quizId: quiz._id,
         userId: user?.id,
+        studentName: studentName, // Pass the student's name from the form
         score: finalScore,
         answers: formattedAnswers,
         timeSpent: (quiz.timeLimit * 60) - timeLeft,
@@ -242,7 +256,7 @@ const ScholarshipTest = () => {
 
   const handleStartTest = async () => {
     // Validate form
-    if (!selectedBranch || !collegeName || !testCode) {
+    if (!selectedBranch || !collegeName || !testCode || !studentName) {
       setFormError(true);
       return;
     }
@@ -265,6 +279,7 @@ const ScholarshipTest = () => {
         userId: user?.id,
         branch: selectedBranch,
         collegeName: collegeName,
+        studentName: studentName,
         principalName: 'Default Principal'
       }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -350,6 +365,24 @@ const ScholarshipTest = () => {
                 </div>
 
                 <form className="space-y-4 mb-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Name
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      placeholder="Enter your Official Name"
+                      className={`w-full p-3 border rounded-lg ${formError && !studentName ? 'border-red-500' : 'border-gray-300'}`}
+                      disabled={loading}
+                    />
+                    {formError && !studentName && (
+                      <p className="text-red-500 text-sm mt-1">Please enter your name</p>
+                    )}
+                  </div>
+
                   <div>
                     <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-1">
                       Select Your Branch

@@ -40,17 +40,17 @@ router.post('/', async (req: AuthRequest, res) => {
       answersCount: req.body.answers?.length
     });
     
-    const { quizId, score, answers, timeSpent, completedAt } = req.body;
+    const { quizId, score, answers, timeSpent, completedAt, studentName } = req.body;
     
     if (!userId) {
       console.error('Missing userId in request');
       return res.status(401).json({ message: 'Unauthorized: Missing userId' });
     }
-    if (!quizId || score === undefined || !answers || timeSpent === undefined) {
-      console.error('Missing required fields:', { quizId, score, answers, timeSpent });
+    if (!quizId || score === undefined || !answers || timeSpent === undefined || !studentName) {
+      console.error('Missing required fields:', { quizId, score, answers, timeSpent, studentName });
       return res.status(400).json({ 
         message: 'Missing required fields',
-        required: ['quizId', 'score', 'answers', 'timeSpent']
+        required: ['quizId', 'score', 'answers', 'timeSpent', 'studentName']
       });
     }
 
@@ -67,6 +67,7 @@ router.post('/', async (req: AuthRequest, res) => {
     // Create new result
     const result = new QuizResult({
       userId,
+      studentName,
       quizId,
       score,
       answers,
