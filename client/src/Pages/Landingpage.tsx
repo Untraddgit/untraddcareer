@@ -1675,7 +1675,7 @@ export default function StudentJourneyRoadmap() {
         onClose={closeModal} 
         title="Privacy Policy"
       >
-        <PrivacyPolicy />
+        <PrivacyPolicy openModal={openModal} />
       </Modal>
       
       <Modal 

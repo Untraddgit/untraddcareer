@@ -631,9 +631,16 @@ const Dashboard = () => {
                         </div>
                         <button
                           onClick={handleStartTest}
-                          className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 inline-flex items-center"
+                          className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center mb-4"
                         >
-                          Start Scholarship Test
+                          Take Scholarship Test
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                          className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 flex items-center justify-center"
+                        >
+                          Register Now
                           <ArrowRight className="ml-2 h-5 w-5" />
                         </button>
             </div>

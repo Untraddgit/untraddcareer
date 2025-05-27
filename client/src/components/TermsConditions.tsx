@@ -1,7 +1,11 @@
 import React from 'react';
 import { Shield } from 'lucide-react';
 
-const TermsConditions: React.FC = () => {
+interface TermsConditionsProps {
+  openModal: (modal: string) => void;
+}
+
+const TermsConditions: React.FC<TermsConditionsProps> = ({ openModal }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-center mb-8">
