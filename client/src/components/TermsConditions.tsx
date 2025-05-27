@@ -38,7 +38,7 @@ const TermsConditions: React.FC = () => {
       <section className="mb-6">
         <h4 className="font-bold text-blue-700 mb-2">4. Refund Policy</h4>
         <p className="text-slate-600 mb-2">
-          We implement a weekly feedback system for the first month. Students rate their satisfaction on a scale of 1-10. If your average rating is below 7 after the first 4 weeks, you're eligible for a full refund on our terms. This ensures we're accountable for delivering quality and gives you time to properly evaluate the program.
+          UntraddCareer offers a comprehensive refund policy based on student satisfaction and performance metrics. For complete details, please refer to our dedicated <button onClick={() => openModal('refund')} className="text-blue-600 underline hover:text-blue-800 cursor-pointer">Refund Policy</button>.
         </p>
       </section>
 

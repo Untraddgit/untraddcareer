@@ -7,6 +7,8 @@ import ContactUs from '../components/ContactUs';
 import TermsConditions from '../components/TermsConditions';
 import PrivacyPolicy from '../components/PrivacyPolicy';
 import Disclaimer from '../components/Disclaimer';
+import RefundPolicy from '../components/RefundPolicy';
+import ShippingPolicy from '../components/ShippingPolicy';
 import ProgramOptions from '../components/ProgramOptions';
 
 // Import profile images
@@ -121,9 +123,9 @@ export default function StudentJourneyRoadmap() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Modal states
-  const [activeModal, setActiveModal] = useState<'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer' | null>(null);
+  const [activeModal, setActiveModal] = useState<'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer' | 'refund' | 'shipping' | null>(null);
   
-  const openModal = (modal: 'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer') => {
+  const openModal = (modal: 'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer' | 'refund' | 'shipping') => {
     setActiveModal(modal);
   };
   
@@ -1623,6 +1625,18 @@ export default function StudentJourneyRoadmap() {
               >
                 Disclaimer
               </button>
+              <button 
+                onClick={() => openModal('shipping')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Shipping Policy
+              </button>
+              <button 
+                onClick={() => openModal('refund')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Refund Policy
+              </button>
             </div>
             <div className="text-center mt-6 text-xs text-slate-500">
               © {new Date().getFullYear()} UntraddCareer. All rights reserved.
@@ -1670,6 +1684,22 @@ export default function StudentJourneyRoadmap() {
         title="Disclaimer"
       >
         <Disclaimer />
+      </Modal>
+      
+      <Modal 
+        isOpen={activeModal === 'refund'} 
+        onClose={closeModal} 
+        title="Refund Policy"
+      >
+        <RefundPolicy />
+      </Modal>
+
+      <Modal 
+        isOpen={activeModal === 'shipping'} 
+        onClose={closeModal} 
+        title="Shipping Policy"
+      >
+        <ShippingPolicy />
       </Modal>
       
       <GlobalStyle />
