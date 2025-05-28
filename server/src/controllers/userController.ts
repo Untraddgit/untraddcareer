@@ -5,10 +5,10 @@ import User, { IUser } from '../models/User';
 export const createOrUpdateUser = async (req: Request, res: Response) => {
   console.log('Received create/update user request:', req.body);
   try {
-    const { clerkId, email, firstName, lastName } = req.body;
+    const { clerkId, email, firstName, lastName, userType } = req.body;
 
-    if (!clerkId || !email || !firstName || !lastName) {
-      console.log('Missing required fields:', { clerkId, email, firstName, lastName });
+    if (!clerkId || !email || !firstName) {
+      console.log('Missing required fields:', { clerkId, email, firstName });
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -21,7 +21,8 @@ export const createOrUpdateUser = async (req: Request, res: Response) => {
       // Update existing user
       user.email = email;
       user.firstName = firstName;
-      user.lastName = lastName;
+      user.lastName = lastName || '';
+      if (userType) user.userType = userType;
       await user.save();
       console.log('User updated successfully:', user);
     } else {
@@ -31,7 +32,8 @@ export const createOrUpdateUser = async (req: Request, res: Response) => {
         clerkId,
         email,
         firstName,
-        lastName
+        lastName: lastName || '',
+        userType: userType || 'student' // Default to student
       });
       console.log('New user created successfully:', user);
     }
@@ -63,15 +65,20 @@ export const getUserByClerkId = async (req: Request, res: Response) => {
   }
 };
 
-// Update user type (admin only)
+// Update user type (admin only) - requires admin clerkId in request body
 export const updateUserType = async (req: Request, res: Response) => {
   console.log('Received update user type request:', req.params, req.body);
   try {
     const { clerkId } = req.params;
-    const { userType } = req.body;
+    const { userType, adminClerkId } = req.body;
+
+    if (!adminClerkId) {
+      console.log('No admin clerkId provided');
+      return res.status(400).json({ message: 'Admin clerkId required' });
+    }
 
     // Verify the requesting user is an admin
-    const requestingUser = await User.findOne({ clerkId: req.user?.id });
+    const requestingUser = await User.findOne({ clerkId: adminClerkId });
     if (!requestingUser || requestingUser.userType !== 'admin') {
       console.log('Unauthorized attempt to update user type');
       return res.status(403).json({ message: 'Unauthorized' });
@@ -94,12 +101,19 @@ export const updateUserType = async (req: Request, res: Response) => {
   }
 };
 
-// Get all users (admin only)
+// Get all users (admin only) - requires admin clerkId in query
 export const getAllUsers = async (req: Request, res: Response) => {
   console.log('Received get all users request');
   try {
+    const { adminClerkId } = req.query;
+
+    if (!adminClerkId) {
+      console.log('No admin clerkId provided');
+      return res.status(400).json({ message: 'Admin clerkId required' });
+    }
+
     // Verify the requesting user is an admin
-    const requestingUser = await User.findOne({ clerkId: req.user?.id });
+    const requestingUser = await User.findOne({ clerkId: adminClerkId as string });
     if (!requestingUser || requestingUser.userType !== 'admin') {
       console.log('Unauthorized attempt to get all users');
       return res.status(403).json({ message: 'Unauthorized' });
