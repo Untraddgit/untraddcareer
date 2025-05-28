@@ -1,20 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useUser, useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/clerk-react';
 import { 
   Users, 
   Award, 
   BarChart3, 
   TrendingUp, 
-  Calendar,
   Search,
-  Filter,
-  Download,
   Eye,
-  CheckCircle,
-  XCircle,
-  Clock,
-  GraduationCap,
-  DollarSign
+  GraduationCap
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import api from '../utils/axios';
@@ -52,7 +45,6 @@ interface DashboardStats {
 }
 
 const AdminDashboard = () => {
-  const { user } = useUser();
   const { getToken } = useAuth();
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [students, setStudents] = useState<StudentData[]>([]);
