@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-// Middleware to verify Clerk authentication
+// Middleware to verify Clerk authentication using modern JWT verification
 export const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -26,17 +26,19 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
     }
 
     try {
-      const session = await clerkClient.sessions.verifySession(token, token);
-      if (!session || !session.userId) {
-        console.log('Invalid session or missing userId');
-        return res.status(401).json({ message: 'Unauthorized: Invalid session' });
+      // Use the new verifyToken method (networkless verification)
+      const verifiedToken = await clerkClient.verifyToken(token);
+      
+      if (!verifiedToken || !verifiedToken.sub) {
+        console.log('Token verification failed');
+        return res.status(401).json({ message: 'Unauthorized: Token verification failed' });
       }
 
-      req.auth = { userId: session.userId };
-      console.log('Auth verified for user:', session.userId);
+      req.auth = { userId: verifiedToken.sub };
+      console.log('Auth verified for user:', verifiedToken.sub);
       next();
     } catch (error) {
-      console.error('Error verifying session:', error);
+      console.error('Error verifying token:', error);
       return res.status(401).json({ message: 'Unauthorized: Invalid token' });
     }
   } catch (error) {
