@@ -409,12 +409,72 @@ const Dashboard = () => {
                       <div className="ml-4 w-px h-6 bg-gray-200"></div>
                       {renderProgressStep(2, 'Take Scholarship Test', hasAttemptedTest, !hasAttemptedTest)}
                       <div className="ml-4 w-px h-6 bg-gray-200"></div>
-                      {renderProgressStep(3, 'Explore Career Resources', false, hasAttemptedTest)}
+                      
+                      {/* Custom Step 3 with Scholarship Button */}
+                      <div className="flex items-start">
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                          hasAttemptedTest ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                        }`}>
+                          {hasAttemptedTest ? <CheckCircle className="w-5 h-5" /> : 3}
+                        </div>
+                        <div className="ml-3 flex-1">
+                          <p className={`text-sm font-medium ${
+                            hasAttemptedTest ? 'text-green-600' : 'text-gray-500'
+                          }`}>
+                            Register for UntraddCareer Program
+                          </p>
+                          {hasAttemptedTest && testResult && testResult.score >= 60 && (
+                            <div className="mt-2">
+                              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-200">
+                                <p className="text-xs text-green-700 mb-2">
+                                  🎉 Congratulations! You're eligible for {getScholarshipDiscount(testResult.score)}% scholarship
+                                </p>
+                                {testResult.score >= 70 ? (
+                                  <button 
+                                    onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                                    className="bg-gradient-to-r from-green-600 to-green-700 text-white py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 text-xs flex items-center justify-center font-semibold shadow-md transform hover:scale-105 transition-all duration-200 w-full"
+                                  >
+                                    <DollarSign className="mr-2 h-4 w-4" />
+                                    Register Now with {getScholarshipDiscount(testResult.score)}% Scholarship
+                                    <ArrowRight className="ml-2 h-3 w-3" />
+                                  </button>
+                                ) : (
+                                  <button 
+                                    onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                                    className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-xs flex items-center justify-center w-full"
+                                  >
+                                    <DollarSign className="mr-2 h-4 w-4" />
+                                    Claim Your {getScholarshipDiscount(testResult.score)}% Scholarship
+                                    <ArrowRight className="ml-2 h-3 w-3" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          {hasAttemptedTest && testResult && testResult.score < 60 && (
+                            <div className="mt-2">
+                              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <p className="text-xs text-blue-700 mb-2">
+                                  Ready to start your career journey?
+                                </p>
+                                <button 
+                                  onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                                  className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-xs flex items-center justify-center w-full"
+                                >
+                                  Register for UntraddCareer Program
+                                  <ArrowRight className="ml-2 h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
                       <div className="ml-4 w-px h-6 bg-gray-200"></div>
-                      {renderProgressStep(4, 'Join UntraddCareer Program', false, false)}
-            </div>
-          </div>
-        </div>
+                      {renderProgressStep(4, 'Start Your Career Journey', false, false)}
+                    </div>
+                  </div>
+                </div>
                 
                 {/* Quick Actions Section */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
