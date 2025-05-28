@@ -469,7 +469,7 @@ const Dashboard = () => {
                             onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
                             className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center"
                           >
-                            Register with discount!
+                            Register with discounts!
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </button>
                         </>
