@@ -1,6 +1,8 @@
 import  { useState, useEffect } from 'react';
 import { BookOpen, Compass, Award, Rocket, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, MessageCircle, Zap, FileText, Settings, Mail, MessageSquare, Shield, Laptop, User, ChevronDown, Menu, X } from 'lucide-react';
 import { createGlobalStyle } from 'styled-components';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
 import AboutUs from '../components/AboutUs';
 import ContactUs from '../components/ContactUs';
@@ -10,6 +12,7 @@ import Disclaimer from '../components/Disclaimer';
 import RefundPolicy from '../components/RefundPolicy';
 import ShippingPolicy from '../components/ShippingPolicy';
 import ProgramOptions from '../components/ProgramOptions';
+import api from '../utils/axios';
 
 // Import profile images
 import maleImage from '../assets/male.jpg';
@@ -117,6 +120,9 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 export default function StudentJourneyRoadmap() {
+  const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
+  const navigate = useNavigate();
   const [activePhase, setActivePhase] = useState(1);
   const [count, setCount] = useState(1500);
   const [activeTab, setActiveTab] = useState('individual');
@@ -124,6 +130,45 @@ export default function StudentJourneyRoadmap() {
   
   // Modal states
   const [activeModal, setActiveModal] = useState<'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer' | 'refund' | 'shipping' | null>(null);
+  
+  // Auto-redirect authenticated users to their dashboard
+  useEffect(() => {
+    const redirectUser = async () => {
+      if (!isLoaded || !user) return;
+      
+      try {
+        console.log('Authenticated user detected, checking user type...');
+        const token = await getToken();
+        const response = await api.get(`/api/users/${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const userType = response.data.userType;
+        console.log('User type:', userType);
+        
+        // Add a small delay to prevent immediate redirect loops
+        setTimeout(() => {
+          if (userType === 'admin') {
+            console.log('Redirecting admin to /admin');
+            navigate('/admin', { replace: true });
+          } else if (userType === 'student') {
+            console.log('Redirecting student to /dashboard');
+            navigate('/dashboard', { replace: true });
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Error fetching user type for redirection:', error);
+        // If there's an error, don't redirect automatically
+        // Let the user manually navigate or try again
+        console.log('Skipping automatic redirect due to error');
+      }
+    };
+
+    // Only redirect if we're on the landing page and user is authenticated
+    if (window.location.pathname === '/') {
+      redirectUser();
+    }
+  }, [isLoaded, user, getToken, navigate]);
   
   const openModal = (modal: 'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer' | 'refund' | 'shipping') => {
     setActiveModal(modal);
