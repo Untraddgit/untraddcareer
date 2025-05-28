@@ -455,13 +455,13 @@ const Dashboard = () => {
                             <div className="mt-2">
                               <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                 <p className="text-xs text-blue-700 mb-2">
-                                  Ready to start your career journey?
+                                Excited to start your career journey?
                                 </p>
                                 <button 
                                   onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
                                   className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-xs flex items-center justify-center w-full"
                                 >
-                                  Register for UntraddCareer Program
+                                  Claim Your 15 percent Schorship
                                   <ArrowRight className="ml-2 h-3 w-3" />
                                 </button>
                               </div>
