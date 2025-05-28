@@ -4,7 +4,7 @@
   "description": "Quiz application backend server",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node ./dist/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "seed": "ts-node src/scripts/seedQuizzes.ts"
