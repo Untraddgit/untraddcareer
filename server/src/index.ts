@@ -7,6 +7,7 @@ import userProfileRouter from './routes/userProfile';
 import quizResultsRouter from './routes/quizResults';
 import quizRouter from './routes/quizRoutes';
 import webhookRouter from './routes/webhookRoutes';
+import userRouter from './routes/userRoutes';
 
 dotenv.config();
 
@@ -100,6 +101,7 @@ app.use((req, res, next) => {
 });
 
 // Mount routers
+app.use('/api/users', userRouter);
 app.use('/api/user-profile', userProfileRouter);
 app.use('/api/quiz-results', quizResultsRouter);
 app.use('/api/quizzes', quizRouter);

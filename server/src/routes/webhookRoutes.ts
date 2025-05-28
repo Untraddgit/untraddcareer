@@ -115,7 +115,8 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res
     res.json({ received: true, message: 'Webhook processed successfully' });
   } catch (error) {
     console.error('Error processing webhook:', error);
-    res.status(400).json({ error: 'Webhook error', details: error.message });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.status(400).json({ error: 'Webhook error', details: errorMessage });
   }
 });
 
