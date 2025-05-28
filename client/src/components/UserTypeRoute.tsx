@@ -144,8 +144,25 @@ const UserTypeRoute = ({ children, allowedUserTypes }: UserTypeRouteProps) => {
     }
   }
 
-  // If user type is allowed or if there's an error and we're allowing student access, render children
-  return <>{children}</>;
+  // If user type is allowed, render children
+  if (userType && allowedUserTypes.includes(userType)) {
+    console.log(`User type ${userType} is allowed for route requiring ${allowedUserTypes.join(', ')}`);
+    return <>{children}</>;
+  }
+
+  // If there's an error and we're allowing student access, render children
+  if (error && allowedUserTypes.includes('student')) {
+    console.log('Error occurred but allowing student access');
+    return <>{children}</>;
+  }
+
+  // Default fallback - redirect to appropriate dashboard
+  console.log('Fallback redirect based on user type:', userType);
+  if (userType === 'admin') {
+    return <Navigate to="/admin" replace />;
+  } else {
+    return <Navigate to="/dashboard" replace />;
+  }
 };
 
 export default UserTypeRoute; 
