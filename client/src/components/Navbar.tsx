@@ -1,17 +1,50 @@
-import { UserButton } from '@clerk/clerk-react';
-import { Home, Award, Book, Users, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { UserButton, useUser } from '@clerk/clerk-react';
+import { Home, Award, Book, Users, Menu, X, BarChart3, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../utils/axios';
+import { useAuth } from '@clerk/clerk-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userType, setUserType] = useState<'student' | 'admin' | null>(null);
+  const { user } = useUser();
+  const { getToken } = useAuth();
 
-  const navItems = [
+  useEffect(() => {
+    const fetchUserType = async () => {
+      if (!user) return;
+      
+      try {
+        const token = await getToken();
+        const response = await api.get(`/api/users/${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserType(response.data.userType);
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+        setUserType('student'); // Default to student
+      }
+    };
+
+    fetchUserType();
+  }, [user, getToken]);
+
+  const studentNavItems = [
     { icon: Home, label: 'Dashboard', href: '/dashboard' },
     { icon: Award, label: 'My Tests', href: '/dashboard#tests' },
     { icon: Book, label: 'Resources', href: '/dashboard#resources' },
     { icon: Users, label: 'Community', href: '/dashboard#community' },
   ];
+
+  const adminNavItems = [
+    { icon: BarChart3, label: 'Admin Dashboard', href: '/admin' },
+    { icon: Users, label: 'Students', href: '/admin#students' },
+    { icon: Award, label: 'Test Results', href: '/admin#tests' },
+    { icon: Settings, label: 'Settings', href: '/admin#settings' },
+  ];
+
+  const navItems = userType === 'admin' ? adminNavItems : studentNavItems;
 
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
@@ -22,6 +55,11 @@ const Navbar = () => {
               <Link to="/" className="flex items-center">
                 <Award className="h-8 w-8 text-blue-600" />
                 <span className="ml-2 text-xl font-bold text-gray-900">UntraddCareer</span>
+                {userType === 'admin' && (
+                  <span className="ml-2 px-2 py-1 text-xs font-medium bg-purple-100 text-purple-600 rounded-full">
+                    Admin
+                  </span>
+                )}
               </Link>
             </div>
             

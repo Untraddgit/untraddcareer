@@ -3,9 +3,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SignedIn, SignedOut, RedirectToSignIn, SignIn } from '@clerk/clerk-react';
 import Dashboard from './Pages/Dashboard';
+import AdminDashboard from './Pages/AdminDashboard';
 import ScholarshipTest from './Pages/ScholarshipTest';
 import LandingPage from './Pages/Landingpage';
 import ProtectedRoute from './components/ProtectedRoute';
+import UserTypeRoute from './components/UserTypeRoute';
 
 function App() {
   return (
@@ -19,7 +21,24 @@ function App() {
           <>
             <SignedIn>
               <ProtectedRoute>
-                <Dashboard />
+                <UserTypeRoute allowedUserTypes={['student']}>
+                  <Dashboard />
+                </UserTypeRoute>
+              </ProtectedRoute>
+            </SignedIn>
+            <SignedOut>
+              <RedirectToSignIn />
+            </SignedOut>
+          </>
+        } />
+
+        <Route path="/admin" element={
+          <>
+            <SignedIn>
+              <ProtectedRoute>
+                <UserTypeRoute allowedUserTypes={['admin']}>
+                  <AdminDashboard />
+                </UserTypeRoute>
               </ProtectedRoute>
             </SignedIn>
             <SignedOut>
@@ -32,7 +51,9 @@ function App() {
           <>
             <SignedIn>
               <ProtectedRoute>
-                <ScholarshipTest />
+                <UserTypeRoute allowedUserTypes={['student']}>
+                  <ScholarshipTest />
+                </UserTypeRoute>
               </ProtectedRoute>
             </SignedIn>
             <SignedOut>

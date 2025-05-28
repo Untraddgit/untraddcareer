@@ -576,11 +576,32 @@ const Dashboard = () => {
                               <p className="text-green-700">
                                 You are eligible for a <span className="font-bold">{getScholarshipDiscount(testResult.score)}% scholarship discount</span> on your program fees!
                               </p>
-                              <div className="mt-3 flex">
-                                <button className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-sm flex items-center">
-                                  Claim Your Scholarship
+                              <div className="mt-3 flex flex-col space-y-2">
+                                {testResult.score >= 70 ? (
+                                  <button 
+                                    onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                                    className="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-800 text-sm flex items-center justify-center font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
+                                  >
+                                    <DollarSign className="mr-2 h-5 w-5" />
+                                    Register Now with {getScholarshipDiscount(testResult.score)}% Scholarship
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                  </button>
+                                ) : (
+                                  <button 
+                                    onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                                    className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-sm flex items-center justify-center"
+                                  >
+                                    Claim Your Scholarship
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                  </button>
+                                )}
+                                <button 
+                                  onClick={() => window.open(`https://wa.me/918789698369?text=Hello, I'm ${user?.firstName || 'a student'} and I scored ${testResult.score}% on the scholarship test. I would like to know more about claiming my ${getScholarshipDiscount(testResult.score)}% scholarship discount.`, '_blank')}
+                                  className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-sm flex items-center justify-center"
+                                >
+                                  Contact for Scholarship Details
                                   <ArrowRight className="ml-2 h-4 w-4" />
-                    </button>
+                                </button>
                               </div>
                             </div>
                           ) : (
