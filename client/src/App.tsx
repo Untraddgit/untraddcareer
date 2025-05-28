@@ -1,7 +1,7 @@
 // src/App.tsx
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, RedirectToSignIn, SignIn } from '@clerk/clerk-react';
 import Dashboard from './Pages/Dashboard';
 import ScholarshipTest from './Pages/ScholarshipTest';
 import LandingPage from './Pages/Landingpage';
@@ -40,6 +40,8 @@ function App() {
             </SignedOut>
           </>
         } />
+
+        <Route path="/sign-in" element={<SignIn routing="path" path="/sign-in" />} />
       </Routes>
     </Router>
   );
