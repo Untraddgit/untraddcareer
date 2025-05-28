@@ -2,7 +2,7 @@ import React from 'react';
 import { Shield } from 'lucide-react';
 
 interface TermsConditionsProps {
-  openModal: (modal: string) => void;
+  openModal: (modal: 'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer' | 'refund' | 'shipping') => void;
 }
 
 const TermsConditions: React.FC<TermsConditionsProps> = ({ openModal }) => {

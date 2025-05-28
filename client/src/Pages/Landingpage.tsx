@@ -1667,7 +1667,7 @@ export default function StudentJourneyRoadmap() {
         onClose={closeModal} 
         title="Terms & Conditions"
       >
-        <TermsConditions />
+        <TermsConditions openModal={openModal} />
       </Modal>
       
       <Modal 
@@ -1675,7 +1675,7 @@ export default function StudentJourneyRoadmap() {
         onClose={closeModal} 
         title="Privacy Policy"
       >
-        <PrivacyPolicy openModal={openModal} />
+        <PrivacyPolicy />
       </Modal>
       
       <Modal 
