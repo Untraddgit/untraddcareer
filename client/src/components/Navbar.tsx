@@ -1,5 +1,5 @@
 import { UserButton, useUser } from '@clerk/clerk-react';
-import { Home, Award, Book, Users, Menu, X, BarChart3, Settings } from 'lucide-react';
+import { Home, Award, Users, Menu, X, BarChart3, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/axios';
@@ -32,17 +32,11 @@ const Navbar = () => {
 
   const studentNavItems = [
     { icon: Home, label: 'Dashboard', href: '/dashboard' },
-    { icon: Award, label: 'My Tests', href: '/dashboard#tests' },
-    { icon: Book, label: 'Resources', href: '/dashboard#resources' },
-    { icon: Users, label: 'Community', href: '/dashboard#community' },
   ];
 
   const adminNavItems = [
     { icon: BarChart3, label: 'Admin Dashboard', href: '/admin' },
-    { icon: Users, label: 'Students', href: '/admin#students' },
-    { icon: Award, label: 'Test Results', href: '/admin#tests' },
-    { icon: Settings, label: 'Settings', href: '/admin#settings' },
-  ];
+    ];
 
   const navItems = userType === 'admin' ? adminNavItems : studentNavItems;
 
@@ -53,7 +47,11 @@ const Navbar = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center">
-                <Award className="h-8 w-8 text-blue-600" />
+                <img 
+                  src="/logo.png" 
+                  alt="UntraddCareer Logo" 
+                  className="h-10 w-10 object-contain"
+                />
                 <span className="ml-2 text-xl font-bold text-gray-900">UntraddCareer</span>
                 {userType === 'admin' && (
                   <span className="ml-2 px-2 py-1 text-xs font-medium bg-purple-100 text-purple-600 rounded-full">

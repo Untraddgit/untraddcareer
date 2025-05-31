@@ -1,7 +1,8 @@
 import  { useState, useEffect } from 'react';
 import { BookOpen, Compass, Award, Rocket, Calendar, Users, Filter, Code, Briefcase, CheckCircle, TrendingUp, Star, MessageCircle, Zap, FileText, Settings, Mail, MessageSquare, Shield, Laptop, User, ChevronDown, Menu, X, BarChart3 } from 'lucide-react';
 import { createGlobalStyle } from 'styled-components';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import { SignInButton } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
 import AboutUs from '../components/AboutUs';
@@ -12,6 +13,7 @@ import Disclaimer from '../components/Disclaimer';
 import RefundPolicy from '../components/RefundPolicy';
 import ShippingPolicy from '../components/ShippingPolicy';
 import ProgramOptions from '../components/ProgramOptions';
+import api from '../utils/axios';
 
 // Import profile images
 import maleImage from '../assets/male.jpg';
@@ -24,7 +26,6 @@ import priyaImage from '../assets/priya.jpeg';
 import chetanImage from '../assets/chetan.jpeg';
 // import tarunImage from '../assets/tarun.jpeg';
 import bibhuImage from '../assets/bibhu.jpeg';
-
 
 const GlobalStyle = createGlobalStyle`
   @keyframes spin-slow {
@@ -120,17 +121,44 @@ const GlobalStyle = createGlobalStyle`
 `;
 export default function StudentJourneyRoadmap() {
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const [activePhase, setActivePhase] = useState(1);
   const [count, setCount] = useState(1500);
   const [activeTab, setActiveTab] = useState('individual');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userType, setUserType] = useState<'student' | 'admin' | null>(null);
   
   // Modal states
   const [activeModal, setActiveModal] = useState<'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer' | 'refund' | 'shipping' | null>(null);
   
   // Remove automatic redirection - let users visit landing page if they want
   // The routing will handle dashboard access through direct navigation
+  
+  // Fetch user type when user is loaded
+  useEffect(() => {
+    const fetchUserType = async () => {
+      if (!user) {
+        setUserType(null);
+        return;
+      }
+      
+      try {
+        const token = await getToken();
+        const response = await api.get(`/api/users/${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserType(response.data.userType);
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+        setUserType('student'); // Default to student
+      }
+    };
+
+    if (isLoaded) {
+      fetchUserType();
+    }
+  }, [user, isLoaded, getToken]);
   
   const openModal = (modal: 'about' | 'contact' | 'terms' | 'privacy' | 'disclaimer' | 'refund' | 'shipping') => {
     setActiveModal(modal);
@@ -280,7 +308,11 @@ export default function StudentJourneyRoadmap() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <Compass className="text-blue-600 mr-2" size={28} />
+              <img 
+                src="/logo.png" 
+                alt="UntraddCareer Logo" 
+                className="h-8 w-8 object-contain mr-2"
+              />
               <h1 className="text-xl md:text-2xl font-bold text-blue-700">UntraddCareer</h1>
             </div>
             
@@ -307,6 +339,13 @@ export default function StudentJourneyRoadmap() {
             
             {/* Desktop navigation */}
             <nav className="hidden md:flex gap-6 items-center">
+              {!user && (
+                <SignInButton mode="modal">
+                  <button className="text-slate-700 hover:text-blue-600 transition-colors font-medium">
+                    Sign In
+                  </button>
+                </SignInButton>
+              )}
               <a 
                 href="#take-it-now" 
                 className="text-slate-700 hover:text-blue-600 transition-colors"
@@ -339,6 +378,16 @@ export default function StudentJourneyRoadmap() {
           {mobileMenuOpen && (
             <div className="md:hidden mt-4 py-3 bg-white border-t border-gray-100 animate-fadeIn">
               <div className="flex flex-col space-y-4">
+                {!user && (
+                  <SignInButton mode="modal">
+                    <button 
+                      className="text-slate-700 hover:text-blue-600 transition-colors px-4 py-2 text-left block font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Sign In
+                    </button>
+                  </SignInButton>
+                )}
                 <a 
                   href="#take-it-now" 
                   className="text-slate-700 hover:text-blue-600 transition-colors px-4 py-2 block"
@@ -380,21 +429,24 @@ export default function StudentJourneyRoadmap() {
               <p className="text-blue-700 mb-3">
                 Welcome back, {user.firstName}! Ready to continue your journey?
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button 
-                  onClick={() => navigate('/dashboard')}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <BookOpen size={16} />
-                  Go to Student Dashboard
-                </button>
-                <button 
-                  onClick={() => navigate('/admin')}
-                  className="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <BarChart3 size={16} />
-                  Go to Admin Dashboard
-                </button>
+              <div className="flex justify-center">
+                {userType === 'admin' ? (
+                  <button 
+                    onClick={() => navigate('/admin')}
+                    className="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <BarChart3 size={16} />
+                    Go to Dashboard
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <BookOpen size={16} />
+                    Go to Dashboard
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -1489,7 +1541,7 @@ export default function StudentJourneyRoadmap() {
                 {[
                   {
                     question: "How is the internship guaranteed?",
-                    answer: "We have a large network of 500+ partner companies and startups. Our curriculum is designed based on their requirements, and we maintain quality training standards that these companies trust. If for any reason we can't place you in a partner company, we offer in-house projects and startup opportunities while continuing placement efforts."
+                    answer: "We have a large network of 50+ partner companies and startups. Our curriculum is designed based on their requirements, and we maintain quality training standards that these companies trust. If for any reason we can't place you in a partner company, we offer in-house projects and startup opportunities while continuing placement efforts."
                   },
                   {
                     question: "What if I have no technical background?",
@@ -1617,7 +1669,11 @@ export default function StudentJourneyRoadmap() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <Compass className="text-blue-400 mr-2" size={24} />
+              <img 
+                src="/logo.png" 
+                alt="UntraddCareer Logo" 
+                className="h-6 w-6 object-contain mr-2"
+              />
               <span className="font-bold text-lg">UntraddCareer</span>
             </div>
             <div className="text-slate-400 text-sm">

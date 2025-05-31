@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Award, 
-  BookOpen, 
-  GraduationCap, 
-  Users, 
-  BarChart, 
-  Home, 
-  CheckCircle, 
-  Calendar, 
-  ArrowRight, 
-  Star, 
-  TrendingUp, 
-  Briefcase, 
+import {
+  Award,
+  BookOpen,
+  GraduationCap,
+  Users,
+  BarChart,
+  Home,
+  CheckCircle,
+  Calendar,
+  ArrowRight,
+  Star,
+  TrendingUp,
+  Briefcase,
   Clock,
   ExternalLink,
   Bell,
@@ -69,7 +69,7 @@ const INTERNSHIP_OPPORTUNITIES = [
     location: "Remote"
   },
   {
-    id: 2, 
+    id: 2,
     company: "DigitalWave",
     logo: "DW",
     logoColor: "bg-purple-100 text-purple-600",
@@ -136,7 +136,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showNotification, setShowNotification] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'community' | 'counseling' | null>(null);
@@ -158,7 +158,7 @@ const Dashboard = () => {
       setUserProfile(response.data);
     } catch (error) {
       console.error('Error fetching profile:', error);
-      
+
       // If profile not found, create a default one
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         try {
@@ -183,7 +183,7 @@ const Dashboard = () => {
     try {
       const token = isLoaded ? await getToken() : null;
       console.log('Fetching test history with token:', !!token);
-      
+
       const response = await api.get('/api/quiz-results', {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         params: { userId: user?.id }
@@ -214,14 +214,14 @@ const Dashboard = () => {
 
     const scroll = () => {
       if (!scrollContainer) return;
-      
+
       scrollPosition += 0.5; // Controls scroll speed
-      
+
       // Reset position when we've scrolled through all items
       if (scrollPosition >= totalWidth - visibleWidth) {
         scrollPosition = 0;
       }
-      
+
       scrollContainer.scrollLeft = scrollPosition;
       animationFrameId = requestAnimationFrame(scroll);
     };
@@ -255,13 +255,13 @@ const Dashboard = () => {
       const token = isLoaded ? await getToken() : null;
       console.log('Checking test status with token:', !!token);
       console.log('User ID:', user?.id);
-      
+
       const response = await api.get('/api/quiz-results/check-test-status', {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         params: { userId: user?.id }
       });
       console.log('Test status response:', response.data);
-      
+
       setHasAttemptedTest(response.data.hasAttempted);
       if (response.data.hasAttempted && response.data.result) {
         console.log('Setting test result:', response.data.result);
@@ -296,17 +296,15 @@ const Dashboard = () => {
   const renderProgressStep = (step: number, title: string, isCompleted: boolean, isCurrent: boolean) => {
     return (
       <div className="flex items-center">
-        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-          isCompleted ? 'bg-green-100 text-green-600' : 
-          isCurrent ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
-        }`}>
+        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${isCompleted ? 'bg-green-100 text-green-600' :
+            isCurrent ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+          }`}>
           {isCompleted ? <CheckCircle className="w-5 h-5" /> : step}
         </div>
         <div className="ml-3">
-          <p className={`text-sm font-medium ${
-            isCompleted ? 'text-green-600' : 
-            isCurrent ? 'text-blue-600' : 'text-gray-500'
-          }`}>
+          <p className={`text-sm font-medium ${isCompleted ? 'text-green-600' :
+              isCurrent ? 'text-blue-600' : 'text-gray-500'
+            }`}>
             {title}
           </p>
         </div>
@@ -324,80 +322,77 @@ const Dashboard = () => {
     setModalType(null);
   };
 
-    return (
-      <>
-        <Navbar />
+  return (
+    <>
+      <Navbar />
       <div className="min-h-screen bg-slate-50 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Welcome Section */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-white">
               <div className="flex justify-between items-start">
-              <div>
+                <div>
                   <h1 className="text-2xl sm:text-3xl font-bold mb-1">Welcome, {user?.firstName}! 👋</h1>
                   <p className="text-blue-100">
                     {userProfile ? `Your ${userProfile.branch} journey begins here at UntraddCareer` : 'Your journey begins here at UntraddCareer'}
                   </p>
-              </div>
-                
+                </div>
+
                 {showNotification && (
                   <div className="hidden sm:block bg-white/20 px-4 py-3 rounded-lg max-w-xs">
                     <div className="flex items-start">
                       <Bell className="h-5 w-5 text-white mr-2 mt-0.5 flex-shrink-0" />
-              <div>
+                      <div>
                         <p className="text-sm font-medium">Complete your scholarship test to unlock special discounts!</p>
-              <button
+                        <button
                           onClick={() => setShowNotification(false)}
                           className="text-xs text-blue-100 mt-1 hover:text-white"
-              >
+                        >
                           Dismiss
-              </button>
-          </div>
-        </div>
-            </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
-            
+
             {/* Navigation Tabs */}
             <div className="border-b border-gray-200">
               <nav className="flex -mb-px px-4 sm:px-6">
                 <button
                   onClick={() => setActiveTab('overview')}
-                  className={`py-4 px-4 text-sm font-medium border-b-2 flex items-center ${
-                    activeTab === 'overview' 
-                      ? 'border-blue-500 text-blue-600' 
+                  className={`py-4 px-4 text-sm font-medium border-b-2 flex items-center ${activeTab === 'overview'
+                      ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   <Home className="h-4 w-4 mr-2" />
                   Overview
                 </button>
                 <button
                   onClick={() => setActiveTab('scholarship')}
-                  className={`py-4 px-4 text-sm font-medium border-b-2 flex items-center ${
-                    activeTab === 'scholarship' 
-                      ? 'border-blue-500 text-blue-600' 
+                  className={`py-4 px-4 text-sm font-medium border-b-2 flex items-center ${activeTab === 'scholarship'
+                      ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   <Award className="h-4 w-4 mr-2" />
                   Scholarship
                 </button>
-              <button
+                <button
                   onClick={() => setActiveTab('resources')}
-                  className={`py-4 px-4 text-sm font-medium border-b-2 flex items-center ${
-                    activeTab === 'resources' 
-                      ? 'border-blue-500 text-blue-600' 
+                  className={`py-4 px-4 text-sm font-medium border-b-2 flex items-center ${activeTab === 'resources'
+                      ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   <BookOpen className="h-4 w-4 mr-2" />
                   Resources
-              </button>
+                </button>
               </nav>
             </div>
-            
+
             {activeTab === 'overview' && (
               <div className="p-6">
                 {/* Your Path Section */}
@@ -409,18 +404,16 @@ const Dashboard = () => {
                       <div className="ml-4 w-px h-6 bg-gray-200"></div>
                       {renderProgressStep(2, 'Take Scholarship Test', hasAttemptedTest, !hasAttemptedTest)}
                       <div className="ml-4 w-px h-6 bg-gray-200"></div>
-                      
+
                       {/* Custom Step 3 with Scholarship Button */}
                       <div className="flex items-start">
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                          hasAttemptedTest ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                        }`}>
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${hasAttemptedTest ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                          }`}>
                           {hasAttemptedTest ? <CheckCircle className="w-5 h-5" /> : 3}
                         </div>
                         <div className="ml-3 flex-1">
-                          <p className={`text-sm font-medium ${
-                            hasAttemptedTest ? 'text-green-600' : 'text-gray-500'
-                          }`}>
+                          <p className={`text-sm font-medium ${hasAttemptedTest ? 'text-green-600' : 'text-gray-500'
+                            }`}>
                             Register for UntraddCareer Program
                           </p>
                           {hasAttemptedTest && testResult && testResult.score >= 60 && (
@@ -430,7 +423,7 @@ const Dashboard = () => {
                                   🎉 Congratulations! You're eligible for {getScholarshipDiscount(testResult.score)}% scholarship
                                 </p>
                                 {testResult.score >= 70 ? (
-                                  <button 
+                                  <button
                                     onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
                                     className="bg-gradient-to-r from-green-600 to-green-700 text-white py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 text-xs flex items-center justify-center font-semibold shadow-md transform hover:scale-105 transition-all duration-200 w-full"
                                   >
@@ -439,7 +432,7 @@ const Dashboard = () => {
                                     <ArrowRight className="ml-2 h-3 w-3" />
                                   </button>
                                 ) : (
-                                  <button 
+                                  <button
                                     onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
                                     className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-xs flex items-center justify-center w-full"
                                   >
@@ -455,9 +448,9 @@ const Dashboard = () => {
                             <div className="mt-2">
                               <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                 <p className="text-xs text-blue-700 mb-2">
-                                Excited to start your career journey?
+                                  Excited to start your career journey?
                                 </p>
-                                <button 
+                                <button
                                   onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
                                   className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-xs flex items-center justify-center w-full"
                                 >
@@ -469,13 +462,13 @@ const Dashboard = () => {
                           )}
                         </div>
                       </div>
-                      
+
                       <div className="ml-4 w-px h-6 bg-gray-200"></div>
                       {renderProgressStep(4, 'Start Your Career Journey', false, false)}
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Quick Actions Section */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
@@ -486,8 +479,8 @@ const Dashboard = () => {
                       <h3 className="ml-3 font-medium text-gray-900">Scholarship Test</h3>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">
-                      {hasAttemptedTest 
-                        ? 'You have completed the scholarship test.' 
+                      {hasAttemptedTest
+                        ? 'You have completed the scholarship test.'
                         : 'Take our assessment to qualify for scholarships up to 15%.'}
                     </p>
                     <div className="mt-2">
@@ -525,55 +518,49 @@ const Dashboard = () => {
                             Take Scholarship Test
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
-                            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center"
-                          >
-                            Register with discounts!
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </button>
+                          
                         </>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
                     <div className="flex items-center mb-3">
                       <div className="p-2 bg-purple-100 rounded-lg">
                         <Calendar className="text-purple-600 w-5 h-5" />
-      </div>
+                      </div>
                       <h3 className="ml-3 font-medium text-gray-900">Free Counseling</h3>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">
-                      Book a free career counseling session with our industry experts.
+                      Book a free career counseling session with our industry experts to get your career on track.
                     </p>
                     <button
                       onClick={() => openModal('counseling')}
                       className="w-full border border-purple-600 text-purple-600 py-2 px-4 rounded-lg hover:bg-purple-50 flex items-center justify-center"
                     >
-                      Book Session
+                      Scheduled for 3rd June
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </button>
                   </div>
-                  
-                  <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
+
+                  {/* <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
                     <div className="flex items-center mb-3">
                       <div className="p-2 bg-green-100 rounded-lg">
                         <Users className="text-green-600 w-5 h-5" />
-                </div>
+                      </div>
                       <h3 className="ml-3 font-medium text-gray-900">Alumni Community</h3>
-                  </div>
+                    </div>
                     <p className="text-sm text-gray-600 mb-3">
                       Connect with peers, alumni, and mentors in your field of study.
                     </p>
-                    <button 
+                    <button
                       onClick={() => openModal('community')}
                       className="w-full border border-green-600 text-green-600 py-2 px-4 rounded-lg hover:bg-green-50 flex items-center justify-center"
                     >
                       Join Community
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             )}
@@ -583,7 +570,7 @@ const Dashboard = () => {
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">Scholarship Test</h2>
                   <p className="text-gray-600 mb-4">
-                    Our scholarship test assesses your aptitude and knowledge. Based on your performance, 
+                    Our scholarship test assesses your aptitude and knowledge. Based on your performance,
                     you may qualify for tuition discounts up to 15%.
                   </p>
                   {testHistory.length > 0 && (
@@ -610,7 +597,7 @@ const Dashboard = () => {
                               <Award className="h-8 w-8 text-blue-600" />
                             </div>
                           </div>
-                          
+
                           <div className="grid grid-cols-2 gap-4 mb-4">
                             <div className="bg-gray-50 p-3 rounded-lg">
                               <p className="text-xs text-gray-500 mb-1">Completed On</p>
@@ -625,7 +612,7 @@ const Dashboard = () => {
                               </p>
                             </div>
                           </div>
-                          
+
                           {/* Scholarship Eligibility Information */}
                           {testResult.score >= 60 ? (
                             <div className="mt-4 bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
@@ -638,7 +625,7 @@ const Dashboard = () => {
                               </p>
                               <div className="mt-3 flex flex-col space-y-2">
                                 {testResult.score >= 70 ? (
-                                  <button 
+                                  <button
                                     onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
                                     className="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-800 text-sm flex items-center justify-center font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
                                   >
@@ -647,7 +634,7 @@ const Dashboard = () => {
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                   </button>
                                 ) : (
-                                  <button 
+                                  <button
                                     onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
                                     className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-sm flex items-center justify-center"
                                   >
@@ -655,7 +642,7 @@ const Dashboard = () => {
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                   </button>
                                 )}
-                                <button 
+                                <button
                                   onClick={() => window.open(`https://wa.me/918789698369?text=Hello, I'm ${user?.firstName || 'a student'} and I scored ${testResult.score}% on the scholarship test. I would like to know more about claiming my ${getScholarshipDiscount(testResult.score)}% scholarship discount.`, '_blank')}
                                   className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-sm flex items-center justify-center"
                                 >
@@ -669,7 +656,7 @@ const Dashboard = () => {
                               <p className="text-yellow-800 text-sm">
                                 You need a score of at least 60% to qualify for a scholarship discount.
                               </p>
-                              <a 
+                              <a
                                 href={`https://wa.me/918789698369?text=Hello, I'm ${user?.firstName || 'a student'} and I would like to request a retest for the UntraddCareer scholarship test.`}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -681,9 +668,9 @@ const Dashboard = () => {
                             </div>
                           )}
                         </div>
-                  )}
-                </div>
-              </div>
+                      )}
+                    </div>
+                  </div>
                 ) : (
                   <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
                     <div className="text-center py-6">
@@ -692,7 +679,7 @@ const Dashboard = () => {
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to qualify for a scholarship?</h3>
                       <p className="text-gray-600 mb-6 max-w-lg mx-auto">
-                        Take our assessment to demonstrate your skills and knowledge. 
+                        Take our assessment to demonstrate your skills and knowledge.
                         Score at least 60% to qualify for tuition discounts.
                       </p>
                       <div>
@@ -724,33 +711,33 @@ const Dashboard = () => {
                           Register Now
                           <ArrowRight className="ml-2 h-5 w-5" />
                         </button>
-            </div>
-          </div>
-        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
-                
+
                 {/* Scholarship Statistics */}
                 <div className="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                   <div className="p-5 border-b border-gray-200">
                     <h3 className="font-medium text-gray-900">Scholarship Impact</h3>
-              </div>
+                  </div>
                   <div className="p-5">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
                           <GraduationCap className="h-5 w-5 text-blue-600 mr-2" />
                           <p className="font-medium text-gray-900">100+</p>
-              </div>
+                        </div>
                         <p className="text-sm text-gray-600">Students received scholarships</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
                           <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
                           <p className="font-medium text-gray-900">96%</p>
                         </div>
                         <p className="text-sm text-gray-600">Placement success rate</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
                           <Briefcase className="h-5 w-5 text-purple-600 mr-2" />
                           <p className="font-medium text-gray-900">₹3T - ₹25T</p>
@@ -762,7 +749,7 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
-            
+
             {activeTab === 'resources' && (
               <div className="p-6">
                 <div className="mb-6">
@@ -771,7 +758,7 @@ const Dashboard = () => {
                     Access exclusive study materials, tutorials, and career guidance resources to help you succeed.
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                   <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                     <div className="p-4 border-b border-gray-200 bg-blue-50">
@@ -821,7 +808,7 @@ const Dashboard = () => {
                       </ul>
                     </div>
                   </div>
-                  
+
                   <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                     <div className="p-4 border-b border-gray-200 bg-purple-50">
                       <h3 className="font-medium text-gray-900 flex items-center">
@@ -837,7 +824,7 @@ const Dashboard = () => {
                               <p className="text-gray-900 text-sm font-medium">Career Opportunities in AI & ML</p>
                               <p className="text-gray-500 text-xs">May 30, 2023 • 5:00 PM</p>
                             </div>
-                            <button 
+                            <button
                               onClick={() => navigate('/#programs')}
                               className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 py-1 px-2 rounded"
                             >
@@ -851,7 +838,7 @@ const Dashboard = () => {
                               <p className="text-gray-900 text-sm font-medium">How to Build Your Portfolio</p>
                               <p className="text-gray-500 text-xs">June 2, 2023 • 6:00 PM</p>
                             </div>
-                            <button 
+                            <button
                               onClick={() => navigate('/#programs')}
                               className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 py-1 px-2 rounded"
                             >
@@ -865,7 +852,7 @@ const Dashboard = () => {
                               <p className="text-gray-900 text-sm font-medium">Resume Building Workshop</p>
                               <p className="text-gray-500 text-xs">June 10, 2023 • 4:00 PM</p>
                             </div>
-                            <button 
+                            <button
                               onClick={() => navigate('/#programs')}
                               className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 py-1 px-2 rounded"
                             >
@@ -877,7 +864,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Success Stories */}
                 <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                   <div className="p-4 border-b border-gray-200 bg-green-50">
@@ -915,13 +902,13 @@ const Dashboard = () => {
                             </p>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-              </div>
             )}
-            </div>
+          </div>
 
           {/* Stats Section (visible at all times) */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -975,16 +962,16 @@ const Dashboard = () => {
                 Updated daily
               </span>
             </div>
-            
+
             <div className="p-5">
-              <div 
+              <div
                 ref={scrollRef}
                 className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide"
                 style={{ scrollBehavior: 'smooth' }}
               >
                 {INTERNSHIP_OPPORTUNITIES.map(internship => (
-                  <div 
-                    key={internship.id} 
+                  <div
+                    key={internship.id}
                     className="flex-shrink-0 w-72 border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                   >
                     <div className="p-4 border-b border-gray-100 flex items-center space-x-3">
@@ -1014,7 +1001,7 @@ const Dashboard = () => {
                           <span>Stipend: {internship.stipend}</span>
                         </div>
                       </div>
-                        {/* <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-sm flex items-center justify-center">
+                      {/* <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-sm flex items-center justify-center">
                           Apply Now
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </button> */}
@@ -1024,8 +1011,8 @@ const Dashboard = () => {
               </div>
               <div className="mt-4 text-center">
                 <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center mx-auto">
-                  And hundreds more opportunities 
-                  </button>
+                  And hundreds more opportunities
+                </button>
               </div>
             </div>
           </div>
@@ -1036,24 +1023,24 @@ const Dashboard = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6 relative">
-            <button 
+            <button
               onClick={closeModal}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
             >
               <X className="h-5 w-5" />
             </button>
-            
+
             <div className="text-center mb-4">
               <div className="bg-yellow-100 p-3 rounded-full inline-block mb-4">
                 <Users className="h-8 w-8 text-yellow-600" />
               </div>
               <h3 className="text-lg font-medium text-gray-900">Membership Required</h3>
             </div>
-            
+
             {modalType === 'community' && (
               <div className="text-center mb-6">
                 <p className="text-gray-600 mb-4">
-                  To access the alumni community, you need to be a program member. 
+                  To access the alumni community, you need to be a program member.
                   Currently, it seems you are not enrolled in any program.
                 </p>
                 <p className="text-sm text-gray-500 mb-6">
@@ -1061,11 +1048,11 @@ const Dashboard = () => {
                 </p>
               </div>
             )}
-            
+
             {modalType === 'counseling' && (
               <div className="text-center mb-6">
                 <p className="text-gray-600 mb-4">
-                  To take a free counseling session worth $100, you need to be a program member. 
+                  To take a free counseling session worth $100, you need to be a program member.
                   Currently, it seems you are not enrolled in any program.
                 </p>
                 <p className="text-sm text-gray-500 mb-6">
@@ -1073,15 +1060,15 @@ const Dashboard = () => {
                 </p>
               </div>
             )}
-            
+
             <div className="flex flex-col space-y-3">
-              <button 
-                onClick={() => navigate('/')} 
+              <button
+                onClick={() => navigate('/')}
                 className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 text-sm font-medium"
               >
                 Explore Programs
               </button>
-              <a 
+              <a
                 href={`https://wa.me/918789698369?text=Hello, I'm ${user?.firstName || 'a student'} and I would like to know more about becoming a program member at UntraddCareer.`}
                 target="_blank"
                 rel="noopener noreferrer"

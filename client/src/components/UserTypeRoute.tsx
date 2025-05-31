@@ -96,6 +96,14 @@ const UserTypeRoute = ({ children, allowedUserTypes }: UserTypeRouteProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100">
         <div className="text-center">
+          <div className="mb-6">
+            <img 
+              src="/logo.png" 
+              alt="UntraddCareer Logo" 
+              className="h-16 w-16 object-contain mx-auto mb-4"
+            />
+            <h2 className="text-xl font-bold text-gray-900 mb-2">UntraddCareer</h2>
+          </div>
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-slate-600">Starting the server and Loading your dashboard...please wait a moment...</p>
         </div>
@@ -108,7 +116,14 @@ const UserTypeRoute = ({ children, allowedUserTypes }: UserTypeRouteProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100">
         <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Access Error</h2>
+          <div className="mb-6">
+            <img 
+              src="/logo.png" 
+              alt="UntraddCareer Logo" 
+              className="h-12 w-12 object-contain mx-auto mb-4"
+            />
+            <h2 className="text-xl font-bold text-red-600 mb-4">Access Error</h2>
+          </div>
           <p className="text-slate-600 mb-4">Unable to verify your admin access. Please try refreshing the page or contact support.</p>
           <button 
             onClick={() => window.location.reload()} 

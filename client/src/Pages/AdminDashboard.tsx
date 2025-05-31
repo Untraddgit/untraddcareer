@@ -149,7 +149,18 @@ const AdminDashboard = () => {
       <>
         <Navbar />
         <div className="min-h-screen bg-slate-50 pt-16 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="text-center">
+            <div className="mb-6">
+              <img 
+                src="/logo.png" 
+                alt="UntraddCareer Logo" 
+                className="h-16 w-16 object-contain mx-auto mb-4"
+              />
+              <h2 className="text-xl font-bold text-gray-900 mb-2">UntraddCareer</h2>
+            </div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-slate-600">Loading admin dashboard...</p>
+          </div>
         </div>
       </>
     );

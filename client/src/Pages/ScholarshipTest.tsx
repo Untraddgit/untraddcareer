@@ -477,9 +477,15 @@ const ScholarshipTest = () => {
         <Navbar />
         <div className="min-h-screen bg-gray-50 pt-16 flex items-center justify-center">
           <div className="text-center">
-            <div className="mb-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <div className="mb-6">
+              <img 
+                src="/logo.png" 
+                alt="UntraddCareer Logo" 
+                className="h-16 w-16 object-contain mx-auto mb-4"
+              />
+              <h2 className="text-xl font-bold text-gray-900 mb-2">UntraddCareer</h2>
             </div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your test...</p>
           </div>
         </div>
