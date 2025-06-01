@@ -1,5 +1,5 @@
 import { UserButton, useUser } from '@clerk/clerk-react';
-import { Home, Award, Users, Menu, X, BarChart3, Settings } from 'lucide-react';
+import { Home, Menu, X, BarChart3 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/axios';
