@@ -35,9 +35,11 @@ const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
             </div>
             
             <h3 className="text-xl font-bold text-blue-700 mb-2 text-center">Join as Individual</h3>
-            <div className="text-3xl font-bold text-blue-800 mb-4 text-center">
-              ₹16,999
-              <span className="text-sm font-normal text-blue-600 ml-2">one-time</span>
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full shadow-md">
+                <span className="text-sm font-bold">20% OFF</span>
+                <span className="text-xs ml-1 opacity-90">Limited seats only</span>
+              </div>
             </div>
             
             <div className="mb-6 bg-blue-200/50 rounded-lg p-4">
@@ -95,11 +97,11 @@ const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
 
             <div className="space-y-3">
               <button 
-                onClick={() => openWhatsApp("Hi, I want to enroll in the Individual Plan (₹16,999). Please guide me through the process.")}
+                onClick={() => openWhatsApp("Hi, I want to enroll in the Individual Plan. Please share the details and pricing information.")}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 cursor-pointer mb-3"
               >
                 <MessageSquare size={18} />
-                Chat to Enroll Now
+                Get Details & Pricing
               </button>
 
               {isSignedIn ? (
@@ -128,9 +130,11 @@ const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
             </div>
             
             <h3 className="text-xl font-bold text-green-700 mb-2">Partner Through College</h3>
-            <div className="text-3xl font-bold text-green-800 mb-4">
-              ₹12,999
-              <span className="text-sm font-normal text-green-600 ml-2">per student</span>
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full shadow-md">
+                <span className="text-sm font-bold">15% OFF</span>
+                <span className="text-xs ml-1 opacity-90">Bulk Pricing available</span>
+              </div>
             </div>
 
             <div className="bg-white rounded-lg p-4 mb-6">
@@ -207,7 +211,7 @@ const ProgramOptions: React.FC<ProgramOptionsProps> = ({ openWhatsApp }) => {
               className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <MessageSquare size={18} />
-              Contact for College Partnership
+              Invite UntraddCareer to my College  
             </button>
             
             <p className="text-center text-sm text-green-700 mt-3">

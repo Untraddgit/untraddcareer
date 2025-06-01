@@ -16,7 +16,7 @@ import ProgramOptions from '../components/ProgramOptions';
 import api from '../utils/axios';
 
 // Import profile images
-import maleImage from '../assets/male.jpg';
+import krishnaImage from '../assets/krishnabajpai.jpg';
 import nehaImage from '../assets/neha.jpg';
 import nehaGuptaImage from '../assets/nehagupta.jpeg';
 import rahulImage from '../assets/rahul.jpeg';
@@ -24,7 +24,7 @@ import vikramImage from '../assets/vikram.jpg';
 // import arjuImage from '../assets/arju swami.webp';
 import priyaImage from '../assets/priya.jpeg';
 import chetanImage from '../assets/chetan.jpeg';
-// import tarunImage from '../assets/tarun.jpeg';
+import tarunImage from '../assets/tarun.jpeg';
 import bibhuImage from '../assets/bibhu.jpeg';
 
 const GlobalStyle = createGlobalStyle`
@@ -518,7 +518,6 @@ export default function StudentJourneyRoadmap() {
                   className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer mb-2 sm:mb-0"
                   aria-label="Enroll as Individual"
                 >
-                  <MessageSquare size={16} className="flex-shrink-0" />
                   <span className="text-sm">I Want It for myself</span>
                 </button>
                 <button 
@@ -526,8 +525,7 @@ export default function StudentJourneyRoadmap() {
                   className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
                   aria-label="Partner as College"
                 >
-                  <MessageSquare size={16} className="flex-shrink-0" />
-                  <span className="text-sm">For my college</span>
+                  <span className="text-sm">Inviting for my college</span>
                 </button>
               </div>
             </div>
@@ -580,9 +578,9 @@ export default function StudentJourneyRoadmap() {
                 Meet Our Expert Faculty
               </h3>
               
-              <div className="bg-blue-50 rounded-lg p-4 mb-6 text-center">
-                <p className="text-blue-700 font-medium">
-                  Our instructors represent the <span className="font-bold text-blue-800">top 0.01%</span> of world geniuses in their respective domains
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-8 text-center border border-blue-100">
+                <p className="text-slate-700 font-medium text-lg">
+                  Our instructors represent the <span className="font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">top 0.01%</span> of world geniuses in their respective domains
                 </p>
               </div>
               
@@ -598,13 +596,13 @@ export default function StudentJourneyRoadmap() {
                         experience: "Data Science, 6+ years exp.",
                         image: "https://randomuser.me/api/portraits/men/77.jpg"
                       },
-                      // {
-                      //   name: "Tarun Jain",
-                      //   role: "Full Stack Developer",
-                      //   credentials: "Senior Developer, SAP Labs",
-                      //   experience: "Vibe Coder, 5+ years exp.",
-                      //   image: tarunImage
-                      // },
+                      {
+                         name: "Tarun Jain",
+                         role: "Full Stack Developer",
+                         credentials: "Senior Developer, SAP Labs",
+                         experience: "Vibe Coder, 5+ years exp.",
+                        image: tarunImage
+                      },
                       {
                         name: "Chetan Verma",
                         role: "AI/ML Enthusiast",
@@ -624,7 +622,7 @@ export default function StudentJourneyRoadmap() {
                         role: "Business & Entrepreneurship",
                         credentials: "Founder, Posterwa",
                         experience: "7+ years exp.",
-                        image: maleImage,
+                        image: krishnaImage,
                         filter: "grayscale"
                       },
                       {
@@ -677,45 +675,49 @@ export default function StudentJourneyRoadmap() {
                         image: rahulImage
                       }
                     ].map((expert, idx) => (
-                      <div key={idx} className="bg-white rounded-lg shadow-lg p-6 flex-shrink-0" style={{ width: '280px' }}>
+                      <div key={idx} className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex-shrink-0 border border-blue-200" style={{ width: '280px' }}>
                         <div className="flex items-center mb-4">
                           {expert.useIcon ? (
-                            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mr-4">
-                              <User size={30} className="text-blue-600" />
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center mr-4 shadow-sm">
+                              <User size={30} className="text-blue-700" />
                             </div>
                           ) : (
                               <img
                                 src={expert.image}
                                 alt={expert.name}
-                                className="w-16 h-16 rounded-full mr-4 object-cover"
+                                className="w-16 h-16 rounded-full mr-4 object-cover shadow-md ring-2 ring-blue-200"
                                 style={{ filter: expert.filter ? "grayscale(100%)" : "none" }}
                               />
                           )}
                           <div>
-                            <h4 className="font-bold text-blue-700">{expert.name}</h4>
-                            <p className="text-sm text-blue-600">{expert.role}</p>
+                            <h4 className="font-bold text-blue-900 text-sm">{expert.name}</h4>
+                            <p className="text-xs text-blue-700 font-medium">{expert.role}</p>
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-sm text-slate-600 flex items-center">
-                            <Award size={16} className="mr-2" />
-                            {expert.credentials}
-                          </p>
-                          <p className="text-sm text-slate-600 flex items-center">
-                            <Briefcase size={16} className="mr-2" />
-                            {expert.experience}
-                          </p>
+                        <div className="space-y-3">
+                          <div className="bg-blue-100 rounded-lg p-3">
+                            <p className="text-xs text-blue-800 flex items-center">
+                              <Award size={14} className="mr-2 text-blue-600" />
+                              {expert.credentials}
+                            </p>
+                          </div>
+                          <div className="bg-blue-100 rounded-lg p-3">
+                            <p className="text-xs text-blue-800 flex items-center">
+                              <Briefcase size={14} className="mr-2 text-blue-600" />
+                              {expert.experience}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}
 
                     {/* More Experts Indicator */}
-                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 flex-shrink-0 flex flex-col items-center justify-center" style={{ width: '280px' }}>
-                      <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center mb-4 shadow-md">
-                        <Users size={30} className="text-blue-600" />
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex-shrink-0 flex flex-col items-center justify-center border border-blue-200" style={{ width: '280px' }}>
+                      <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center mb-4 shadow-sm">
+                        <Users size={30} className="text-blue-700" />
                       </div>
-                      <h4 className="font-bold text-blue-700 text-center mb-1">And Many More...</h4>
-                      <p className="text-sm text-slate-600 text-center">
+                      <h4 className="font-bold text-blue-900 text-center mb-2">And Many More...</h4>
+                      <p className="text-xs text-blue-700 text-center leading-relaxed">
                         Our faculty includes 40+ industry experts across all domains
                       </p>
                     </div>
