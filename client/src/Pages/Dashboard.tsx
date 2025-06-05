@@ -32,6 +32,18 @@ interface UserProfile {
   principalName: string;
 }
 
+interface User {
+  clerkId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  userType: 'student' | 'admin';
+  course?: string;
+  plan?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface TestResult {
   score: number;
   completedAt: string;
@@ -130,6 +142,7 @@ const Dashboard = () => {
   const { getToken, isLoaded } = useAuth();
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [hasAttemptedTest, setHasAttemptedTest] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [testHistory, setTestHistory] = useState<TestResult[]>([]);
@@ -144,9 +157,22 @@ const Dashboard = () => {
   useEffect(() => {
     if (!isLoaded || !user) return;
     fetchUserProfile();
+    fetchUserData();
     checkTestStatus();
     fetchTestHistory();
   }, [isLoaded, user]);
+
+  const fetchUserData = async () => {
+    try {
+      const token = isLoaded ? await getToken() : null;
+      const response = await api.get(`/api/users/${user?.id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   const fetchUserProfile = async () => {
     try {
@@ -407,16 +433,27 @@ const Dashboard = () => {
 
                       {/* Custom Step 3 with Scholarship Button */}
                       <div className="flex items-start">
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${hasAttemptedTest ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${hasAttemptedTest || userData?.plan === 'premium' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
                           }`}>
-                          {hasAttemptedTest ? <CheckCircle className="w-5 h-5" /> : 3}
+                          {hasAttemptedTest || userData?.plan === 'premium' ? <CheckCircle className="w-5 h-5" /> : 3}
                         </div>
                         <div className="ml-3 flex-1">
-                          <p className={`text-sm font-medium ${hasAttemptedTest ? 'text-green-600' : 'text-gray-500'
+                          <p className={`text-sm font-medium ${hasAttemptedTest || userData?.plan === 'premium' ? 'text-green-600' : 'text-gray-500'
                             }`}>
                             Register for UntraddCareer Program
                           </p>
-                          {hasAttemptedTest && testResult && testResult.score >= 60 && (
+                          {userData?.plan === 'premium' ? (
+                            <div className="mt-2">
+                              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-200">
+                                <p className="text-sm text-green-700 mb-2 flex items-center">
+                                  🎉 <span className="ml-2 font-semibold">Congratulations! Your true journey begins here!</span>
+                                </p>
+                                <p className="text-xs text-green-600">
+                                  You are successfully enrolled in the {userData.course || 'UntraddCareer'} program with {userData.plan} plan.
+                                </p>
+                              </div>
+                            </div>
+                          ) : hasAttemptedTest && testResult && testResult.score >= 60 ? (
                             <div className="mt-2">
                               <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-200">
                                 <p className="text-xs text-green-700 mb-2">
@@ -443,8 +480,7 @@ const Dashboard = () => {
                                 )}
                               </div>
                             </div>
-                          )}
-                          {hasAttemptedTest && testResult && testResult.score < 60 && (
+                          ) : hasAttemptedTest && testResult && testResult.score < 60 ? (
                             <div className="mt-2">
                               <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                 <p className="text-xs text-blue-700 mb-2">
@@ -459,18 +495,18 @@ const Dashboard = () => {
                                 </button>
                               </div>
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </div>
 
                       <div className="ml-4 w-px h-6 bg-gray-200"></div>
-                      {renderProgressStep(4, 'Start Your Career Journey', false, false)}
+                      {renderProgressStep(4, 'Start Your Career Journey', userData?.plan === 'premium', false)}
                     </div>
                   </div>
                 </div>
 
                 {/* Quick Actions Section */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className={`grid grid-cols-1 gap-4 ${userData?.plan === 'premium' ? 'sm:grid-cols-1 lg:grid-cols-1' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
                   <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
                     <div className="flex items-center mb-3">
                       <div className="p-2 bg-blue-100 rounded-lg">
@@ -524,24 +560,27 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center mb-3">
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <Calendar className="text-purple-600 w-5 h-5" />
+                  {/* Free Counseling Card - Only show if user doesn't have premium plan */}
+                  {userData?.plan !== 'premium' && (
+                    <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
+                      <div className="flex items-center mb-3">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <Calendar className="text-purple-600 w-5 h-5" />
+                        </div>
+                        <h3 className="ml-3 font-medium text-gray-900">Free Counseling</h3>
                       </div>
-                      <h3 className="ml-3 font-medium text-gray-900">Free Counseling</h3>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Book a free career counseling session with our industry experts to get your career on track.
+                      </p>
+                      <button
+                        onClick={() => openModal('counseling')}
+                        className="w-full border border-purple-600 text-purple-600 py-2 px-4 rounded-lg hover:bg-purple-50 flex items-center justify-center"
+                      >
+                        Scheduled for 3rd June
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </button>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      Book a free career counseling session with our industry experts to get your career on track.
-                    </p>
-                    <button
-                      onClick={() => openModal('counseling')}
-                      className="w-full border border-purple-600 text-purple-600 py-2 px-4 rounded-lg hover:bg-purple-50 flex items-center justify-center"
-                    >
-                      Scheduled for 3rd June
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </button>
-                  </div>
+                  )}
 
                   {/* <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
                     <div className="flex items-center mb-3">

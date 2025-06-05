@@ -25,6 +25,8 @@ import vikramImage from '../assets/vikram.jpg';
 import priyaImage from '../assets/priya.jpeg';
 import chetanImage from '../assets/chetan.jpeg';
 import tarunImage from '../assets/tarun.jpeg';
+
+import jenicaImage from '../assets/jenica.jpeg';
 import bibhuImage from '../assets/bibhu.jpeg';
 
 const GlobalStyle = createGlobalStyle`
@@ -603,6 +605,13 @@ export default function StudentJourneyRoadmap() {
                          experience: "Vibe Coder, 5+ years exp.",
                         image: tarunImage
                       },
+                      {
+                        name: "Jenica Chawla",
+                        role: "Career Counselor",
+                        credentials: "national women cell incharge ANTI-CORRUPTION ASSOCIATION NGO",
+                        experience: "Career Counseling 3+ years exp.",
+                       image: jenicaImage
+                     },
                       {
                         name: "Chetan Verma",
                         role: "AI/ML Enthusiast",

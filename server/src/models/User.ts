@@ -6,6 +6,8 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   userType: 'student' | 'admin';
+  course?: string;
+  plan?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +39,14 @@ const UserSchema = new Schema<IUser>({
     type: String,
     enum: ['student', 'admin'],
     default: 'student'
+  },
+  course: {
+    type: String,
+    required: false
+  },
+  plan: {
+    type: String,
+    required: false
   }
 }, {
   timestamps: true,
