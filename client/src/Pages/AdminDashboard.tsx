@@ -3,11 +3,16 @@ import { useAuth } from '@clerk/clerk-react';
 import { 
   Users, 
   Award, 
+  BarChart3, 
   TrendingUp, 
   Search,
   Eye,
   GraduationCap,
+  BookOpen,
+  Plus,
+  Edit,
   Trash2,
+  Save,
   X,
   LayoutDashboard,
   FileText,
@@ -211,7 +216,13 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const AdminDashboard = () => {
   const { getToken } = useAuth();
   
-  // State variables
+  // Time unit options
+  const timeUnitOptions = [
+    { value: 'hours', label: 'Hours', shortLabel: 'hrs' },
+    { value: 'days', label: 'Days', shortLabel: 'days' },
+    { value: 'weeks', label: 'Weeks', shortLabel: 'weeks' },
+    { value: 'months', label: 'Months', shortLabel: 'months' }
+  ] as const;
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [students, setStudents] = useState<StudentData[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
@@ -226,11 +237,10 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterScore, setFilterScore] = useState<'all' | 'high' | 'scholarship'>('all');
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'tests' | 'counselling' | 'course-management'>('overview');
-  const [showCourseModal, setShowCourseModal] = useState(false);
-  const [showResourceModal, setShowResourceModal] = useState(false);
   
   // Course management state
   const [courses, setCourses] = useState<Course[]>([]);
+  const [showCourseModal, setShowCourseModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [courseForm, setCourseForm] = useState<Course>({
     courseName: '',
@@ -245,6 +255,7 @@ const AdminDashboard = () => {
   const [selectedPredefinedCourse, setSelectedPredefinedCourse] = useState<string>('');
   const [courseStudents, setCourseStudents] = useState<StudentWithProgress[]>([]);
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<AssignmentSubmission[]>([]);
+  const [showResourceModal, setShowResourceModal] = useState(false);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [resourceForm, setResourceForm] = useState<PredefinedCourseResource>({
@@ -348,28 +359,29 @@ const AdminDashboard = () => {
       setCourses(coursesResponse.data);
       setPredefinedCourses(predefinedCoursesResponse.data);
       setStudentFeedback(feedbackResponse.data);
-
-      // Calculate stats
-      const totalTests = testsResponse.data.length;
-      const totalStudents = studentsResponse.data.length;
-      const averageScore = totalTests > 0 ? testsResponse.data.reduce((sum: number, test: TestResult) => sum + test.score, 0) / totalTests : 0;
-      const scholarshipEligible = testsResponse.data.filter((test: TestResult) => test.score >= 60).length;
-      const highPerformers = testsResponse.data.filter((test: TestResult) => test.score >= 70).length;
-      const topPerformers = testsResponse.data.filter((test: TestResult) => test.score >= 80).length;
-
-      setStats({
-        totalStudents,
-        totalTestsTaken: totalTests,
-        averageScore: Math.round(averageScore * 100) / 100,
-        scholarshipEligible,
-        highPerformers,
-        topPerformers
-      });
     } catch (error) {
       console.error('Error fetching admin data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateStats = (tests: TestResult[], studentList: StudentData[]) => {
+    const totalTests = tests.length;
+    const totalStudents = studentList.length;
+    const averageScore = totalTests > 0 ? tests.reduce((sum, test) => sum + test.score, 0) / totalTests : 0;
+    const scholarshipEligible = tests.filter(test => test.score >= 60).length;
+    const highPerformers = tests.filter(test => test.score >= 70).length;
+    const topPerformers = tests.filter(test => test.score >= 80).length;
+
+    setStats({
+      totalStudents,
+      totalTestsTaken: totalTests,
+      averageScore: Math.round(averageScore * 100) / 100,
+      scholarshipEligible,
+      highPerformers,
+      topPerformers
+    });
   };
 
   const getScholarshipLevel = (score: number) => {
@@ -1575,14 +1587,14 @@ const AdminDashboard = () => {
                                   Notes: {session.notes}
                                 </p>
                               )}
-                            </div>
+                    </div>
                             <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                               session.status === 'completed' ? 'bg-green-100 text-green-800' :
                               session.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                               'bg-blue-100 text-blue-800'
                             }`}>
                               {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
-                            </div>
+                  </div>
                           </div>
                           {session.status === 'scheduled' && (
                             <div className="mt-4 flex space-x-2">
@@ -1653,11 +1665,11 @@ const AdminDashboard = () => {
                                 <div>
                                   <span className="text-sm font-medium text-gray-700">College:</span>
                                   <span className="text-sm text-gray-600 ml-2">{feedback.college}</span>
-                                </div>
+                  </div>
                                 <div>
                                   <span className="text-sm font-medium text-gray-700">Semester:</span>
                                   <span className="text-sm text-gray-600 ml-2">{feedback.semester}</span>
-                                </div>
+                </div>
                                 <div>
                                   <span className="text-sm font-medium text-gray-700">Three Words:</span>
                                   <span className="text-sm text-gray-600 ml-2">{feedback.threeWords.join(', ')}</span>

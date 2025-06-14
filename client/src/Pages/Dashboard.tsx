@@ -1,45 +1,54 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight,
-  ChevronDown,
-  ChevronUp,
-  ChevronRight,
-  CheckCircle,
-  Circle,
-  Wrench,
-  Target,
-  MessageCircle,
-  X,
-  Home,
-  BookOpen,
+import {
   Award,
-  Calendar,
-  Clock,
+  BookOpen,
+  GraduationCap,
   Users,
+  BarChart,
+  Home,
+  CheckCircle,
+  Calendar,
+  ArrowRight,
   Star,
   TrendingUp,
-  GraduationCap,
   Briefcase,
+  Clock,
+  ExternalLink,
+  Bell,
   MapPin,
   DollarSign,
-  ExternalLink,
-  Lock,
+  X,
+  ChevronDown,
+  ChevronRight,
   Play,
-  BarChart
+  Lock,
+  Wrench,
+  Target,
+  MessageCircle
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import api from '../utils/axios';
 import CounselingFeedbackTab from '../components/CounselingFeedbackTab';
+import api from '../utils/axios';
+import axios from 'axios';
 
 interface UserProfile {
+  branch: string;
+  collegeName: string;
+  principalName: string;
+}
+
+interface User {
+  clerkId: string;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
-  phone: string;
+  userType: 'student' | 'admin';
   course?: string;
-  plan?: 'basic' | 'premium';
+  plan?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface TestResult {
@@ -48,58 +57,172 @@ interface TestResult {
   timeSpent: number;
 }
 
-interface Course {
+interface CourseTask {
+  title: string;
+  description: string;
+  estimatedTime: number;
+  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
+  resources?: string[];
+  isCompleted?: boolean;
+  completedAt?: string;
+  timeSpent?: number;
+  notes?: string;
+}
+
+interface CourseSubtopic {
+  title: string;
+  description: string;
+  estimatedTime: number;
+  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
+  tasks: CourseTask[];
+  isCompleted?: boolean;
+  completedAt?: string;
+  resources?: string[];
+}
+
+interface CourseTopic {
+  title: string;
+  description: string;
+  estimatedWeeks: number;
+  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
+  subtopics: CourseSubtopic[];
+  isCompleted?: boolean;
+  completedAt?: string;
+  resources?: string[];
+}
+
+interface CourseData {
   _id: string;
   courseName: string;
   displayName: string;
   description: string;
-  topics: Topic[];
+  topics: CourseTopic[];
   totalDuration: number;
+  isActive: boolean;
+}
+
+// New interfaces for predefined courses
+interface PredefinedCourseProject {
+  title: string;
+  description?: string;
+}
+
+interface PredefinedCourseResource {
+  title: string;
+  url: string;
+  type: 'video' | 'article' | 'document' | 'tool' | 'other';
+}
+
+interface PredefinedCourseAssignment {
+  _id: string;
+  title: string;
+  description: string;
+  dueDate?: string;
+  maxScore: number;
+  instructions: string;
+}
+
+interface PredefinedCourseWeek {
+  week: number;
+  title: string;
+  topics: string[];
+  projects: (string | PredefinedCourseProject)[];
+  liveClassTopics: string[];
+  resources?: PredefinedCourseResource[];
+  assignments?: PredefinedCourseAssignment[];
+  isCompleted?: boolean;
+  completedAt?: string;
+  isLocked?: boolean;
+}
+
+interface PredefinedCourseToolsAndTechnologies {
+  languages: string[];
+  frontend: string[];
+  backend: string[];
+  databases: string[];
+  authentication: string[];
+  devops: string[];
+  deployment: string[];
+  ai: string[];
+  testingMonitoring: string[];
+  tooling: string[];
+  csFundamentals: string[];
+}
+
+interface PredefinedCourseData {
+  _id: string;
+  courseName: string;
+  displayName?: string;
   durationWeeks: number;
-  weeklyRoadmap: WeeklyRoadmap[];
-  toolsAndTechnologies: Record<string, string[]>;
-  expectedOutcomes: string[];
   effortPerWeek: string;
   liveClassesPerWeek: number;
   courseDescription: string;
+  weeklyRoadmap: PredefinedCourseWeek[];
+  toolsAndTechnologies: PredefinedCourseToolsAndTechnologies;
+  expectedOutcomes: string[];
+  isActive: boolean;
 }
 
-interface WeeklyRoadmap {
+interface PredefinedCourseModuleProgress {
   week: number;
-  topics: string[];
-  projects: string[];
-  liveClassTopics: string[];
-  resources: { title: string; link: string }[];
-  assignments: Assignment[];
-}
-
-interface Assignment {
-  title: string;
-  description: string;
-  dueDate: string;
-}
-
-interface ModuleProgress {
-  week: number;
-  completed: boolean;
-  timeSpent: number;
+  isCompleted: boolean;
+  completedAt?: string;
+  isLocked: boolean;
+  completedBy?: string;
+  notes?: string;
 }
 
 interface PredefinedCourseProgress {
-  currentWeek: number;
+  _id: string;
+  studentId: string;
+  courseName: string;
+  courseId: string;
+  modules: PredefinedCourseModuleProgress[];
   overallProgress: number;
+  currentWeek: number;
+  startedAt: string;
+  lastAccessedAt: string;
+  completedAt?: string;
   totalTimeSpent: number;
-  modules: ModuleProgress[];
 }
 
 interface StudentProgress {
+  _id: string;
+  studentId: string;
+  courseName: string;
   courseId: string;
-  progress: number;
-  currentWeek: number;
-  completedTopics: string[];
+  topics: any[];
+  overallProgress: number;
+  startedAt: string;
+  lastAccessedAt: string;
+  completedAt?: string;
+  totalTimeSpent: number;
 }
 
-// Define scholarship tiers
+interface StudentFeedback {
+  studentId: string;
+  name: string;
+  semester: string;
+  college: string;
+  threeWords: string[];
+  strengths: string;
+  areasOfImprovement: string;
+  stressHandling: string;
+  motivation: string;
+  englishRating: number;
+  hindiRating: number;
+  confidence: string;
+  decisionMaking: string;
+  biggestAchievement: string;
+  turningPoint: string;
+  conflicts: string;
+  futureConcern: string;
+  alignInThoughts: string;
+  courseChosen: string;
+  createdAt: string;
+}
+
+// Define scholarship tiers - same as in ScholarshipTest
 const SCHOLARSHIP_TIERS = [
   { minScore: 80, discount: 15 },
   { minScore: 70, discount: 10 },
@@ -129,155 +252,473 @@ const INTERNSHIP_OPPORTUNITIES = [
     stipend: "₹8,000/month",
     location: "Remote"
   },
-  // ... other internship opportunities ...
+  {
+    id: 2,
+    company: "DigitalWave",
+    logo: "DW",
+    logoColor: "bg-purple-100 text-purple-600",
+    position: "Digital Marketing Intern",
+    duration: "6 months",
+    positions: 3,
+    stipend: "₹12,000/month",
+    location: "Bangalore"
+  },
+  {
+    id: 3,
+    company: "Games24x7",
+    logo: "GT",
+    logoColor: "bg-green-100 text-green-600",
+    position: "Game Administration Intern",
+    duration: "4 months",
+    positions: 2,
+    stipend: "₹10,000/month",
+    location: "Hybrid"
+  },
+  {
+    id: 4,
+    company: "DataSmart Analytics",
+    logo: "DA",
+    logoColor: "bg-yellow-100 text-yellow-600",
+    position: "Data Analysis Intern",
+    duration: "3 months",
+    positions: 4,
+    stipend: "₹8,000/month",
+    location: "Delhi NCR"
+  },
+  {
+    id: 5,
+    company: "CoreXtech IT Services Pvt. Ltd.",
+    logo: "CX",
+    logoColor: "bg-indigo-100 text-indigo-600",
+    position: "Cloud Engineer Intern",
+    duration: "6 months",
+    positions: 2,
+    stipend: "₹22,000/month",
+    location: "Pune"
+  },
+  {
+    id: 6,
+    company: "CreativeSolutions",
+    logo: "CS",
+    logoColor: "bg-pink-100 text-pink-600",
+    position: "UI/UX Design Intern",
+    duration: "3 months",
+    positions: 3,
+    stipend: "₹15,000/month",
+    location: "Remote"
+  }
 ];
 
-const renderProgressStep = (step: number, label: string, isCompleted: boolean, isActive: boolean) => {
-  return (
-    <div className="flex items-center">
-      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-        isCompleted ? 'bg-green-100 text-green-600' : isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
-      }`}>
-        {isCompleted ? <CheckCircle className="w-5 h-5" /> : step}
-      </div>
-      <div className="ml-3">
-        <p className={`text-sm font-medium ${
-          isCompleted ? 'text-green-600' : isActive ? 'text-blue-600' : 'text-gray-500'
-        }`}>
-          {label}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// Types
-interface Topic {
+interface UpcomingSession {
+  _id: string;
   title: string;
-  description: string;
-  subtopics: Subtopic[];
-}
-
-interface Subtopic {
-  title: string;
-  description: string;
-  tasks: Task[];
-}
-
-interface Task {
-  title: string;
-  description: string;
-  isCompleted?: boolean;
-}
-
-interface StudentFeedback {
-  studentId: string;
-  name: string;
-  semester: string;
-  college: string;
-  threeWords: string[];
-  strengths: string;
-  areasOfImprovement: string;
-  stressHandling: string;
-  motivation: string;
-  englishRating: number;
-  hindiRating: number;
-  confidence: string;
-  decisionMaking: string;
-  biggestAchievement: string;
-  turningPoint: string;
-  conflicts: string;
-  futureConcern: string;
-  alignInThoughts: string;
-  courseChosen: string;
-  createdAt: string;
+  description?: string;
+  date: string;
+  time: string;
+  link: string;
 }
 
 const Dashboard = () => {
+  const { user } = useUser();
+  const { getToken, isLoaded } = useAuth();
   const navigate = useNavigate();
-  const { getToken } = useAuth();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  
-  // State
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'course' | 'test' | 'counselingfeedback'>('overview');
-  const [userData, setUserData] = useState<UserProfile | null>(null);
-  const [courseData, setCourseData] = useState<Course | null>(null);
-  const [expandedTopics, setExpandedTopics] = useState<Record<number, boolean>>({});
-  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<'community' | 'test' | 'counseling'>('community');
-  const [showSyllabus, setShowSyllabus] = useState(false);
-  const [testResult, setTestResult] = useState<TestResult | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [hasAttemptedTest, setHasAttemptedTest] = useState(false);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [testHistory, setTestHistory] = useState<TestResult[]>([]);
-  const [predefinedCourseData, setPredefinedCourseData] = useState<Course | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'course' | 'test' | 'counselingfeedback'>('overview');
+  const [showNotification, setShowNotification] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<'community' | 'counseling'>('community');
+
+  // Course materials state
+  const [courseData, setCourseData] = useState<CourseData | null>(null);
+  const [studentProgress, setStudentProgress] = useState<StudentProgress | null>(null);
+  const [loadingCourse, setLoadingCourse] = useState(false);
+  
+  // Predefined course state
+  const [predefinedCourseData, setPredefinedCourseData] = useState<PredefinedCourseData | null>(null);
   const [predefinedCourseProgress, setPredefinedCourseProgress] = useState<PredefinedCourseProgress | null>(null);
   const [loadingPredefinedCourse, setLoadingPredefinedCourse] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<{week: number, assignment: PredefinedCourseAssignment} | null>(null);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
-  const [selectedAssignment, setSelectedAssignment] = useState<{
-    week: number;
-    assignment: Assignment;
-  } | null>(null);
   const [assignmentLink, setAssignmentLink] = useState('');
-  const [studentFeedback, setStudentFeedback] = useState<StudentFeedback[]>([]);
-  const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
-  const [user, setUser] = useState<UserProfile | null>(null);
+  
+  // Collapsible state management
+  const [expandedTopics, setExpandedTopics] = useState<{ [key: number]: boolean }>({});
+  const [expandedSubtopics, setExpandedSubtopics] = useState<{ [key: string]: boolean }>({});
+  const [showSyllabus, setShowSyllabus] = useState(false);
+  const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
+  const [studentFeedback, setStudentFeedback] = useState<StudentFeedback | null>(null);
 
+  // Initial data fetch
   useEffect(() => {
-    fetchCourseData();
-  }, []);
+    if (!isLoaded || !user) return;
+    fetchUserProfile();
+    fetchUserData();
+    checkTestStatus();
+    fetchTestHistory();
+    fetchPredefinedCourseMaterials();
+    fetchUpcomingSessions();
+    fetchStudentFeedback();
+  }, [isLoaded, user]);
 
-  const fetchCourseData = async () => {
+  // Fetch upcoming sessions when userData changes
+  useEffect(() => {
+    if (!isLoaded || !user || !userData?.course) return;
+    fetchUpcomingSessions();
+  }, [isLoaded, user, userData?.course]);
+
+  const fetchUserData = async () => {
     try {
-      const token = await getToken();
-      const response = await api.get('/api/courses/student/current-course', {
-        headers: { Authorization: `Bearer ${token}` }
+      const token = isLoaded ? await getToken() : null;
+      const response = await api.get(`/api/users/${user?.id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      setCourseData(response.data);
+      setUserData(response.data);
     } catch (error) {
-      console.error('Error fetching course data:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching user data:', error);
     }
   };
 
-  const toggleTopic = (index: number) => {
-    setExpandedTopics(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
+  const fetchUserProfile = async () => {
+    try {
+      const token = isLoaded ? await getToken() : null;
+      const response = await api.get('/api/user-profile', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        params: { userId: user?.id }
+      });
+      setUserProfile(response.data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+
+      // If profile not found, create a default one
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        try {
+          const token = isLoaded ? await getToken() : null;
+          const response = await api.post('/api/user-profile', {
+            userId: user?.id,
+            branch: 'BCA', // Default branch
+            collegeName: 'Default College',
+            principalName: 'Default Principal'
+          }, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          });
+          setUserProfile(response.data);
+        } catch (createError) {
+          console.error('Error creating default profile:', createError);
+        }
+      }
+    }
+  };
+
+  const fetchTestHistory = async () => {
+    try {
+      const token = isLoaded ? await getToken() : null;
+      console.log('Fetching test history with token:', !!token);
+
+      const response = await api.get('/api/quiz-results', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        params: { userId: user?.id }
+      });
+      console.log('Test history response:', response.data);
+      setTestHistory(response.data);
+    } catch (error) {
+      console.error('Error fetching test history:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          headers: error.response?.headers
+        });
+      }
+    }
+  };
+
+  const fetchCourseMaterials = async () => {
+    try {
+      setLoadingCourse(true);
+      const token = isLoaded ? await getToken() : null;
+      
+      const response = await api.get('/api/courses/student/course-materials', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      
+      setCourseData(response.data.course);
+      setStudentProgress(response.data.progress);
+    } catch (error) {
+      console.error('Error fetching course materials:', error);
+      // Don't show error for students without assigned courses
+      if (axios.isAxiosError(error) && error.response?.status !== 404) {
+        console.error('Course materials error:', error.response?.data);
+      }
+    } finally {
+      setLoadingCourse(false);
+    }
+  };
+
+  const fetchPredefinedCourseMaterials = async () => {
+    try {
+      setLoadingPredefinedCourse(true);
+      const token = isLoaded ? await getToken() : null;
+      
+      const response = await api.get('/api/predefined-courses/student/predefined-course-materials', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      
+      setPredefinedCourseData(response.data.course);
+      setPredefinedCourseProgress(response.data.progress);
+    } catch (error) {
+      console.error('Error fetching predefined course materials:', error);
+      // Don't show error for students without assigned courses
+      if (axios.isAxiosError(error) && error.response?.status !== 404) {
+        console.error('Predefined course materials error:', error.response?.data);
+      }
+    } finally {
+      setLoadingPredefinedCourse(false);
+    }
+  };
+
+  const fetchUpcomingSessions = async () => {
+    try {
+      const token = await getToken();
+      const response = await api.get('/api/student/upcoming-sessions', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUpcomingSessions(response.data);
+    } catch (error) {
+      console.error('Error fetching upcoming sessions:', error);
+    }
+  };
+
+  const fetchStudentFeedback = async () => {
+    try {
+      const token = await getToken();
+      const response = await api.get('/api/student/feedback', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStudentFeedback(response.data);
+    } catch (error) {
+      console.error('Error fetching student feedback:', error);
+    }
+  };
+
+  // Auto-scroll effect for internship listings
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
+    let animationFrameId: number;
+    let scrollPosition = 0;
+    const totalWidth = scrollContainer.scrollWidth;
+    const visibleWidth = scrollContainer.clientWidth;
+
+    const scroll = () => {
+      if (!scrollContainer) return;
+
+      scrollPosition += 0.5; // Controls scroll speed
+
+      // Reset position when we've scrolled through all items
+      if (scrollPosition >= totalWidth - visibleWidth) {
+        scrollPosition = 0;
+      }
+
+      scrollContainer.scrollLeft = scrollPosition;
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    // Start scrolling animation
+    animationFrameId = requestAnimationFrame(scroll);
+
+    // Pause scrolling when hovering
+    const handleMouseEnter = () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+
+    const handleMouseLeave = () => {
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
+    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
+        scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, []);
+
+  const checkTestStatus = async () => {
+    try {
+      const token = isLoaded ? await getToken() : null;
+      console.log('Checking test status with token:', !!token);
+      console.log('User ID:', user?.id);
+
+      const response = await api.get('/api/quiz-results/check-test-status', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        params: { userId: user?.id }
+      });
+      console.log('Test status response:', response.data);
+
+      setHasAttemptedTest(response.data.hasAttempted);
+      if (response.data.hasAttempted && response.data.result) {
+        console.log('Setting test result:', response.data.result);
+        setTestResult(response.data.result);
+      } else {
+        console.log('No test result found in response');
+      }
+    } catch (error) {
+      console.error('Error checking test status:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          headers: error.response?.headers
+        });
+      }
+    }
   };
 
   const handleStartTest = () => {
-    setModalType('test');
+    console.log('handleStartTest called');
+    console.log('hasAttemptedTest:', hasAttemptedTest);
+    if (hasAttemptedTest) {
+      alert('You have already taken the test. Only one attempt is allowed.');
+      console.log('Navigation blocked: Test already attempted.');
+      return;
+    }
+    console.log('Navigating to /scholarship-test...');
+    navigate('/scholarship-test');
+  };
+
+  const renderProgressStep = (step: number, title: string, isCompleted: boolean, isCurrent: boolean) => {
+    return (
+      <div className="flex items-center">
+        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${isCompleted ? 'bg-green-100 text-green-600' :
+            isCurrent ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+          }`}>
+          {isCompleted ? <CheckCircle className="w-5 h-5" /> : step}
+        </div>
+        <div className="ml-3">
+          <p className={`text-sm font-medium ${isCompleted ? 'text-green-600' :
+              isCurrent ? 'text-blue-600' : 'text-gray-500'
+            }`}>
+            {title}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const openModal = (type: 'community' | 'counseling') => {
+    setModalType(type);
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setModalType('community');
+    setModalType('community'); // Reset to default value instead of null
   };
 
-  const openModal = (type: 'community' | 'test' | 'counseling') => {
-    setModalType(type);
-    setShowModal(true);
+  const updateTaskProgress = async (topicIndex: number, subtopicIndex: number, taskIndex: number, isCompleted: boolean) => {
+    try {
+      const token = isLoaded ? await getToken() : null;
+      
+      const response = await api.put('/api/courses/student/progress', {
+        topicIndex,
+        subtopicIndex,
+        taskIndex,
+        isCompleted,
+        timeSpent: isCompleted ? 30 : 0 // Default 30 minutes when completing a task
+      }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      
+      setStudentProgress(response.data);
+      
+      // Update the course data to reflect the completion status
+      if (courseData) {
+        const updatedCourseData = { ...courseData };
+        const task = updatedCourseData.topics[topicIndex]?.subtopics[subtopicIndex]?.tasks[taskIndex];
+        if (task) {
+          task.isCompleted = isCompleted;
+          if (isCompleted) {
+            task.completedAt = new Date().toISOString();
+          }
+        }
+        setCourseData(updatedCourseData);
+      }
+    } catch (error) {
+      console.error('Error updating task progress:', error);
+    }
   };
 
-  const handleAssignmentSubmission = async (week: number, assignment: Assignment) => {
+  // Collapsible helper functions
+  const toggleTopic = (topicIndex: number) => {
+    const newExpanded = { ...expandedTopics };
+    newExpanded[topicIndex] = !newExpanded[topicIndex];
+    setExpandedTopics(newExpanded);
+  };
+
+  const toggleSubtopic = (topicIndex: number, subtopicIndex: number) => {
+    const key = `${topicIndex}-${subtopicIndex}`;
+    const newExpanded = { ...expandedSubtopics };
+    newExpanded[key] = !newExpanded[key];
+    setExpandedSubtopics(newExpanded);
+  };
+
+  const expandAllTopics = () => {
+    if (courseData) {
+      const allTopics = courseData.topics.map((_, index) => index);
+      const expandedState = allTopics.reduce<Record<number, boolean>>((acc, index) => ({ ...acc, [index]: true }), {});
+      setExpandedTopics(expandedState);
+    }
+  };
+
+  const collapseAllTopics = () => {
+    setExpandedTopics({});
+    setExpandedSubtopics({});
+  };
+
+  // Helper function to format time with units
+  const formatTimeWithUnit = (time: number, unit: 'hours' | 'days' | 'weeks' | 'months') => {
+    const unitLabels = {
+      hours: time === 1 ? 'hour' : 'hours',
+      days: time === 1 ? 'day' : 'days', 
+      weeks: time === 1 ? 'week' : 'weeks',
+      months: time === 1 ? 'month' : 'months'
+    };
+    return `${time} ${unitLabels[unit]}`;
+  };
+
+  const getShortTimeUnit = (unit: 'hours' | 'days' | 'weeks' | 'months') => {
+    const shortLabels = {
+      hours: 'hrs',
+      days: 'days',
+      weeks: 'wks', 
+      months: 'mos'
+    };
+    return shortLabels[unit];
+  };
+
+  const handleAssignmentSubmission = (week: number, assignment: PredefinedCourseAssignment) => {
     setSelectedAssignment({ week, assignment });
     setShowAssignmentModal(true);
   };
 
-  const handleSubmitAssignment = async () => {
-    if (!selectedAssignment || !assignmentLink) return;
-    
+  // Add this function after other handlers
+  const handleSubmitAssignment = async (week: number, assignment: PredefinedCourseAssignment) => {
     try {
       const token = await getToken();
-      await api.post('/api/assignments/submit', {
-        courseId: courseData?._id,
-        week: selectedAssignment.week,
-        assignmentId: selectedAssignment.assignment.title,
+      await api.post(`/api/predefined-courses/student/assignments/${week}`, {
+        assignmentId: assignment._id,
         submissionLink: assignmentLink
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -285,20 +726,12 @@ const Dashboard = () => {
       
       setShowAssignmentModal(false);
       setAssignmentLink('');
-      // Optionally refresh the course data or show a success message
+      alert('Assignment submitted successfully!');
     } catch (error) {
       console.error('Error submitting assignment:', error);
-      // Handle error (show error message to user)
+      alert('Error submitting assignment. Please try again.');
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen">
@@ -308,18 +741,18 @@ const Dashboard = () => {
           {/* Navigation Tabs */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
             <nav className="flex space-x-8 border-b border-gray-200 px-6">
-              <button
-                onClick={() => setActiveTab('overview')}
+                <button
+                  onClick={() => setActiveTab('overview')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 flex items-center ${
                   activeTab === 'overview' 
                     ? 'border-purple-500 text-purple-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Overview
-              </button>
-              <button
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                  <Home className="h-4 w-4 mr-2" />
+                  Overview
+                </button>
+                <button
                 onClick={() => setActiveTab('course')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 flex items-center ${
                   activeTab === 'course' 
@@ -335,667 +768,673 @@ const Dashboard = () => {
                 className={`py-4 px-1 text-sm font-medium border-b-2 flex items-center ${
                   activeTab === 'test' 
                     ? 'border-purple-500 text-purple-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <Award className="h-4 w-4 mr-2" />
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                  <Award className="h-4 w-4 mr-2" />
                 Test
-              </button>
-              <button
+                </button>
+                <button
                 onClick={() => setActiveTab('counselingfeedback')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 flex items-center ${
                   activeTab === 'counselingfeedback' 
                     ? 'border-purple-500 text-purple-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 My Counseling Feedback
-              </button>
-            </nav>
-          </div>
+                </button>
+              </nav>
+            </div>
 
           {/* Tab Content */}
-          {activeTab === 'overview' && (
-            <div className="p-6">
-              {/* Your Path Section */}
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Career Path</h2>
-                <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                  <div className="space-y-6">
-                    {renderProgressStep(1, 'Create Your Profile', true, false)}
-                    <div className="ml-4 w-px h-6 bg-gray-200"></div>
-                    {renderProgressStep(2, 'Take Scholarship Test', hasAttemptedTest, !hasAttemptedTest)}
-                    <div className="ml-4 w-px h-6 bg-gray-200"></div>
+            {activeTab === 'overview' && (
+              <div className="p-6">
+                {/* Your Path Section */}
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Career Path</h2>
+                  <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                    <div className="space-y-6">
+                      {renderProgressStep(1, 'Create Your Profile', true, false)}
+                      <div className="ml-4 w-px h-6 bg-gray-200"></div>
+                      {renderProgressStep(2, 'Take Scholarship Test', hasAttemptedTest, !hasAttemptedTest)}
+                      <div className="ml-4 w-px h-6 bg-gray-200"></div>
 
-                    {/* Custom Step 3 with Scholarship Button */}
-                    <div className="flex items-start">
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${hasAttemptedTest || userData?.plan === 'premium' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                        }`}>
-                        {hasAttemptedTest || userData?.plan === 'premium' ? <CheckCircle className="w-5 h-5" /> : 3}
-                      </div>
-                      <div className="ml-3 flex-1">
-                        <p className={`text-sm font-medium ${hasAttemptedTest || userData?.plan === 'premium' ? 'text-green-600' : 'text-gray-500'
+                      {/* Custom Step 3 with Scholarship Button */}
+                      <div className="flex items-start">
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${hasAttemptedTest || userData?.plan === 'premium' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
                           }`}>
-                          Register for UntraddCareer Program
-                        </p>
-                        {userData?.plan === 'premium' ? (
-                          <div className="mt-2">
-                            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-200">
-                              <p className="text-sm text-green-700 mb-2 flex items-center">
-                                🎉 <span className="ml-2 font-semibold">Congratulations! Your true journey begins here!</span>
-                              </p>
-                              <p className="text-xs text-green-600">
-                                You are successfully enrolled in the {userData.course || 'UntraddCareer'} program with {userData.plan} plan.
-                              </p>
-                            </div>
-                          </div>
-                        ) : hasAttemptedTest && testResult && testResult.score >= 60 ? (
-                          <div className="mt-2">
-                            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-200">
-                              <p className="text-xs text-green-700 mb-2">
-                                🎉 Congratulations! You're eligible for {getScholarshipDiscount(testResult.score)}% scholarship
-                              </p>
-                              {testResult.score >= 70 ? (
-                                <button
-                                  onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
-                                  className="bg-gradient-to-r from-green-600 to-green-700 text-white py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 text-xs flex items-center justify-center font-semibold shadow-md transform hover:scale-105 transition-all duration-200 w-full"
-                                >
-                                  <DollarSign className="mr-2 h-4 w-4" />
-                                  Register Now with {getScholarshipDiscount(testResult.score)}% Scholarship
-                                  <ArrowRight className="ml-2 h-3 w-3" />
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
-                                  className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-xs flex items-center justify-center w-full"
-                                >
-                                  <DollarSign className="mr-2 h-4 w-4" />
-                                  Claim Your {getScholarshipDiscount(testResult.score)}% Scholarship
-                                  <ArrowRight className="ml-2 h-3 w-3" />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        ) : hasAttemptedTest && testResult && testResult.score < 60 ? (
-                          <div className="mt-2">
-                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                              <p className="text-xs text-blue-700 mb-2">
-                                Excited to start your career journey?
-                              </p>
-                              <button
-                                onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
-                                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-xs flex items-center justify-center w-full"
-                              >
-                                Claim Your 15 percent Schorship
-                                <ArrowRight className="ml-2 h-3 w-3" />
-                              </button>
-                            </div>
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    <div className="ml-4 w-px h-6 bg-gray-200"></div>
-                    {renderProgressStep(4, 'Your Journey has started!', userData?.plan === 'premium', false)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Actions Section */}
-              <div className={`grid grid-cols-1 gap-4 ${userData?.plan === 'premium' ? 'sm:grid-cols-1 lg:grid-cols-1' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
-                <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
-                  <div className="flex items-center mb-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Award className="text-blue-600 w-5 h-5" />
-                    </div>
-                    <h3 className="ml-3 font-medium text-gray-900">Scholarship Test</h3>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {hasAttemptedTest
-                      ? 'You have completed the scholarship test.'
-                      : 'Take our assessment to qualify for scholarships up to 15%.'}
-                  </p>
-                  <div className="mt-2">
-                    {hasAttemptedTest ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center text-green-600">
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          <span className="text-sm font-medium">Completed</span>
+                          {hasAttemptedTest || userData?.plan === 'premium' ? <CheckCircle className="w-5 h-5" /> : 3}
                         </div>
-                        {testResult && (
-                          <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-xs text-gray-500">Your Score</p>
-                                <p className="text-lg font-bold text-blue-600">{testResult.score}%</p>
-                              </div>
-                              <div className="bg-blue-100 p-2 rounded-full">
-                                <Award className="h-5 w-5 text-blue-600" />
+                        <div className="ml-3 flex-1">
+                          <p className={`text-sm font-medium ${hasAttemptedTest || userData?.plan === 'premium' ? 'text-green-600' : 'text-gray-500'
+                            }`}>
+                            Register for UntraddCareer Program
+                          </p>
+                          {userData?.plan === 'premium' ? (
+                            <div className="mt-2">
+                              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-200">
+                                <p className="text-sm text-green-700 mb-2 flex items-center">
+                                  🎉 <span className="ml-2 font-semibold">Congratulations! Your true journey begins here!</span>
+                                </p>
+                                <p className="text-xs text-green-600">
+                                  You are successfully enrolled in the {userData.course || 'UntraddCareer'} program with {userData.plan} plan.
+                                </p>
                               </div>
                             </div>
-                            {testResult.score >= 60 && (
-                              <p className="text-xs text-green-600 mt-1">
-                                Eligible for {getScholarshipDiscount(testResult.score)}% scholarship
-                              </p>
-                            )}
-                          </div>
-                        )}
+                          ) : hasAttemptedTest && testResult && testResult.score >= 60 ? (
+                            <div className="mt-2">
+                              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-200">
+                                <p className="text-xs text-green-700 mb-2">
+                                  🎉 Congratulations! You're eligible for {getScholarshipDiscount(testResult.score)}% scholarship
+                                </p>
+                                {testResult.score >= 70 ? (
+                                  <button
+                                    onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                                    className="bg-gradient-to-r from-green-600 to-green-700 text-white py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 text-xs flex items-center justify-center font-semibold shadow-md transform hover:scale-105 transition-all duration-200 w-full"
+                                  >
+                                    <DollarSign className="mr-2 h-4 w-4" />
+                                    Register Now with {getScholarshipDiscount(testResult.score)}% Scholarship
+                                    <ArrowRight className="ml-2 h-3 w-3" />
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                                    className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-xs flex items-center justify-center w-full"
+                                  >
+                                    <DollarSign className="mr-2 h-4 w-4" />
+                                    Claim Your {getScholarshipDiscount(testResult.score)}% Scholarship
+                                    <ArrowRight className="ml-2 h-3 w-3" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ) : hasAttemptedTest && testResult && testResult.score < 60 ? (
+                            <div className="mt-2">
+                              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <p className="text-xs text-blue-700 mb-2">
+                                  Excited to start your career journey?
+                                </p>
+                                <button
+                                  onClick={() => window.open('https://rzp.io/rzp/wND9YCXB', '_blank')}
+                                  className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-xs flex items-center justify-center w-full"
+                                >
+                                  Claim Your 15 percent Schorship
+                                  <ArrowRight className="ml-2 h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
-                    ) : (
-                      <div>
-                        <button
-                          onClick={handleStartTest}
-                          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center mb-3"
-                        >
-                          Take Scholarship Test
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </button>
-                        
-                      </div>
-                    )}
+
+                      <div className="ml-4 w-px h-6 bg-gray-200"></div>
+                      {renderProgressStep(4, 'Your Journey has started!', userData?.plan === 'premium', false)}
+                    </div>
                   </div>
                 </div>
 
-                {/* Free Counseling Card - Only show if user doesn't have premium plan */}
-                {userData?.plan !== 'premium' && (
+                {/* Quick Actions Section */}
+                <div className={`grid grid-cols-1 gap-4 ${userData?.plan === 'premium' ? 'sm:grid-cols-1 lg:grid-cols-1' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
                   <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
                     <div className="flex items-center mb-3">
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <Calendar className="text-purple-600 w-5 h-5" />
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Award className="text-blue-600 w-5 h-5" />
                       </div>
-                      <h3 className="ml-3 font-medium text-gray-900">Free Counseling</h3>
+                      <h3 className="ml-3 font-medium text-gray-900">Scholarship Test</h3>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">
-                      Book a free career counseling session with our industry experts to get your career on track.
+                      {hasAttemptedTest
+                        ? 'You have completed the scholarship test.'
+                        : 'Take our assessment to qualify for scholarships up to 15%.'}
                     </p>
-                    <button
-                      onClick={() => openModal('counseling')}
-                      className="w-full border border-purple-600 text-purple-600 py-2 px-4 rounded-lg hover:bg-purple-50 flex items-center justify-center"
-                    >
-                      Scheduled for 3rd June
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </button>
-                  </div>
-                )}
-
-                {/* <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
-                  <div className="flex items-center mb-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <Users className="text-green-600 w-5 h-5" />
-                    </div>
-                    <h3 className="ml-3 font-medium text-gray-900">Alumni Community</h3>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Connect with peers, alumni, and mentors in your field of study.
-                  </p>
-                  <button
-                    onClick={() => openModal('community')}
-                    className="w-full border border-green-600 text-green-600 py-2 px-4 rounded-lg hover:bg-green-50 flex items-center justify-center"
-                  >
-                    Join Community
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </button>
-                </div> */}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'course' && (
-            <div className="p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Course Materials</h2>
-                <p className="text-gray-600 mb-4">
-                  {predefinedCourseData ? `Follow your ${predefinedCourseData.displayName || predefinedCourseData.courseName} course roadmap and track your progress.` : 'Access your course materials and track your learning progress.'}
-                </p>
-              </div>
-
-              {loadingPredefinedCourse ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading course materials...</p>
-                </div>
-              ) : predefinedCourseData && predefinedCourseProgress ? (
-                <div className="space-y-6">
-                  {/* Course Overview */}
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">{predefinedCourseData.displayName || predefinedCourseData.courseName}</h3>
-                        <p className="text-gray-600 mt-1">{predefinedCourseData.courseDescription}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-3xl font-bold text-blue-600">{predefinedCourseProgress.overallProgress}%</div>
-                        <div className="text-sm text-gray-500">Complete</div>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 text-gray-500 mr-2" />
-                        <span>Duration: {predefinedCourseData.durationWeeks} weeks</span>
-                      </div>
-                      <div className="flex items-center">
-                        <BookOpen className="h-4 w-4 text-gray-500 mr-2" />
-                        <span>Modules: {predefinedCourseData.weeklyRoadmap.length}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <TrendingUp className="h-4 w-4 text-gray-500 mr-2" />
-                        <span>Time Spent: {Math.floor(predefinedCourseProgress.totalTimeSpent / 60)}h {predefinedCourseProgress.totalTimeSpent % 60}m</span>
-                      </div>
-                    </div>
-                    
-                    {/* Progress Bar */}
-                    <div className="mt-4">
-                      <div className="bg-white rounded-full h-3 overflow-hidden">
-                        <div 
-                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-300"
-                          style={{ width: `${predefinedCourseProgress.overallProgress}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                   {/* Course Syllabus Overview */}
-                   <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                     <button
-                       onClick={() => setShowSyllabus(!showSyllabus)}
-                       className="w-full p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 transition-colors"
-                     >
-                       <div className="flex items-center justify-between">
-                         <div className="flex items-center">
-                           <BookOpen className="h-5 w-5 text-purple-600 mr-2" />
-                           <div className="text-left">
-                             <h4 className="font-semibold text-gray-900">Course Syllabus & Tools</h4>
-                             <p className="text-gray-600 text-sm mt-1">Complete roadmap with technologies and expected outcomes</p>
-                           </div>
-                         </div>
-                         {showSyllabus ? (
-                           <ChevronDown className="h-5 w-5 text-gray-500" />
-                         ) : (
-                           <ChevronRight className="h-5 w-5 text-gray-500" />
-                         )}
-                       </div>
-                     </button>
-                     
-                     {showSyllabus && (
-                       <div className="p-4">
-                         {/* Tools and Technologies */}
-                         <div className="mb-6">
-                           <h5 className="font-medium text-gray-900 mb-3">🛠️ Tools & Technologies</h5>
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             {Object.entries(predefinedCourseData.toolsAndTechnologies || {}).map(([category, tools]) => (
-                               <div key={category} className="bg-gray-50 rounded-lg p-3">
-                                 <h6 className="text-sm font-medium text-gray-800 mb-2 capitalize">
-                                   {category.replace(/([A-Z])/g, ' $1').trim()}
-                                 </h6>
-                                 <div className="flex flex-wrap gap-1">
-                                   {Array.isArray(tools) ? tools.map((tool: string, index: number) => (
-                                     <span key={index} className="text-xs bg-white text-gray-700 px-2 py-1 rounded border">
-                                       {tool}
-                                     </span>
-                                   )) : (
-                                     <span className="text-xs text-gray-500">No tools specified</span>
-                                   )}
-                                 </div>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-
-                         {/* Expected Outcomes */}
-                         <div className="mb-6">
-                           <h5 className="font-medium text-gray-900 mb-3">🎯 Expected Outcomes</h5>
-                           <div className="space-y-2">
-                             {predefinedCourseData.expectedOutcomes.map((outcome, index) => (
-                               <div key={index} className="flex items-start">
-                                 <span className="bg-green-100 text-green-600 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
-                                   ✓
-                                 </span>
-                                 <p className="text-sm text-gray-700">{outcome}</p>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-
-                         {/* Course Details */}
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           <div className="bg-blue-50 rounded-lg p-3">
-                             <h6 className="text-sm font-medium text-blue-800 mb-1">Effort Required</h6>
-                             <p className="text-sm text-blue-700">{predefinedCourseData.effortPerWeek}</p>
-                           </div>
-                           <div className="bg-purple-50 rounded-lg p-3">
-                             <h6 className="text-sm font-medium text-purple-800 mb-1">Live Classes</h6>
-                             <p className="text-sm text-purple-700">{predefinedCourseData.liveClassesPerWeek} per week</p>
-                           </div>
-                         </div>
-                       </div>
-                     )}
-                   </div>
-
-                   {/* Course Control Panel */}
-                   <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-                     <div className="flex items-center justify-between">
-                       <h4 className="font-semibold text-gray-900 flex items-center">
-                         <Play className="h-5 w-5 text-green-600 mr-2" />
-                         Weekly Modules Progress
-                       </h4>
-                       <div className="text-sm text-gray-600">
-                         Current Week: {predefinedCourseProgress.currentWeek} / {predefinedCourseData.durationWeeks}
-                       </div>
-                     </div>
-                   </div>
-
-                   {/* Weekly Modules */}
-                   <div className="space-y-4">
-                     {predefinedCourseData.weeklyRoadmap.map((week, weekIndex) => {
-                       const moduleProgress = predefinedCourseProgress.modules.find(m => m.week === week.week);
-                       const isLocked = false; // All modules are now unlocked for students
-                       const isCompleted = moduleProgress?.completed ?? false;
-                       const isExpanded = expandedTopics[weekIndex];
-
-                       return (
-                         <div key={weekIndex} className={`bg-white rounded-lg border shadow-sm overflow-hidden ${
-                           isLocked ? 'border-gray-300 opacity-75' : 
-                           isCompleted ? 'border-green-300' : 'border-blue-300'
-                         }`}>
-                           <button
-                             onClick={() => !isLocked && toggleTopic(weekIndex)}
-                             disabled={isLocked}
-                             className={`w-full p-4 border-b transition-colors ${
-                               isLocked ? 'bg-gray-100 cursor-not-allowed' :
-                               isCompleted ? 'bg-green-50 hover:bg-green-100 border-green-200' :
-                               'bg-blue-50 hover:bg-blue-100 border-blue-200'
-                             }`}
-                           >
-                             <div className="flex items-center justify-between">
-                               <div className="flex items-center">
-                                 <div className="flex items-center mr-3">
-                                   {isLocked ? (
-                                     <Lock className="h-5 w-5 text-gray-400 mr-2" />
-                                   ) : isExpanded ? (
-                                     <ChevronDown className="h-5 w-5 text-gray-500 mr-2" />
-                                   ) : (
-                                     <ChevronRight className="h-5 w-5 text-gray-500 mr-2" />
-                                   )}
-                                   <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                     isLocked ? 'bg-gray-200 text-gray-500' :
-                                     isCompleted ? 'bg-green-100 text-green-600' :
-                                     'bg-blue-100 text-blue-600'
-                                   }`}>
-                                     {week.week}
-                                   </span>
-                                 </div>
-                                 <div className="text-left">
-                                   <h4 className={`font-semibold ${
-                                     isLocked ? 'text-gray-500' : 'text-gray-900'
-                                   }`}>
-                                     Week {week.week}: {week.topics.join(', ')}
-                                   </h4>
-                                 </div>
-                               </div>
-                               <div className="flex items-center">
-                                 {isCompleted && (
-                                   <span className="text-green-600 text-sm mr-3">Completed</span>
-                                 )}
-                                 {isExpanded ? (
-                                   <ChevronDown className="h-5 w-5 text-gray-500" />
-                                 ) : (
-                                   <ChevronRight className="h-5 w-5 text-gray-500" />
-                                 )}
-                               </div>
-                             </div>
-                           </button>
-
-                           {isExpanded && !isLocked && (
-                             <div className="p-4 space-y-4">
-                               {/* Topics */}
-                               <div className="mb-4">
-                                 <h6 className="text-sm font-medium text-gray-700 mb-2">📚 Topics:</h6>
-                                 <div className="space-y-1">
-                                   {week.topics.map((topic, topicIndex) => (
-                                     <div key={topicIndex} className="bg-gray-50 rounded p-2">
-                                       <span className="text-sm text-gray-700">• {topic}</span>
-                                     </div>
-                                   ))}
-                                 </div>
-                               </div>
-
-                               {/* Projects */}
-                               <div className="mb-4">
-                                 <h6 className="text-sm font-medium text-gray-700 mb-2">🚀 Projects:</h6>
-                                 <div className="space-y-2">
-                                   {week.projects.map((project, projectIndex) => (
-                                     <div key={projectIndex} className="bg-blue-50 rounded p-3">
-                                       <span className="text-sm font-medium text-blue-800">
-                                         {project}
-                                       </span>
-                                     </div>
-                                   ))}
-                                 </div>
-                               </div>
-
-                               {/* Live Class Topics */}
-                               <div className="mb-4">
-                                 <h6 className="text-sm font-medium text-gray-700 mb-2">🎥 Live Class Topics:</h6>
-                                 <div className="space-y-1">
-                                   {week.liveClassTopics.map((topic, topicIndex) => (
-                                     <div key={topicIndex} className="bg-purple-50 rounded p-2">
-                                       <span className="text-sm text-purple-700">• {topic}</span>
-                                     </div>
-                                   ))}
-                                 </div>
-                               </div>
-
-                               {/* Resources */}
-                               {week.resources.length > 0 && (
-                                 <div className="mb-4">
-                                   <h6 className="text-sm font-medium text-gray-700 mb-2">📖 Resources:</h6>
-                                   <div className="space-y-2">
-                                     {week.resources.map((resource, resourceIndex) => (
-                                       <div key={resourceIndex} className="bg-yellow-50 rounded p-3">
-                                         <a 
-                                           href={resource.link} 
-                                           target="_blank" 
-                                           rel="noopener noreferrer"
-                                           className="text-sm font-medium text-yellow-800 hover:text-yellow-900 flex items-center"
-                                         >
-                                           <ExternalLink className="h-3 w-3 mr-1" />
-                                           {resource.title}
-                                         </a>
-                                       </div>
-                                     ))}
-                                   </div>
-                                 </div>
-                               )}
-
-                               {/* Assignments */}
-                               {week.assignments.length > 0 && (
-                                 <div className="mb-4">
-                                   <h6 className="text-sm font-medium text-gray-700 mb-2">📝 Assignments:</h6>
-                                   <div className="space-y-2">
-                                     {week.assignments.map((assignment, assignmentIndex) => (
-                                       <div key={assignmentIndex} className="bg-green-50 rounded p-3">
-                                         <div className="flex justify-between items-start">
-                                           <div>
-                                             <h6 className="text-sm font-medium text-green-800">{assignment.title}</h6>
-                                             <p className="text-xs text-green-700 mt-1">{assignment.description}</p>
-                                             {assignment.dueDate && (
-                                               <p className="text-xs text-green-600 mt-1">
-                                                 Due: {new Date(assignment.dueDate).toLocaleDateString()}
-                                               </p>
-                                             )}
-                                           </div>
-                                           <button
-                                             onClick={() => handleAssignmentSubmission(week.week, assignment)}
-                                             className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors"
-                                           >
-                                             Submit
-                                           </button>
-                                         </div>
-                                       </div>
-                                     ))}
-                                   </div>
-                                 </div>
-                               )}
-                             </div>
-                           )}
-                         </div>
-                       );
-                     })}
-                   </div>
-
-                   {/* Tools and Technologies */}
-                   <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                     <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                       <Wrench className="h-5 w-5 text-blue-600 mr-2" />
-                       Tools & Technologies
-                     </h4>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       {Object.entries(predefinedCourseData.toolsAndTechnologies || {}).map(([category, tools]) => (
-                         <div key={category} className="bg-gray-50 rounded-lg p-3">
-                           <h6 className="text-sm font-medium text-gray-800 mb-2 capitalize">
-                             {category.replace(/([A-Z])/g, ' $1').trim()}
-                           </h6>
-                           <div className="flex flex-wrap gap-1">
-                             {Array.isArray(tools) ? tools.map((tool: string, index: number) => (
-                               <span key={index} className="text-xs bg-white text-gray-700 px-2 py-1 rounded border">
-                                 {tool}
-                               </span>
-                             )) : (
-                               <span className="text-xs text-gray-500">No tools specified</span>
-                             )}
-                           </div>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-
-                   {/* Expected Outcomes */}
-                   <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                     <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                       <Target className="h-5 w-5 text-green-600 mr-2" />
-                       Expected Outcomes
-                     </h4>
-                     <div className="space-y-2">
-                       {predefinedCourseData.expectedOutcomes.map((outcome, index) => (
-                         <div key={index} className="flex items-start">
-                           <span className="bg-green-100 text-green-600 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
-                             ✓
-                           </span>
-                           <p className="text-sm text-gray-700">{outcome}</p>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Course Assigned</h3>
-                  <p className="text-gray-600 mb-4">
-                    You don't have a course assigned yet. Contact your administrator to get enrolled in a course.
-                  </p>
-                  <a
-                    href={`https://wa.me/918789698369?text=Hello, I'm ${user?.firstName || 'a student'} and I would like to know about course enrollment.`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 inline-flex items-center"
-                  >
-                    Contact Support
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </a>
-                </div>
-              )}
-
-              {userData?.course && (
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8 mt-8">
-                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="p-4 border-b border-gray-200 bg-purple-50">
-                      <h3 className="font-medium text-gray-900 flex items-center">
-                        <Calendar className="h-5 w-5 text-purple-600 mr-2" />
-                        Upcoming Sessions
-                      </h3>
-                    </div>
-                    <div className="p-4">
-                      {upcomingSessions.length > 0 ? (
-                        <ul className="space-y-3">
-                          {upcomingSessions.map((session) => (
-                            <li key={session._id} className="border-b border-gray-100 pb-2">
-                              <div className="flex justify-between items-start">
+                    <div className="mt-2">
+                      {hasAttemptedTest ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center text-green-600">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            <span className="text-sm font-medium">Completed</span>
+                          </div>
+                          {testResult && (
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-gray-900 text-sm font-medium">{session.title}</p>
-                                  {session.description && (
-                                    <p className="text-gray-600 text-xs mt-1">{session.description}</p>
-                                  )}
-                                  <p className="text-gray-500 text-xs mt-1">
-                                    {new Date(session.date).toLocaleDateString()} • {session.time}
-                                  </p>
+                                  <p className="text-xs text-gray-500">Your Score</p>
+                                  <p className="text-lg font-bold text-blue-600">{testResult.score}%</p>
                                 </div>
-                                <a
-                                  href={session.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 py-1 px-2 rounded"
-                                >
-                                  Join
-                                </a>
+                                <div className="bg-blue-100 p-2 rounded-full">
+                                  <Award className="h-5 w-5 text-blue-600" />
+                                </div>
                               </div>
-                            </li>
-                          ))}
-                        </ul>
+                              {testResult.score >= 60 && (
+                                <p className="text-xs text-green-600 mt-1">
+                                  Eligible for {getScholarshipDiscount(testResult.score)}% scholarship
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       ) : (
-                        <p className="text-gray-500 text-sm text-center py-4">
-                          No upcoming sessions scheduled at the moment.
-                        </p>
+                      <div>
+                          <button
+                            onClick={handleStartTest}
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center mb-3"
+                          >
+                            Take Scholarship Test
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </button>
+                          
+                      </div>
                       )}
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* Success Stories */}
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-gray-200 bg-green-50">
-                  <h3 className="font-medium text-gray-900 flex items-center">
-                    <Users className="h-5 w-5 text-green-600 mr-2" />
-                    Student Success Stories
-                  </h3>
-                </div>
-                <div className="p-4">
-                  <div className="space-y-4">
-                    <div className="border-b border-gray-100 pb-3">
-                      <div className="flex items-start">
-                        <div className="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
-                          P
+                  {/* Free Counseling Card - Only show if user doesn't have premium plan */}
+                  {userData?.plan !== 'premium' && (
+                    <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
+                      <div className="flex items-center mb-3">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <Calendar className="text-purple-600 w-5 h-5" />
                         </div>
-                        <div className="ml-3">
-                          <p className="text-gray-900 text-sm font-medium">Princy</p>
-                          <p className="text-gray-500 text-xs">Marketing and Branding, Cosmos Digital</p>
-                          <p className="text-gray-600 text-sm mt-1">
-                            "Coming from a tier-3 college, I had minimal exposure to industry trends. UntraddCareer helped me build practical marketing skills that employers actually want."
-                          </p>
+                        <h3 className="ml-3 font-medium text-gray-900">Free Counseling</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Book a free career counseling session with our industry experts to get your career on track.
+                      </p>
+                      <button
+                        onClick={() => openModal('counseling')}
+                        className="w-full border border-purple-600 text-purple-600 py-2 px-4 rounded-lg hover:bg-purple-50 flex items-center justify-center"
+                      >
+                        Scheduled for 3rd June
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
+                    <div className="flex items-center mb-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Users className="text-green-600 w-5 h-5" />
+                      </div>
+                      <h3 className="ml-3 font-medium text-gray-900">Alumni Community</h3>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Connect with peers, alumni, and mentors in your field of study.
+                    </p>
+                    <button
+                      onClick={() => openModal('community')}
+                      className="w-full border border-green-600 text-green-600 py-2 px-4 rounded-lg hover:bg-green-50 flex items-center justify-center"
+                    >
+                      Join Community
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </button>
+                  </div> */}
+                </div>
+              </div>
+            )}
+
+          {activeTab === 'course' && (
+              <div className="p-6">
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Course Materials</h2>
+                  <p className="text-gray-600 mb-4">
+                    {predefinedCourseData ? `Follow your ${predefinedCourseData.displayName || predefinedCourseData.courseName} course roadmap and track your progress.` : 'Access your course materials and track your learning progress.'}
+                  </p>
+                </div>
+
+                {loadingPredefinedCourse ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading course materials...</p>
+                  </div>
+                ) : predefinedCourseData && predefinedCourseProgress ? (
+                  <div className="space-y-6">
+                    {/* Course Overview */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">{predefinedCourseData.displayName || predefinedCourseData.courseName}</h3>
+                          <p className="text-gray-600 mt-1">{predefinedCourseData.courseDescription}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-3xl font-bold text-blue-600">{predefinedCourseProgress.overallProgress}%</div>
+                          <div className="text-sm text-gray-500">Complete</div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 text-gray-500 mr-2" />
+                          <span>Duration: {predefinedCourseData.durationWeeks} weeks</span>
+                        </div>
+                        <div className="flex items-center">
+                          <BookOpen className="h-4 w-4 text-gray-500 mr-2" />
+                          <span>Modules: {predefinedCourseData.weeklyRoadmap.length}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <TrendingUp className="h-4 w-4 text-gray-500 mr-2" />
+                          <span>Time Spent: {Math.floor(predefinedCourseProgress.totalTimeSpent / 60)}h {predefinedCourseProgress.totalTimeSpent % 60}m</span>
+                        </div>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      <div className="mt-4">
+                        <div className="bg-white rounded-full h-3 overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-300"
+                            style={{ width: `${predefinedCourseProgress.overallProgress}%` }}
+                          ></div>
                         </div>
                       </div>
                     </div>
-                    <div>
-                      <div className="flex items-start">
-                        <div className="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
-                          R
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-gray-900 text-sm font-medium">Roushan</p>
-                          <p className="text-gray-500 text-xs">Full Stack Intern, IeltsAppeal Education</p>
-                          <p className="text-gray-600 text-sm mt-1">
-                            "Despite having zero coding experience, the structured training helped me transition from BBA to tech. My internship converted to a full-time role within 2 months!"
+
+                     {/* Course Syllabus Overview */}
+                     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                       <button
+                         onClick={() => setShowSyllabus(!showSyllabus)}
+                         className="w-full p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 transition-colors"
+                       >
+                         <div className="flex items-center justify-between">
+                           <div className="flex items-center">
+                             <BookOpen className="h-5 w-5 text-purple-600 mr-2" />
+                             <div className="text-left">
+                               <h4 className="font-semibold text-gray-900">Course Syllabus & Tools</h4>
+                               <p className="text-gray-600 text-sm mt-1">Complete roadmap with technologies and expected outcomes</p>
+                             </div>
+                           </div>
+                           {showSyllabus ? (
+                             <ChevronDown className="h-5 w-5 text-gray-500" />
+                           ) : (
+                             <ChevronRight className="h-5 w-5 text-gray-500" />
+                           )}
+                         </div>
+                       </button>
+                       
+                       {showSyllabus && (
+                         <div className="p-4">
+                           {/* Tools and Technologies */}
+                           <div className="mb-6">
+                             <h5 className="font-medium text-gray-900 mb-3">🛠️ Tools & Technologies</h5>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               {Object.entries(predefinedCourseData.toolsAndTechnologies || {}).map(([category, tools]) => (
+                                 <div key={category} className="bg-gray-50 rounded-lg p-3">
+                                   <h6 className="text-sm font-medium text-gray-800 mb-2 capitalize">
+                                     {category.replace(/([A-Z])/g, ' $1').trim()}
+                                   </h6>
+                                   <div className="flex flex-wrap gap-1">
+                                     {Array.isArray(tools) ? tools.map((tool: string, index: number) => (
+                                       <span key={index} className="text-xs bg-white text-gray-700 px-2 py-1 rounded border">
+                                         {tool}
+                                       </span>
+                                     )) : (
+                                       <span className="text-xs text-gray-500">No tools specified</span>
+                                     )}
+                                   </div>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+
+                           {/* Expected Outcomes */}
+                           <div className="mb-6">
+                             <h5 className="font-medium text-gray-900 mb-3">🎯 Expected Outcomes</h5>
+                             <div className="space-y-2">
+                               {predefinedCourseData.expectedOutcomes.map((outcome, index) => (
+                                 <div key={index} className="flex items-start">
+                                   <span className="bg-green-100 text-green-600 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
+                                     ✓
+                                   </span>
+                                   <p className="text-sm text-gray-700">{outcome}</p>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+
+                           {/* Course Details */}
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div className="bg-blue-50 rounded-lg p-3">
+                               <h6 className="text-sm font-medium text-blue-800 mb-1">Effort Required</h6>
+                               <p className="text-sm text-blue-700">{predefinedCourseData.effortPerWeek}</p>
+                             </div>
+                             <div className="bg-purple-50 rounded-lg p-3">
+                               <h6 className="text-sm font-medium text-purple-800 mb-1">Live Classes</h6>
+                               <p className="text-sm text-purple-700">{predefinedCourseData.liveClassesPerWeek} per week</p>
+                             </div>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+
+                     {/* Course Control Panel */}
+                     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                       <div className="flex items-center justify-between">
+                         <h4 className="font-semibold text-gray-900 flex items-center">
+                           <Play className="h-5 w-5 text-green-600 mr-2" />
+                           Weekly Modules Progress
+                         </h4>
+                         <div className="text-sm text-gray-600">
+                           Current Week: {predefinedCourseProgress.currentWeek} / {predefinedCourseData.durationWeeks}
+                         </div>
+                       </div>
+                     </div>
+
+                     {/* Weekly Modules */}
+                     <div className="space-y-4">
+                       {predefinedCourseData.weeklyRoadmap.map((week, weekIndex) => {
+                         const moduleProgress = predefinedCourseProgress.modules.find(m => m.week === week.week);
+                         const isLocked = false; // All modules are now unlocked for students
+                         const isCompleted = moduleProgress?.isCompleted ?? false;
+                       const isExpanded = expandedTopics[weekIndex];
+
+                         return (
+                           <div key={weekIndex} className={`bg-white rounded-lg border shadow-sm overflow-hidden ${
+                             isLocked ? 'border-gray-300 opacity-75' : 
+                             isCompleted ? 'border-green-300' : 'border-blue-300'
+                           }`}>
+                             <button
+                               onClick={() => !isLocked && toggleTopic(weekIndex)}
+                               disabled={isLocked}
+                               className={`w-full p-4 border-b transition-colors ${
+                                 isLocked ? 'bg-gray-100 cursor-not-allowed' :
+                                 isCompleted ? 'bg-green-50 hover:bg-green-100 border-green-200' :
+                                 'bg-blue-50 hover:bg-blue-100 border-blue-200'
+                               }`}
+                             >
+                               <div className="flex items-center justify-between">
+                                 <div className="flex items-center">
+                                   <div className="flex items-center mr-3">
+                                     {isLocked ? (
+                                       <Lock className="h-5 w-5 text-gray-400 mr-2" />
+                                     ) : isExpanded ? (
+                                       <ChevronDown className="h-5 w-5 text-gray-500 mr-2" />
+                                     ) : (
+                                       <ChevronRight className="h-5 w-5 text-gray-500 mr-2" />
+                                     )}
+                                     <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                       isLocked ? 'bg-gray-200 text-gray-500' :
+                                       isCompleted ? 'bg-green-100 text-green-600' :
+                                       'bg-blue-100 text-blue-600'
+                                     }`}>
+                                       {week.week}
+                                     </span>
+                                   </div>
+                                   <div className="text-left">
+                                     <h4 className={`font-semibold ${
+                                       isLocked ? 'text-gray-500' : 'text-gray-900'
+                                     }`}>
+                                       Week {week.week}: {week.title}
+                                     </h4>
+                                   </div>
+                                 </div>
+                                 <div className="flex items-center">
+                                   {isCompleted && (
+                                     <span className="text-green-600 text-sm mr-3">Completed</span>
+                                   )}
+                                   {isExpanded ? (
+                                     <ChevronDown className="h-5 w-5 text-gray-500" />
+                                   ) : (
+                                     <ChevronRight className="h-5 w-5 text-gray-500" />
+                                   )}
+                                 </div>
+                               </div>
+                             </button>
+
+                             {isExpanded && !isLocked && (
+                               <div className="p-4 space-y-4">
+                                 {/* Topics */}
+                                 <div className="mb-4">
+                                   <h6 className="text-sm font-medium text-gray-700 mb-2">📚 Topics:</h6>
+                                   <div className="space-y-1">
+                                     {week.topics.map((topic, topicIndex) => (
+                                       <div key={topicIndex} className="bg-gray-50 rounded p-2">
+                                         <span className="text-sm text-gray-700">• {topic}</span>
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+
+                                 {/* Projects */}
+                                 <div className="mb-4">
+                                   <h6 className="text-sm font-medium text-gray-700 mb-2">🚀 Projects:</h6>
+                                   <div className="space-y-2">
+                                     {week.projects.map((project, projectIndex) => (
+                                       <div key={projectIndex} className="bg-blue-50 rounded p-3">
+                                         <span className="text-sm font-medium text-blue-800">
+                                           {typeof project === 'string' ? project : project.title}
+                                         </span>
+                                         {typeof project === 'object' && project.description && (
+                                           <p className="text-xs text-blue-600 mt-1">{project.description}</p>
+                                         )}
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+
+                                 {/* Live Class Topics */}
+                                 <div className="mb-4">
+                                   <h6 className="text-sm font-medium text-gray-700 mb-2">🎥 Live Class Topics:</h6>
+                                   <div className="space-y-1">
+                                     {week.liveClassTopics.map((topic, topicIndex) => (
+                                       <div key={topicIndex} className="bg-purple-50 rounded p-2">
+                                         <span className="text-sm text-purple-700">• {topic}</span>
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+
+                                 {/* Resources */}
+                                 {week.resources && week.resources.length > 0 && (
+                                   <div className="mb-4">
+                                     <h6 className="text-sm font-medium text-gray-700 mb-2">📖 Resources:</h6>
+                                     <div className="space-y-2">
+                                       {week.resources.map((resource, resourceIndex) => (
+                                         <div key={resourceIndex} className="bg-yellow-50 rounded p-3">
+                                           <a 
+                                             href={resource.url} 
+                                             target="_blank" 
+                                             rel="noopener noreferrer"
+                                             className="text-sm font-medium text-yellow-800 hover:text-yellow-900 flex items-center"
+                                           >
+                                             <ExternalLink className="h-3 w-3 mr-1" />
+                                             {resource.title}
+                                           </a>
+                                           <span className="text-xs text-yellow-600 capitalize">
+                                             {resource.type}
+                                           </span>
+                                         </div>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
+
+                                 {/* Assignments */}
+                                 {week.assignments && week.assignments.length > 0 && (
+                                   <div className="mb-4">
+                                     <h6 className="text-sm font-medium text-gray-700 mb-2">📝 Assignments:</h6>
+                                     <div className="space-y-2">
+                                       {week.assignments.map((assignment, assignmentIndex) => (
+                                         <div key={assignmentIndex} className="bg-green-50 rounded p-3">
+                                           <div className="flex justify-between items-start">
+                                             <div>
+                                               <h6 className="text-sm font-medium text-green-800">{assignment.title}</h6>
+                                               <p className="text-xs text-green-700 mt-1">{assignment.description}</p>
+                                               {assignment.dueDate && (
+                                                 <p className="text-xs text-green-600 mt-1">
+                                                   Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                                                 </p>
+                                               )}
+                                             </div>
+                                             <button
+                                               onClick={() => handleAssignmentSubmission(week.week, assignment)}
+                                               className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors"
+                                             >
+                                               Submit
+                                             </button>
+                                           </div>
+                                         </div>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
+                               </div>
+                             )}
+                           </div>
+                         );
+                       })}
+                     </div>
+
+                     {/* Tools and Technologies */}
+                     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                       <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                         <Wrench className="h-5 w-5 text-blue-600 mr-2" />
+                         Tools & Technologies
+                       </h4>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         {Object.entries(predefinedCourseData.toolsAndTechnologies || {}).map(([category, tools]) => (
+                           <div key={category} className="bg-gray-50 rounded-lg p-3">
+                             <h6 className="text-sm font-medium text-gray-800 mb-2 capitalize">
+                               {category.replace(/([A-Z])/g, ' $1').trim()}
+                             </h6>
+                             <div className="flex flex-wrap gap-1">
+                               {Array.isArray(tools) ? tools.map((tool: string, index: number) => (
+                                 <span key={index} className="text-xs bg-white text-gray-700 px-2 py-1 rounded border">
+                                   {tool}
+                                 </span>
+                               )) : (
+                                 <span className="text-xs text-gray-500">No tools specified</span>
+                               )}
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+
+                     {/* Expected Outcomes */}
+                     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                       <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                         <Target className="h-5 w-5 text-green-600 mr-2" />
+                         Expected Outcomes
+                       </h4>
+                       <div className="space-y-2">
+                         {predefinedCourseData.expectedOutcomes.map((outcome, index) => (
+                           <div key={index} className="flex items-start">
+                             <span className="bg-green-100 text-green-600 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
+                               ✓
+                             </span>
+                             <p className="text-sm text-gray-700">{outcome}</p>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Course Assigned</h3>
+                    <p className="text-gray-600 mb-4">
+                      You don't have a course assigned yet. Contact your administrator to get enrolled in a course.
+                    </p>
+                    <a
+                      href={`https://wa.me/918789698369?text=Hello, I'm ${user?.firstName || 'a student'} and I would like to know about course enrollment.`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 inline-flex items-center"
+                    >
+                      Contact Support
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </a>
+                  </div>
+                )}
+
+                {userData?.course && (
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8 mt-8">
+                    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                      <div className="p-4 border-b border-gray-200 bg-purple-50">
+                        <h3 className="font-medium text-gray-900 flex items-center">
+                          <Calendar className="h-5 w-5 text-purple-600 mr-2" />
+                          Upcoming Sessions
+                        </h3>
+                      </div>
+                      <div className="p-4">
+                        {upcomingSessions.length > 0 ? (
+                          <ul className="space-y-3">
+                            {upcomingSessions.map((session) => (
+                              <li key={session._id} className="border-b border-gray-100 pb-2">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <p className="text-gray-900 text-sm font-medium">{session.title}</p>
+                                    {session.description && (
+                                      <p className="text-gray-600 text-xs mt-1">{session.description}</p>
+                                    )}
+                                    <p className="text-gray-500 text-xs mt-1">
+                                      {new Date(session.date).toLocaleDateString()} • {session.time}
+                                    </p>
+                                  </div>
+                                  <a
+                                    href={session.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 py-1 px-2 rounded"
+                                  >
+                                    Join
+                                  </a>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-gray-500 text-sm text-center py-4">
+                            No upcoming sessions scheduled at the moment.
                           </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Success Stories */}
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                  <div className="p-4 border-b border-gray-200 bg-green-50">
+                    <h3 className="font-medium text-gray-900 flex items-center">
+                      <Users className="h-5 w-5 text-green-600 mr-2" />
+                      Student Success Stories
+                    </h3>
+                  </div>
+                  <div className="p-4">
+                    <div className="space-y-4">
+                      <div className="border-b border-gray-100 pb-3">
+                        <div className="flex items-start">
+                          <div className="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                            P
+                          </div>
+                          <div className="ml-3">
+                            <p className="text-gray-900 text-sm font-medium">Princy</p>
+                            <p className="text-gray-500 text-xs">Marketing and Branding, Cosmos Digital</p>
+                            <p className="text-gray-600 text-sm mt-1">
+                              "Coming from a tier-3 college, I had minimal exposure to industry trends. UntraddCareer helped me build practical marketing skills that employers actually want."
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-start">
+                          <div className="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                            R
+                          </div>
+                          <div className="ml-3">
+                            <p className="text-gray-900 text-sm font-medium">Roushan</p>
+                            <p className="text-gray-500 text-xs">Full Stack Intern, IeltsAppeal Education</p>
+                            <p className="text-gray-600 text-sm mt-1">
+                              "Despite having zero coding experience, the structured training helped me transition from BBA to tech. My internship converted to a full-time role within 2 months!"
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
           )}
 
           {activeTab === 'test' && (
@@ -1189,239 +1628,239 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-      </div>
+          </div>
 
-      {/* Stats Section (visible at all times) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-5 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Student Trust</p>
-              <h3 className="text-2xl font-bold text-gray-900">10/10</h3>
-            </div>
-            <Users className="text-blue-600 w-8 h-8 opacity-80" />
-          </div>
-        </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Success Rate</p>
-              <h3 className="text-2xl font-bold text-gray-900">96%+</h3>
-            </div>
-            <BarChart className="text-green-600 w-8 h-8 opacity-80" />
-          </div>
-        </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Scholarships Awarded</p>
-              <h3 className="text-2xl font-bold text-gray-900">100+</h3>
-            </div>
-            <Award className="text-purple-600 w-8 h-8 opacity-80" />
-          </div>
-        </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Company Tieups</p>
-              <h3 className="text-2xl font-bold text-gray-900">50+</h3>
-            </div>
-            <GraduationCap className="text-orange-600 w-8 h-8 opacity-80" />
-          </div>
-        </div>
-      </div>
-
-      {/* Active Hirings Section - New Addition */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-        <div className="p-5 border-b border-gray-200 flex justify-between items-center">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Active Hirings</h2>
-            <p className="text-sm text-gray-600">Latest internship opportunities from our partner companies</p>
-          </div>
-          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium flex items-center">
-            <Clock className="h-3 w-3 mr-1" />
-            Updated daily
-          </span>
-        </div>
-
-        <div className="p-5">
-          <div
-            ref={scrollRef}
-            className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide"
-            style={{ scrollBehavior: 'smooth' }}
-          >
-            {INTERNSHIP_OPPORTUNITIES.map(internship => (
-              <div
-                key={internship.id}
-                className="flex-shrink-0 w-72 border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-              >
-                <div className="p-4 border-b border-gray-100 flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-full ${internship.logoColor} flex items-center justify-center font-bold`}>
-                    {internship.logo}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">{internship.company}</h3>
-                    <p className="text-xs text-gray-500 flex items-center">
-                      <MapPin className="h-3 w-3 mr-1" /> {internship.location}
-                    </p>
-                  </div>
+          {/* Stats Section (visible at all times) */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Student Trust</p>
+                  <h3 className="text-2xl font-bold text-gray-900">10/10</h3>
                 </div>
-                <div className="p-4">
-                  <h4 className="font-medium text-gray-800 mb-2">{internship.position}</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                      <span>Duration: {internship.duration}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Users className="h-4 w-4 mr-2 text-gray-400" />
-                      <span>Positions: {internship.positions}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
-                      <span>Stipend: {internship.stipend}</span>
-                    </div>
-                  </div>
-                  {/* <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-sm flex items-center justify-center">
-                      Apply Now
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </button> */}
-                </div>
+                <Users className="text-blue-600 w-8 h-8 opacity-80" />
               </div>
-            ))}
+            </div>
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Success Rate</p>
+                  <h3 className="text-2xl font-bold text-gray-900">96%+</h3>
+                </div>
+                <BarChart className="text-green-600 w-8 h-8 opacity-80" />
+              </div>
+            </div>
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Scholarships Awarded</p>
+                  <h3 className="text-2xl font-bold text-gray-900">100+</h3>
+                </div>
+                <Award className="text-purple-600 w-8 h-8 opacity-80" />
+              </div>
+            </div>
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Company Tieups</p>
+                  <h3 className="text-2xl font-bold text-gray-900">50+</h3>
+                </div>
+                <GraduationCap className="text-orange-600 w-8 h-8 opacity-80" />
+              </div>
+            </div>
           </div>
-          <div className="mt-4 text-center">
-            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center mx-auto">
-              And hundreds more opportunities
-            </button>
+
+          {/* Active Hirings Section - New Addition */}
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+            <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Active Hirings</h2>
+                <p className="text-sm text-gray-600">Latest internship opportunities from our partner companies</p>
+              </div>
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium flex items-center">
+                <Clock className="h-3 w-3 mr-1" />
+                Updated daily
+              </span>
+            </div>
+
+            <div className="p-5">
+              <div
+                ref={scrollRef}
+                className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide"
+                style={{ scrollBehavior: 'smooth' }}
+              >
+                {INTERNSHIP_OPPORTUNITIES.map(internship => (
+                  <div
+                    key={internship.id}
+                    className="flex-shrink-0 w-72 border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <div className="p-4 border-b border-gray-100 flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-full ${internship.logoColor} flex items-center justify-center font-bold`}>
+                        {internship.logo}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">{internship.company}</h3>
+                        <p className="text-xs text-gray-500 flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" /> {internship.location}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-medium text-gray-800 mb-2">{internship.position}</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>Duration: {internship.duration}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Users className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>Positions: {internship.positions}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>Stipend: {internship.stipend}</span>
+                        </div>
+                      </div>
+                      {/* <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-sm flex items-center justify-center">
+                          Apply Now
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </button> */}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-center">
+                <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center mx-auto">
+                  And hundreds more opportunities
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
   );
 
   // Membership Required Modal
-  {showModal && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl max-w-md w-full p-6 relative">
-        <button
-          onClick={closeModal}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
-        <div className="text-center mb-4">
-          <div className="bg-yellow-100 p-3 rounded-full inline-block mb-4">
-            <Users className="h-8 w-8 text-yellow-600" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">Membership Required</h3>
-        </div>
-
-        {modalType === 'community' && (
-          <div className="text-center mb-6">
-            <p className="text-gray-600 mb-4">
-              To access the alumni community, you need to be a program member.
-              Currently, it seems you are not enrolled in any program.
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              Join our program to connect with successful alumni and build your professional network.
-            </p>
-          </div>
-        )}
-
-        {modalType === 'counseling' && (
-          <div className="text-center mb-6">
-            <p className="text-gray-600 mb-4">
-              To take a free counseling session worth $100, you need to be a program member.
-              Currently, it seems you are not enrolled in any program.
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              Take a program to become a member or talk to our program coordinator for more information.
-            </p>
-          </div>
-        )}
-
-        <div className="flex flex-col space-y-3">
-          <button
-            onClick={() => navigate('/')}
-            className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 text-sm font-medium"
-          >
-            Explore Programs
-          </button>
-          <a
-            href={`https://wa.me/918789698369?text=Hello, I'm ${user?.firstName || 'a student'} and I would like to know more about becoming a program member at UntraddCareer.`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 text-sm font-medium flex items-center justify-center"
-          >
-            Chat with Program Coordinator
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </a>
-        </div>
-      </div>
-    </div>
-  )}
-
-  // Assignment Modal
-  {showAssignmentModal && selectedAssignment && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-lg w-full">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Submit Assignment: {(selectedAssignment as { assignment: { title: string } }).assignment.title}
-            </h3>
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 relative">
             <button
-              onClick={() => {
-                setShowAssignmentModal(false);
-                setAssignmentLink('');
-              }}
-              className="text-gray-400 hover:text-gray-600"
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
             >
               <X className="h-5 w-5" />
             </button>
+
+            <div className="text-center mb-4">
+              <div className="bg-yellow-100 p-3 rounded-full inline-block mb-4">
+                <Users className="h-8 w-8 text-yellow-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">Membership Required</h3>
+            </div>
+
+            {modalType === 'community' && (
+              <div className="text-center mb-6">
+                <p className="text-gray-600 mb-4">
+                  To access the alumni community, you need to be a program member.
+                  Currently, it seems you are not enrolled in any program.
+                </p>
+                <p className="text-sm text-gray-500 mb-6">
+                  Join our program to connect with successful alumni and build your professional network.
+                </p>
+              </div>
+            )}
+
+            {modalType === 'counseling' && (
+              <div className="text-center mb-6">
+                <p className="text-gray-600 mb-4">
+                  To take a free counseling session worth $100, you need to be a program member.
+                  Currently, it seems you are not enrolled in any program.
+                </p>
+                <p className="text-sm text-gray-500 mb-6">
+                  Take a program to become a member or talk to our program coordinator for more information.
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col space-y-3">
+              <button
+                onClick={() => navigate('/')}
+                className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 text-sm font-medium"
+              >
+                Explore Programs
+              </button>
+              <a
+                href={`https://wa.me/918789698369?text=Hello, I'm ${user?.firstName || 'a student'} and I would like to know more about becoming a program member at UntraddCareer.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 text-sm font-medium flex items-center justify-center"
+              >
+                Chat with Program Coordinator
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </div>
           </div>
         </div>
-        
-        <div className="p-6">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Assignment Link
-            </label>
-            <input
-              type="url"
-              value={assignmentLink}
-              onChange={(e) => setAssignmentLink(e.target.value)}
-              placeholder="Paste your assignment submission link here"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          
-          <div className="flex justify-end space-x-3">
-            <button
+      )}
+
+  // Assignment Modal
+      {showAssignmentModal && selectedAssignment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+              Submit Assignment: {(selectedAssignment as { assignment: { title: string } }).assignment.title}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAssignmentModal(false);
+                    setAssignmentLink('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Assignment Link
+                </label>
+                <input
+                  type="url"
+                  value={assignmentLink}
+                  onChange={(e) => setAssignmentLink(e.target.value)}
+                  placeholder="Paste your assignment submission link here"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowAssignmentModal(false);
+                    setAssignmentLink('');
+                  }}
+                  className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                >
+                  Cancel
+                </button>
+                <button
               onClick={() => {
-                setShowAssignmentModal(false);
-                setAssignmentLink('');
-              }}
-              className="px-4 py-2 text-gray-700 hover:text-gray-900"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                const assignment = selectedAssignment as { week: number; assignment: Assignment };
+                const assignment = selectedAssignment as { week: number; assignment: PredefinedCourseAssignment };
                 handleSubmitAssignment(assignment.week, assignment.assignment);
               }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Submit
-            </button>
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  )}
+      )}
 }
 
-export default Dashboard;
+export default Dashboard; 
