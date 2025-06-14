@@ -2,6 +2,8 @@ import express from 'express';
 import { verifyAuth } from '../middleware/auth';
 import QuizResult from '../models/QuizResult';
 import User from '../models/User';
+import CounsellingSession from '../models/CounsellingSession';
+import StudentFeedback from '../models/StudentFeedback';
 
 const router = express.Router();
 
@@ -43,13 +45,31 @@ router.get('/test-results', verifyAuth, verifyAdmin, async (req, res) => {
 router.get('/students', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const students = await User.find({})
-      .select('clerkId email firstName lastName userType createdAt')
+      .select('clerkId email firstName lastName userType plan createdAt')
       .sort({ createdAt: -1 })
       .lean();
 
     res.json(students);
   } catch (error) {
     console.error('Error fetching students:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get all premium students (admin only)
+router.get('/premium-students', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const premiumStudents = await User.find({ 
+      userType: 'student',
+      plan: 'premium'
+    })
+      .select('clerkId email firstName lastName plan createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(premiumStudents);
+  } catch (error) {
+    console.error('Error fetching premium students:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -79,6 +99,114 @@ router.get('/stats', verifyAuth, verifyAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching admin stats:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get all counselling sessions (admin only)
+router.get('/counselling-sessions', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const sessions = await CounsellingSession.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(sessions);
+  } catch (error) {
+    console.error('Error fetching counselling sessions:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create a new counselling session (admin only)
+router.post('/counselling-sessions', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { studentId, scheduledDate, scheduledTime, notes } = req.body;
+
+    const session = new CounsellingSession({
+      studentId,
+      scheduledDate,
+      scheduledTime,
+      notes
+    });
+
+    await session.save();
+    res.status(201).json(session);
+  } catch (error) {
+    console.error('Error creating counselling session:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update a counselling session (admin only)
+router.put('/counselling-sessions/:sessionId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { status, feedback } = req.body;
+
+    const session = await CounsellingSession.findByIdAndUpdate(
+      sessionId,
+      { status, feedback },
+      { new: true }
+    );
+
+    if (!session) {
+      return res.status(404).json({ message: 'Session not found' });
+    }
+
+    res.json(session);
+  } catch (error) {
+    console.error('Error updating counselling session:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get all student feedback (admin only)
+router.get('/student-feedback', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const feedback = await StudentFeedback.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(feedback);
+  } catch (error) {
+    console.error('Error fetching student feedback:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get student feedback by ID (admin only)
+router.get('/student-feedback/:studentId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const feedback = await StudentFeedback.findOne({ studentId: req.params.studentId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!feedback) {
+      return res.status(404).json({ message: 'Feedback not found' });
+    }
+
+    res.json(feedback);
+  } catch (error) {
+    console.error('Error fetching student feedback:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create or update student feedback (admin only)
+router.post('/student-feedback', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const feedbackData = req.body;
+    
+    // Update if exists, create if doesn't
+    const feedback = await StudentFeedback.findOneAndUpdate(
+      { studentId: feedbackData.studentId },
+      feedbackData,
+      { new: true, upsert: true }
+    );
+
+    res.status(201).json(feedback);
+  } catch (error) {
+    console.error('Error saving student feedback:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

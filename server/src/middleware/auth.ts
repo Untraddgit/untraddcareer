@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { clerkClient } from '@clerk/clerk-sdk-node';
 import dotenv from 'dotenv';
+import User from '../models/User';
 
 dotenv.config();
 
@@ -21,7 +22,6 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
     const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
-      console.log('No token provided in request');
       return res.status(401).json({ message: 'Unauthorized: No token provided' });
     }
 
@@ -30,12 +30,10 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
       const verifiedToken = await clerkClient.verifyToken(token);
       
       if (!verifiedToken || !verifiedToken.sub) {
-        console.log('Token verification failed');
         return res.status(401).json({ message: 'Unauthorized: Token verification failed' });
       }
 
       req.auth = { userId: verifiedToken.sub };
-      console.log('Auth verified for user:', verifiedToken.sub);
       next();
     } catch (error) {
       console.error('Error verifying token:', error);
@@ -44,6 +42,25 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
   } catch (error) {
     console.error('Auth middleware error:', error);
     return res.status(500).json({ message: 'Internal server error during authentication' });
+  }
+};
+
+// Middleware to verify admin privileges
+export const verifyAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.auth?.userId) {
+      return res.status(401).json({ message: 'Unauthorized: No user ID found' });
+    }
+
+    const user = await User.findOne({ clerkId: req.auth.userId });
+    if (!user || user.userType !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: Admin privileges required' });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Admin verification error:', error);
+    return res.status(500).json({ message: 'Internal server error during admin verification' });
   }
 };
 

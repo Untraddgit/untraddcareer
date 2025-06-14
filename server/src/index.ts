@@ -9,6 +9,10 @@ import quizRouter from './routes/quizRoutes';
 import webhookRouter from './routes/webhookRoutes';
 import userRouter from './routes/userRoutes';
 import adminRouter from './routes/adminRoutes';
+import courseRouter from './routes/courseRoutes';
+import predefinedCourseRouter from './routes/predefinedCourseRoutes';
+import upcomingSessionRouter from './routes/upcomingSessionRoutes';
+import studentRoutes from './routes/studentRoutes';
 
 dotenv.config();
 
@@ -66,18 +70,13 @@ app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
-      console.log('Request with no origin');
       return callback(null, true);
     }
     
-    console.log('Request origin:', origin);
-    
     if (allowedOrigins.indexOf(origin) === -1) {
-      console.log('Origin not allowed:', origin);
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
-    console.log('Origin allowed:', origin);
     return callback(null, true);
   },
   credentials: true,
@@ -107,6 +106,10 @@ app.use('/api/user-profile', userProfileRouter);
 app.use('/api/quiz-results', quizResultsRouter);
 app.use('/api/quizzes', quizRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/courses', courseRouter);
+app.use('/api/predefined-courses', predefinedCourseRouter);
+app.use('/api', upcomingSessionRouter);
+app.use('/api/student', studentRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

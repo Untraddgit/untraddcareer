@@ -7,7 +7,8 @@
     "start": "node ./dist/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "seed": "ts-node src/scripts/seedQuizzes.ts"
+    "seed": "ts-node src/scripts/seedQuizzes.ts",
+    "populate-courses": "ts-node src/scripts/populatePredefinedCourses.ts"
   },
   "dependencies": {
     "@clerk/clerk-sdk-node": "^4.13.23",
@@ -19,6 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
     "morgan": "^1.10.0",
+    "multer": "^2.0.1",
     "svix": "^1.66.0"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
+    "@types/multer": "^1.4.13",
     "@types/node": "^20.10.4",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.1",

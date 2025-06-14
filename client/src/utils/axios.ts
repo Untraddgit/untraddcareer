@@ -37,7 +37,6 @@ api.interceptors.request.use(
       const token = await window.Clerk.session.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log('Request headers:', config.headers);
       } else {
         console.warn('No auth token available');
       }
@@ -58,11 +57,6 @@ api.interceptors.request.use(
 // Debug interceptor for responses
 api.interceptors.response.use(
   (response) => {
-    console.log('API Response:', {
-      url: response.config.url,
-      status: response.status,
-      data: response.data
-    });
     return response;
   },
   (error) => {
@@ -70,8 +64,7 @@ api.interceptors.response.use(
       console.error('Server Error:', {
         url: error.config.url,
         status: error.response.status,
-        data: error.response.data,
-        headers: error.response.headers
+        data: error.response.data
       });
       // Handle 401 Unauthorized
       if (error.response.status === 401) {
