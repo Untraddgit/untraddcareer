@@ -3,16 +3,11 @@ import { useAuth } from '@clerk/clerk-react';
 import { 
   Users, 
   Award, 
-  BarChart3, 
   TrendingUp, 
   Search,
   Eye,
   GraduationCap,
-  BookOpen,
-  Plus,
-  Edit,
   Trash2,
-  Save,
   X,
   LayoutDashboard,
   FileText,
@@ -216,13 +211,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const AdminDashboard = () => {
   const { getToken } = useAuth();
   
-  // Time unit options
-  const timeUnitOptions = [
-    { value: 'hours', label: 'Hours', shortLabel: 'hrs' },
-    { value: 'days', label: 'Days', shortLabel: 'days' },
-    { value: 'weeks', label: 'Weeks', shortLabel: 'weeks' },
-    { value: 'months', label: 'Months', shortLabel: 'months' }
-  ] as const;
+  // State variables
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [students, setStudents] = useState<StudentData[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
@@ -237,10 +226,11 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterScore, setFilterScore] = useState<'all' | 'high' | 'scholarship'>('all');
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'tests' | 'counselling' | 'course-management'>('overview');
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [showResourceModal, setShowResourceModal] = useState(false);
   
   // Course management state
   const [courses, setCourses] = useState<Course[]>([]);
-  const [showCourseModal, setShowCourseModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [courseForm, setCourseForm] = useState<Course>({
     courseName: '',
@@ -255,7 +245,6 @@ const AdminDashboard = () => {
   const [selectedPredefinedCourse, setSelectedPredefinedCourse] = useState<string>('');
   const [courseStudents, setCourseStudents] = useState<StudentWithProgress[]>([]);
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<AssignmentSubmission[]>([]);
-  const [showResourceModal, setShowResourceModal] = useState(false);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [resourceForm, setResourceForm] = useState<PredefinedCourseResource>({
@@ -359,29 +348,28 @@ const AdminDashboard = () => {
       setCourses(coursesResponse.data);
       setPredefinedCourses(predefinedCoursesResponse.data);
       setStudentFeedback(feedbackResponse.data);
+
+      // Calculate stats
+      const totalTests = testsResponse.data.length;
+      const totalStudents = studentsResponse.data.length;
+      const averageScore = totalTests > 0 ? testsResponse.data.reduce((sum: number, test: TestResult) => sum + test.score, 0) / totalTests : 0;
+      const scholarshipEligible = testsResponse.data.filter((test: TestResult) => test.score >= 60).length;
+      const highPerformers = testsResponse.data.filter((test: TestResult) => test.score >= 70).length;
+      const topPerformers = testsResponse.data.filter((test: TestResult) => test.score >= 80).length;
+
+      setStats({
+        totalStudents,
+        totalTestsTaken: totalTests,
+        averageScore: Math.round(averageScore * 100) / 100,
+        scholarshipEligible,
+        highPerformers,
+        topPerformers
+      });
     } catch (error) {
       console.error('Error fetching admin data:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const calculateStats = (tests: TestResult[], studentList: StudentData[]) => {
-    const totalTests = tests.length;
-    const totalStudents = studentList.length;
-    const averageScore = totalTests > 0 ? tests.reduce((sum, test) => sum + test.score, 0) / totalTests : 0;
-    const scholarshipEligible = tests.filter(test => test.score >= 60).length;
-    const highPerformers = tests.filter(test => test.score >= 70).length;
-    const topPerformers = tests.filter(test => test.score >= 80).length;
-
-    setStats({
-      totalStudents,
-      totalTestsTaken: totalTests,
-      averageScore: Math.round(averageScore * 100) / 100,
-      scholarshipEligible,
-      highPerformers,
-      topPerformers
-    });
   };
 
   const getScholarshipLevel = (score: number) => {

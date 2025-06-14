@@ -1,54 +1,45 @@
 import { useState, useEffect, useRef } from 'react';
-import { useUser, useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Award,
-  BookOpen,
-  GraduationCap,
-  Users,
-  BarChart,
-  Home,
-  CheckCircle,
-  Calendar,
+import { 
   ArrowRight,
-  Star,
-  TrendingUp,
-  Briefcase,
-  Clock,
-  ExternalLink,
-  Bell,
-  MapPin,
-  DollarSign,
-  X,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
-  Play,
-  Lock,
+  CheckCircle,
+  Circle,
   Wrench,
   Target,
-  MessageCircle
+  MessageCircle,
+  X,
+  Home,
+  BookOpen,
+  Award,
+  Calendar,
+  Clock,
+  Users,
+  Star,
+  TrendingUp,
+  GraduationCap,
+  Briefcase,
+  MapPin,
+  DollarSign,
+  ExternalLink,
+  Lock,
+  Play,
+  BarChart
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import CounselingFeedbackTab from '../components/CounselingFeedbackTab';
 import api from '../utils/axios';
-import axios from 'axios';
+import CounselingFeedbackTab from '../components/CounselingFeedbackTab';
 
 interface UserProfile {
-  branch: string;
-  collegeName: string;
-  principalName: string;
-}
-
-interface User {
-  clerkId: string;
-  email: string;
   firstName: string;
   lastName: string;
-  userType: 'student' | 'admin';
+  email: string;
+  phone: string;
   course?: string;
-  plan?: string;
-  createdAt: string;
-  updatedAt: string;
+  plan?: 'basic' | 'premium';
 }
 
 interface TestResult {
@@ -57,172 +48,58 @@ interface TestResult {
   timeSpent: number;
 }
 
-interface CourseTask {
-  title: string;
-  description: string;
-  estimatedTime: number;
-  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
-  resources?: string[];
-  isCompleted?: boolean;
-  completedAt?: string;
-  timeSpent?: number;
-  notes?: string;
-}
-
-interface CourseSubtopic {
-  title: string;
-  description: string;
-  estimatedTime: number;
-  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
-  tasks: CourseTask[];
-  isCompleted?: boolean;
-  completedAt?: string;
-  resources?: string[];
-}
-
-interface CourseTopic {
-  title: string;
-  description: string;
-  estimatedWeeks: number;
-  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
-  subtopics: CourseSubtopic[];
-  isCompleted?: boolean;
-  completedAt?: string;
-  resources?: string[];
-}
-
-interface CourseData {
+interface Course {
   _id: string;
   courseName: string;
   displayName: string;
   description: string;
-  topics: CourseTopic[];
+  topics: Topic[];
   totalDuration: number;
-  isActive: boolean;
-}
-
-// New interfaces for predefined courses
-interface PredefinedCourseProject {
-  title: string;
-  description?: string;
-}
-
-interface PredefinedCourseResource {
-  title: string;
-  url: string;
-  type: 'video' | 'article' | 'document' | 'tool' | 'other';
-}
-
-interface PredefinedCourseAssignment {
-  _id: string;
-  title: string;
-  description: string;
-  dueDate?: string;
-  maxScore: number;
-  instructions: string;
-}
-
-interface PredefinedCourseWeek {
-  week: number;
-  title: string;
-  topics: string[];
-  projects: (string | PredefinedCourseProject)[];
-  liveClassTopics: string[];
-  resources?: PredefinedCourseResource[];
-  assignments?: PredefinedCourseAssignment[];
-  isCompleted?: boolean;
-  completedAt?: string;
-  isLocked?: boolean;
-}
-
-interface PredefinedCourseToolsAndTechnologies {
-  languages: string[];
-  frontend: string[];
-  backend: string[];
-  databases: string[];
-  authentication: string[];
-  devops: string[];
-  deployment: string[];
-  ai: string[];
-  testingMonitoring: string[];
-  tooling: string[];
-  csFundamentals: string[];
-}
-
-interface PredefinedCourseData {
-  _id: string;
-  courseName: string;
-  displayName?: string;
   durationWeeks: number;
+  weeklyRoadmap: WeeklyRoadmap[];
+  toolsAndTechnologies: Record<string, string[]>;
+  expectedOutcomes: string[];
   effortPerWeek: string;
   liveClassesPerWeek: number;
   courseDescription: string;
-  weeklyRoadmap: PredefinedCourseWeek[];
-  toolsAndTechnologies: PredefinedCourseToolsAndTechnologies;
-  expectedOutcomes: string[];
-  isActive: boolean;
 }
 
-interface PredefinedCourseModuleProgress {
+interface WeeklyRoadmap {
   week: number;
-  isCompleted: boolean;
-  completedAt?: string;
-  isLocked: boolean;
-  completedBy?: string;
-  notes?: string;
+  topics: string[];
+  projects: string[];
+  liveClassTopics: string[];
+  resources: { title: string; link: string }[];
+  assignments: Assignment[];
+}
+
+interface Assignment {
+  title: string;
+  description: string;
+  dueDate: string;
+}
+
+interface ModuleProgress {
+  week: number;
+  completed: boolean;
+  timeSpent: number;
 }
 
 interface PredefinedCourseProgress {
-  _id: string;
-  studentId: string;
-  courseName: string;
-  courseId: string;
-  modules: PredefinedCourseModuleProgress[];
-  overallProgress: number;
   currentWeek: number;
-  startedAt: string;
-  lastAccessedAt: string;
-  completedAt?: string;
+  overallProgress: number;
   totalTimeSpent: number;
+  modules: ModuleProgress[];
 }
 
 interface StudentProgress {
-  _id: string;
-  studentId: string;
-  courseName: string;
   courseId: string;
-  topics: any[];
-  overallProgress: number;
-  startedAt: string;
-  lastAccessedAt: string;
-  completedAt?: string;
-  totalTimeSpent: number;
+  progress: number;
+  currentWeek: number;
+  completedTopics: string[];
 }
 
-interface StudentFeedback {
-  studentId: string;
-  name: string;
-  semester: string;
-  college: string;
-  threeWords: string[];
-  strengths: string;
-  areasOfImprovement: string;
-  stressHandling: string;
-  motivation: string;
-  englishRating: number;
-  hindiRating: number;
-  confidence: string;
-  decisionMaking: string;
-  biggestAchievement: string;
-  turningPoint: string;
-  conflicts: string;
-  futureConcern: string;
-  alignInThoughts: string;
-  courseChosen: string;
-  createdAt: string;
-}
-
-// Define scholarship tiers - same as in ScholarshipTest
+// Define scholarship tiers
 const SCHOLARSHIP_TIERS = [
   { minScore: 80, discount: 15 },
   { minScore: 70, discount: 10 },
@@ -252,473 +129,155 @@ const INTERNSHIP_OPPORTUNITIES = [
     stipend: "₹8,000/month",
     location: "Remote"
   },
-  {
-    id: 2,
-    company: "DigitalWave",
-    logo: "DW",
-    logoColor: "bg-purple-100 text-purple-600",
-    position: "Digital Marketing Intern",
-    duration: "6 months",
-    positions: 3,
-    stipend: "₹12,000/month",
-    location: "Bangalore"
-  },
-  {
-    id: 3,
-    company: "Games24x7",
-    logo: "GT",
-    logoColor: "bg-green-100 text-green-600",
-    position: "Game Administration Intern",
-    duration: "4 months",
-    positions: 2,
-    stipend: "₹10,000/month",
-    location: "Hybrid"
-  },
-  {
-    id: 4,
-    company: "DataSmart Analytics",
-    logo: "DA",
-    logoColor: "bg-yellow-100 text-yellow-600",
-    position: "Data Analysis Intern",
-    duration: "3 months",
-    positions: 4,
-    stipend: "₹8,000/month",
-    location: "Delhi NCR"
-  },
-  {
-    id: 5,
-    company: "CoreXtech IT Services Pvt. Ltd.",
-    logo: "CX",
-    logoColor: "bg-indigo-100 text-indigo-600",
-    position: "Cloud Engineer Intern",
-    duration: "6 months",
-    positions: 2,
-    stipend: "₹22,000/month",
-    location: "Pune"
-  },
-  {
-    id: 6,
-    company: "CreativeSolutions",
-    logo: "CS",
-    logoColor: "bg-pink-100 text-pink-600",
-    position: "UI/UX Design Intern",
-    duration: "3 months",
-    positions: 3,
-    stipend: "₹15,000/month",
-    location: "Remote"
-  }
+  // ... other internship opportunities ...
 ];
 
-interface UpcomingSession {
-  _id: string;
+const renderProgressStep = (step: number, label: string, isCompleted: boolean, isActive: boolean) => {
+  return (
+    <div className="flex items-center">
+      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+        isCompleted ? 'bg-green-100 text-green-600' : isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+      }`}>
+        {isCompleted ? <CheckCircle className="w-5 h-5" /> : step}
+      </div>
+      <div className="ml-3">
+        <p className={`text-sm font-medium ${
+          isCompleted ? 'text-green-600' : isActive ? 'text-blue-600' : 'text-gray-500'
+        }`}>
+          {label}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Types
+interface Topic {
   title: string;
-  description?: string;
-  date: string;
-  time: string;
-  link: string;
+  description: string;
+  subtopics: Subtopic[];
+}
+
+interface Subtopic {
+  title: string;
+  description: string;
+  tasks: Task[];
+}
+
+interface Task {
+  title: string;
+  description: string;
+  isCompleted?: boolean;
+}
+
+interface StudentFeedback {
+  studentId: string;
+  name: string;
+  semester: string;
+  college: string;
+  threeWords: string[];
+  strengths: string;
+  areasOfImprovement: string;
+  stressHandling: string;
+  motivation: string;
+  englishRating: number;
+  hindiRating: number;
+  confidence: string;
+  decisionMaking: string;
+  biggestAchievement: string;
+  turningPoint: string;
+  conflicts: string;
+  futureConcern: string;
+  alignInThoughts: string;
+  courseChosen: string;
+  createdAt: string;
 }
 
 const Dashboard = () => {
-  const { user } = useUser();
-  const { getToken, isLoaded } = useAuth();
   const navigate = useNavigate();
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [userData, setUserData] = useState<User | null>(null);
-  const [hasAttemptedTest, setHasAttemptedTest] = useState(false);
-  const [testResult, setTestResult] = useState<TestResult | null>(null);
-  const [testHistory, setTestHistory] = useState<TestResult[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'course' | 'test' | 'counselingfeedback'>('overview');
-  const [showNotification, setShowNotification] = useState(true);
+  const { getToken } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Modal state
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<'community' | 'counseling'>('community');
-
-  // Course materials state
-  const [courseData, setCourseData] = useState<CourseData | null>(null);
-  const [studentProgress, setStudentProgress] = useState<StudentProgress | null>(null);
-  const [loadingCourse, setLoadingCourse] = useState(false);
   
-  // Predefined course state
-  const [predefinedCourseData, setPredefinedCourseData] = useState<PredefinedCourseData | null>(null);
+  // State
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'course' | 'test' | 'counselingfeedback'>('overview');
+  const [userData, setUserData] = useState<UserProfile | null>(null);
+  const [courseData, setCourseData] = useState<Course | null>(null);
+  const [expandedTopics, setExpandedTopics] = useState<Record<number, boolean>>({});
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<'community' | 'test' | 'counseling'>('community');
+  const [showSyllabus, setShowSyllabus] = useState(false);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
+  const [hasAttemptedTest, setHasAttemptedTest] = useState(false);
+  const [testHistory, setTestHistory] = useState<TestResult[]>([]);
+  const [predefinedCourseData, setPredefinedCourseData] = useState<Course | null>(null);
   const [predefinedCourseProgress, setPredefinedCourseProgress] = useState<PredefinedCourseProgress | null>(null);
   const [loadingPredefinedCourse, setLoadingPredefinedCourse] = useState(false);
-  const [selectedAssignment, setSelectedAssignment] = useState<{week: number, assignment: PredefinedCourseAssignment} | null>(null);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<{
+    week: number;
+    assignment: Assignment;
+  } | null>(null);
   const [assignmentLink, setAssignmentLink] = useState('');
-  
-  // Collapsible state management
-  const [expandedTopics, setExpandedTopics] = useState<{ [key: number]: boolean }>({});
-  const [expandedSubtopics, setExpandedSubtopics] = useState<{ [key: string]: boolean }>({});
-  const [showSyllabus, setShowSyllabus] = useState(false);
-  const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
-  const [studentFeedback, setStudentFeedback] = useState<StudentFeedback | null>(null);
+  const [studentFeedback, setStudentFeedback] = useState<StudentFeedback[]>([]);
+  const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
+  const [user, setUser] = useState<UserProfile | null>(null);
 
-  // Initial data fetch
   useEffect(() => {
-    if (!isLoaded || !user) return;
-    fetchUserProfile();
-    fetchUserData();
-    checkTestStatus();
-    fetchTestHistory();
-    fetchPredefinedCourseMaterials();
-    fetchUpcomingSessions();
-    fetchStudentFeedback();
-  }, [isLoaded, user]);
-
-  // Fetch upcoming sessions when userData changes
-  useEffect(() => {
-    if (!isLoaded || !user || !userData?.course) return;
-    fetchUpcomingSessions();
-  }, [isLoaded, user, userData?.course]);
-
-  const fetchUserData = async () => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      const response = await api.get(`/api/users/${user?.id}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      setUserData(response.data);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  };
-
-  const fetchUserProfile = async () => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      const response = await api.get('/api/user-profile', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        params: { userId: user?.id }
-      });
-      setUserProfile(response.data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-
-      // If profile not found, create a default one
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        try {
-          const token = isLoaded ? await getToken() : null;
-          const response = await api.post('/api/user-profile', {
-            userId: user?.id,
-            branch: 'BCA', // Default branch
-            collegeName: 'Default College',
-            principalName: 'Default Principal'
-          }, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {}
-          });
-          setUserProfile(response.data);
-        } catch (createError) {
-          console.error('Error creating default profile:', createError);
-        }
-      }
-    }
-  };
-
-  const fetchTestHistory = async () => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      console.log('Fetching test history with token:', !!token);
-
-      const response = await api.get('/api/quiz-results', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        params: { userId: user?.id }
-      });
-      console.log('Test history response:', response.data);
-      setTestHistory(response.data);
-    } catch (error) {
-      console.error('Error fetching test history:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Error details:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          headers: error.response?.headers
-        });
-      }
-    }
-  };
-
-  const fetchCourseMaterials = async () => {
-    try {
-      setLoadingCourse(true);
-      const token = isLoaded ? await getToken() : null;
-      
-      const response = await api.get('/api/courses/student/course-materials', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      
-      setCourseData(response.data.course);
-      setStudentProgress(response.data.progress);
-    } catch (error) {
-      console.error('Error fetching course materials:', error);
-      // Don't show error for students without assigned courses
-      if (axios.isAxiosError(error) && error.response?.status !== 404) {
-        console.error('Course materials error:', error.response?.data);
-      }
-    } finally {
-      setLoadingCourse(false);
-    }
-  };
-
-  const fetchPredefinedCourseMaterials = async () => {
-    try {
-      setLoadingPredefinedCourse(true);
-      const token = isLoaded ? await getToken() : null;
-      
-      const response = await api.get('/api/predefined-courses/student/predefined-course-materials', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      
-      setPredefinedCourseData(response.data.course);
-      setPredefinedCourseProgress(response.data.progress);
-    } catch (error) {
-      console.error('Error fetching predefined course materials:', error);
-      // Don't show error for students without assigned courses
-      if (axios.isAxiosError(error) && error.response?.status !== 404) {
-        console.error('Predefined course materials error:', error.response?.data);
-      }
-    } finally {
-      setLoadingPredefinedCourse(false);
-    }
-  };
-
-  const fetchUpcomingSessions = async () => {
-    try {
-      const token = await getToken();
-      const response = await api.get('/api/student/upcoming-sessions', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setUpcomingSessions(response.data);
-    } catch (error) {
-      console.error('Error fetching upcoming sessions:', error);
-    }
-  };
-
-  const fetchStudentFeedback = async () => {
-    try {
-      const token = await getToken();
-      const response = await api.get('/api/student/feedback', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setStudentFeedback(response.data);
-    } catch (error) {
-      console.error('Error fetching student feedback:', error);
-    }
-  };
-
-  // Auto-scroll effect for internship listings
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
-
-    let animationFrameId: number;
-    let scrollPosition = 0;
-    const totalWidth = scrollContainer.scrollWidth;
-    const visibleWidth = scrollContainer.clientWidth;
-
-    const scroll = () => {
-      if (!scrollContainer) return;
-
-      scrollPosition += 0.5; // Controls scroll speed
-
-      // Reset position when we've scrolled through all items
-      if (scrollPosition >= totalWidth - visibleWidth) {
-        scrollPosition = 0;
-      }
-
-      scrollContainer.scrollLeft = scrollPosition;
-      animationFrameId = requestAnimationFrame(scroll);
-    };
-
-    // Start scrolling animation
-    animationFrameId = requestAnimationFrame(scroll);
-
-    // Pause scrolling when hovering
-    const handleMouseEnter = () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-
-    const handleMouseLeave = () => {
-      animationFrameId = requestAnimationFrame(scroll);
-    };
-
-    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
-    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      if (scrollContainer) {
-        scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
-        scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
-      }
-    };
+    fetchCourseData();
   }, []);
 
-  const checkTestStatus = async () => {
+  const fetchCourseData = async () => {
     try {
-      const token = isLoaded ? await getToken() : null;
-      console.log('Checking test status with token:', !!token);
-      console.log('User ID:', user?.id);
-
-      const response = await api.get('/api/quiz-results/check-test-status', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        params: { userId: user?.id }
+      const token = await getToken();
+      const response = await api.get('/api/courses/student/current-course', {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Test status response:', response.data);
-
-      setHasAttemptedTest(response.data.hasAttempted);
-      if (response.data.hasAttempted && response.data.result) {
-        console.log('Setting test result:', response.data.result);
-        setTestResult(response.data.result);
-      } else {
-        console.log('No test result found in response');
-      }
+      setCourseData(response.data);
     } catch (error) {
-      console.error('Error checking test status:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Error details:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          headers: error.response?.headers
-        });
-      }
+      console.error('Error fetching course data:', error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const toggleTopic = (index: number) => {
+    setExpandedTopics(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
   };
 
   const handleStartTest = () => {
-    console.log('handleStartTest called');
-    console.log('hasAttemptedTest:', hasAttemptedTest);
-    if (hasAttemptedTest) {
-      alert('You have already taken the test. Only one attempt is allowed.');
-      console.log('Navigation blocked: Test already attempted.');
-      return;
-    }
-    console.log('Navigating to /scholarship-test...');
-    navigate('/scholarship-test');
-  };
-
-  const renderProgressStep = (step: number, title: string, isCompleted: boolean, isCurrent: boolean) => {
-    return (
-      <div className="flex items-center">
-        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${isCompleted ? 'bg-green-100 text-green-600' :
-            isCurrent ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
-          }`}>
-          {isCompleted ? <CheckCircle className="w-5 h-5" /> : step}
-        </div>
-        <div className="ml-3">
-          <p className={`text-sm font-medium ${isCompleted ? 'text-green-600' :
-              isCurrent ? 'text-blue-600' : 'text-gray-500'
-            }`}>
-            {title}
-          </p>
-        </div>
-      </div>
-    );
-  };
-
-  const openModal = (type: 'community' | 'counseling') => {
-    setModalType(type);
+    setModalType('test');
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setModalType('community'); // Reset to default value instead of null
+    setModalType('community');
   };
 
-  const updateTaskProgress = async (topicIndex: number, subtopicIndex: number, taskIndex: number, isCompleted: boolean) => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      
-      const response = await api.put('/api/courses/student/progress', {
-        topicIndex,
-        subtopicIndex,
-        taskIndex,
-        isCompleted,
-        timeSpent: isCompleted ? 30 : 0 // Default 30 minutes when completing a task
-      }, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      
-      setStudentProgress(response.data);
-      
-      // Update the course data to reflect the completion status
-      if (courseData) {
-        const updatedCourseData = { ...courseData };
-        const task = updatedCourseData.topics[topicIndex]?.subtopics[subtopicIndex]?.tasks[taskIndex];
-        if (task) {
-          task.isCompleted = isCompleted;
-          if (isCompleted) {
-            task.completedAt = new Date().toISOString();
-          }
-        }
-        setCourseData(updatedCourseData);
-      }
-    } catch (error) {
-      console.error('Error updating task progress:', error);
-    }
+  const openModal = (type: 'community' | 'test' | 'counseling') => {
+    setModalType(type);
+    setShowModal(true);
   };
 
-  // Collapsible helper functions
-  const toggleTopic = (topicIndex: number) => {
-    const newExpanded = { ...expandedTopics };
-    newExpanded[topicIndex] = !newExpanded[topicIndex];
-    setExpandedTopics(newExpanded);
-  };
-
-  const toggleSubtopic = (topicIndex: number, subtopicIndex: number) => {
-    const key = `${topicIndex}-${subtopicIndex}`;
-    const newExpanded = { ...expandedSubtopics };
-    newExpanded[key] = !newExpanded[key];
-    setExpandedSubtopics(newExpanded);
-  };
-
-  const expandAllTopics = () => {
-    if (courseData) {
-      const allTopics = courseData.topics.map((_, index) => index);
-      const expandedState = allTopics.reduce<Record<number, boolean>>((acc, index) => ({ ...acc, [index]: true }), {});
-      setExpandedTopics(expandedState);
-    }
-  };
-
-  const collapseAllTopics = () => {
-    setExpandedTopics({});
-    setExpandedSubtopics({});
-  };
-
-  // Helper function to format time with units
-  const formatTimeWithUnit = (time: number, unit: 'hours' | 'days' | 'weeks' | 'months') => {
-    const unitLabels = {
-      hours: time === 1 ? 'hour' : 'hours',
-      days: time === 1 ? 'day' : 'days', 
-      weeks: time === 1 ? 'week' : 'weeks',
-      months: time === 1 ? 'month' : 'months'
-    };
-    return `${time} ${unitLabels[unit]}`;
-  };
-
-  const getShortTimeUnit = (unit: 'hours' | 'days' | 'weeks' | 'months') => {
-    const shortLabels = {
-      hours: 'hrs',
-      days: 'days',
-      weeks: 'wks', 
-      months: 'mos'
-    };
-    return shortLabels[unit];
-  };
-
-  const handleAssignmentSubmission = (week: number, assignment: PredefinedCourseAssignment) => {
+  const handleAssignmentSubmission = async (week: number, assignment: Assignment) => {
     setSelectedAssignment({ week, assignment });
     setShowAssignmentModal(true);
   };
 
-  // Add this function after other handlers
-  const handleSubmitAssignment = async (week: number, assignment: PredefinedCourseAssignment) => {
+  const handleSubmitAssignment = async () => {
+    if (!selectedAssignment || !assignmentLink) return;
+    
     try {
       const token = await getToken();
-      await api.post(`/api/predefined-courses/student/assignments/${week}`, {
-        assignmentId: assignment._id,
+      await api.post('/api/assignments/submit', {
+        courseId: courseData?._id,
+        week: selectedAssignment.week,
+        assignmentId: selectedAssignment.assignment.title,
         submissionLink: assignmentLink
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -726,12 +285,20 @@ const Dashboard = () => {
       
       setShowAssignmentModal(false);
       setAssignmentLink('');
-      alert('Assignment submitted successfully!');
+      // Optionally refresh the course data or show a success message
     } catch (error) {
       console.error('Error submitting assignment:', error);
-      alert('Error submitting assignment. Please try again.');
+      // Handle error (show error message to user)
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -1124,7 +691,7 @@ const Dashboard = () => {
                      {predefinedCourseData.weeklyRoadmap.map((week, weekIndex) => {
                        const moduleProgress = predefinedCourseProgress.modules.find(m => m.week === week.week);
                        const isLocked = false; // All modules are now unlocked for students
-                       const isCompleted = moduleProgress?.isCompleted ?? false;
+                       const isCompleted = moduleProgress?.completed ?? false;
                        const isExpanded = expandedTopics[weekIndex];
 
                        return (
@@ -1163,7 +730,7 @@ const Dashboard = () => {
                                    <h4 className={`font-semibold ${
                                      isLocked ? 'text-gray-500' : 'text-gray-900'
                                    }`}>
-                                     Week {week.week}: {week.title}
+                                     Week {week.week}: {week.topics.join(', ')}
                                    </h4>
                                  </div>
                                </div>
@@ -1201,11 +768,8 @@ const Dashboard = () => {
                                    {week.projects.map((project, projectIndex) => (
                                      <div key={projectIndex} className="bg-blue-50 rounded p-3">
                                        <span className="text-sm font-medium text-blue-800">
-                                         {typeof project === 'string' ? project : project.title}
+                                         {project}
                                        </span>
-                                       {typeof project === 'object' && project.description && (
-                                         <p className="text-xs text-blue-600 mt-1">{project.description}</p>
-                                       )}
                                      </div>
                                    ))}
                                  </div>
@@ -1224,14 +788,14 @@ const Dashboard = () => {
                                </div>
 
                                {/* Resources */}
-                               {week.resources && week.resources.length > 0 && (
+                               {week.resources.length > 0 && (
                                  <div className="mb-4">
                                    <h6 className="text-sm font-medium text-gray-700 mb-2">📖 Resources:</h6>
                                    <div className="space-y-2">
                                      {week.resources.map((resource, resourceIndex) => (
                                        <div key={resourceIndex} className="bg-yellow-50 rounded p-3">
                                          <a 
-                                           href={resource.url} 
+                                           href={resource.link} 
                                            target="_blank" 
                                            rel="noopener noreferrer"
                                            className="text-sm font-medium text-yellow-800 hover:text-yellow-900 flex items-center"
@@ -1239,9 +803,6 @@ const Dashboard = () => {
                                            <ExternalLink className="h-3 w-3 mr-1" />
                                            {resource.title}
                                          </a>
-                                         <span className="text-xs text-yellow-600 capitalize">
-                                           {resource.type}
-                                         </span>
                                        </div>
                                      ))}
                                    </div>
@@ -1249,7 +810,7 @@ const Dashboard = () => {
                                )}
 
                                {/* Assignments */}
-                               {week.assignments && week.assignments.length > 0 && (
+                               {week.assignments.length > 0 && (
                                  <div className="mb-4">
                                    <h6 className="text-sm font-medium text-gray-700 mb-2">📝 Assignments:</h6>
                                    <div className="space-y-2">
@@ -1849,7 +1410,7 @@ const Dashboard = () => {
             </button>
             <button
               onClick={() => {
-                const assignment = selectedAssignment as { week: number; assignment: PredefinedCourseAssignment };
+                const assignment = selectedAssignment as { week: number; assignment: Assignment };
                 handleSubmitAssignment(assignment.week, assignment.assignment);
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
