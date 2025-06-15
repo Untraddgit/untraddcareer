@@ -16,7 +16,6 @@ import {
   Briefcase,
   Clock,
   ExternalLink,
-  Bell,
   MapPin,
   DollarSign,
   X,
@@ -28,16 +27,11 @@ import {
   Target,
   MessageCircle
 } from 'lucide-react';
+
 import Navbar from '../components/Navbar';
 import CounselingFeedbackTab from '../components/CounselingFeedbackTab';
 import api from '../utils/axios';
 import axios from 'axios';
-
-interface UserProfile {
-  branch: string;
-  collegeName: string;
-  principalName: string;
-}
 
 interface User {
   clerkId: string;
@@ -55,50 +49,6 @@ interface TestResult {
   score: number;
   completedAt: string;
   timeSpent: number;
-}
-
-interface CourseTask {
-  title: string;
-  description: string;
-  estimatedTime: number;
-  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
-  resources?: string[];
-  isCompleted?: boolean;
-  completedAt?: string;
-  timeSpent?: number;
-  notes?: string;
-}
-
-interface CourseSubtopic {
-  title: string;
-  description: string;
-  estimatedTime: number;
-  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
-  tasks: CourseTask[];
-  isCompleted?: boolean;
-  completedAt?: string;
-  resources?: string[];
-}
-
-interface CourseTopic {
-  title: string;
-  description: string;
-  estimatedWeeks: number;
-  estimatedTimeUnit: 'hours' | 'days' | 'weeks' | 'months';
-  subtopics: CourseSubtopic[];
-  isCompleted?: boolean;
-  completedAt?: string;
-  resources?: string[];
-}
-
-interface CourseData {
-  _id: string;
-  courseName: string;
-  displayName: string;
-  description: string;
-  topics: CourseTopic[];
-  totalDuration: number;
-  isActive: boolean;
 }
 
 // New interfaces for predefined courses
@@ -180,19 +130,6 @@ interface PredefinedCourseProgress {
   modules: PredefinedCourseModuleProgress[];
   overallProgress: number;
   currentWeek: number;
-  startedAt: string;
-  lastAccessedAt: string;
-  completedAt?: string;
-  totalTimeSpent: number;
-}
-
-interface StudentProgress {
-  _id: string;
-  studentId: string;
-  courseName: string;
-  courseId: string;
-  topics: any[];
-  overallProgress: number;
   startedAt: string;
   lastAccessedAt: string;
   completedAt?: string;
@@ -322,24 +259,17 @@ const Dashboard = () => {
   const { user } = useUser();
   const { getToken, isLoaded } = useAuth();
   const navigate = useNavigate();
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userData, setUserData] = useState<User | null>(null);
   const [hasAttemptedTest, setHasAttemptedTest] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
-  const [testHistory, setTestHistory] = useState<TestResult[]>([]);
+  const [testHistory] = useState<TestResult[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'course' | 'test' | 'counselingfeedback'>('overview');
-  const [showNotification, setShowNotification] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'community' | 'counseling'>('community');
 
-  // Course materials state
-  const [courseData, setCourseData] = useState<CourseData | null>(null);
-  const [studentProgress, setStudentProgress] = useState<StudentProgress | null>(null);
-  const [loadingCourse, setLoadingCourse] = useState(false);
-  
   // Predefined course state
   const [predefinedCourseData, setPredefinedCourseData] = useState<PredefinedCourseData | null>(null);
   const [predefinedCourseProgress, setPredefinedCourseProgress] = useState<PredefinedCourseProgress | null>(null);
@@ -350,7 +280,6 @@ const Dashboard = () => {
   
   // Collapsible state management
   const [expandedTopics, setExpandedTopics] = useState<{ [key: number]: boolean }>({});
-  const [expandedSubtopics, setExpandedSubtopics] = useState<{ [key: string]: boolean }>({});
   const [showSyllabus, setShowSyllabus] = useState(false);
   const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
   const [studentFeedback, setStudentFeedback] = useState<StudentFeedback | null>(null);
@@ -358,20 +287,12 @@ const Dashboard = () => {
   // Initial data fetch
   useEffect(() => {
     if (!isLoaded || !user) return;
-    fetchUserProfile();
     fetchUserData();
     checkTestStatus();
-    fetchTestHistory();
-    fetchPredefinedCourseMaterials();
+    fetchPredefinedCourseData();
     fetchUpcomingSessions();
     fetchStudentFeedback();
   }, [isLoaded, user]);
-
-  // Fetch upcoming sessions when userData changes
-  useEffect(() => {
-    if (!isLoaded || !user || !userData?.course) return;
-    fetchUpcomingSessions();
-  }, [isLoaded, user, userData?.course]);
 
   const fetchUserData = async () => {
     try {
@@ -385,83 +306,7 @@ const Dashboard = () => {
     }
   };
 
-  const fetchUserProfile = async () => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      const response = await api.get('/api/user-profile', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        params: { userId: user?.id }
-      });
-      setUserProfile(response.data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-
-      // If profile not found, create a default one
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        try {
-          const token = isLoaded ? await getToken() : null;
-          const response = await api.post('/api/user-profile', {
-            userId: user?.id,
-            branch: 'BCA', // Default branch
-            collegeName: 'Default College',
-            principalName: 'Default Principal'
-          }, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {}
-          });
-          setUserProfile(response.data);
-        } catch (createError) {
-          console.error('Error creating default profile:', createError);
-        }
-      }
-    }
-  };
-
-  const fetchTestHistory = async () => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      console.log('Fetching test history with token:', !!token);
-
-      const response = await api.get('/api/quiz-results', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        params: { userId: user?.id }
-      });
-      console.log('Test history response:', response.data);
-      setTestHistory(response.data);
-    } catch (error) {
-      console.error('Error fetching test history:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Error details:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          headers: error.response?.headers
-        });
-      }
-    }
-  };
-
-  const fetchCourseMaterials = async () => {
-    try {
-      setLoadingCourse(true);
-      const token = isLoaded ? await getToken() : null;
-      
-      const response = await api.get('/api/courses/student/course-materials', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      
-      setCourseData(response.data.course);
-      setStudentProgress(response.data.progress);
-    } catch (error) {
-      console.error('Error fetching course materials:', error);
-      // Don't show error for students without assigned courses
-      if (axios.isAxiosError(error) && error.response?.status !== 404) {
-        console.error('Course materials error:', error.response?.data);
-      }
-    } finally {
-      setLoadingCourse(false);
-    }
-  };
-
-  const fetchPredefinedCourseMaterials = async () => {
+  const fetchPredefinedCourseData = async () => {
     try {
       setLoadingPredefinedCourse(true);
       const token = isLoaded ? await getToken() : null;
@@ -627,87 +472,6 @@ const Dashboard = () => {
     setModalType('community'); // Reset to default value instead of null
   };
 
-  const updateTaskProgress = async (topicIndex: number, subtopicIndex: number, taskIndex: number, isCompleted: boolean) => {
-    try {
-      const token = isLoaded ? await getToken() : null;
-      
-      const response = await api.put('/api/courses/student/progress', {
-        topicIndex,
-        subtopicIndex,
-        taskIndex,
-        isCompleted,
-        timeSpent: isCompleted ? 30 : 0 // Default 30 minutes when completing a task
-      }, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      
-      setStudentProgress(response.data);
-      
-      // Update the course data to reflect the completion status
-      if (courseData) {
-        const updatedCourseData = { ...courseData };
-        const task = updatedCourseData.topics[topicIndex]?.subtopics[subtopicIndex]?.tasks[taskIndex];
-        if (task) {
-          task.isCompleted = isCompleted;
-          if (isCompleted) {
-            task.completedAt = new Date().toISOString();
-          }
-        }
-        setCourseData(updatedCourseData);
-      }
-    } catch (error) {
-      console.error('Error updating task progress:', error);
-    }
-  };
-
-  // Collapsible helper functions
-  const toggleTopic = (topicIndex: number) => {
-    const newExpanded = { ...expandedTopics };
-    newExpanded[topicIndex] = !newExpanded[topicIndex];
-    setExpandedTopics(newExpanded);
-  };
-
-  const toggleSubtopic = (topicIndex: number, subtopicIndex: number) => {
-    const key = `${topicIndex}-${subtopicIndex}`;
-    const newExpanded = { ...expandedSubtopics };
-    newExpanded[key] = !newExpanded[key];
-    setExpandedSubtopics(newExpanded);
-  };
-
-  const expandAllTopics = () => {
-    if (courseData) {
-      const allTopics = courseData.topics.map((_, index) => index);
-      const expandedState = allTopics.reduce<Record<number, boolean>>((acc, index) => ({ ...acc, [index]: true }), {});
-      setExpandedTopics(expandedState);
-    }
-  };
-
-  const collapseAllTopics = () => {
-    setExpandedTopics({});
-    setExpandedSubtopics({});
-  };
-
-  // Helper function to format time with units
-  const formatTimeWithUnit = (time: number, unit: 'hours' | 'days' | 'weeks' | 'months') => {
-    const unitLabels = {
-      hours: time === 1 ? 'hour' : 'hours',
-      days: time === 1 ? 'day' : 'days', 
-      weeks: time === 1 ? 'week' : 'weeks',
-      months: time === 1 ? 'month' : 'months'
-    };
-    return `${time} ${unitLabels[unit]}`;
-  };
-
-  const getShortTimeUnit = (unit: 'hours' | 'days' | 'weeks' | 'months') => {
-    const shortLabels = {
-      hours: 'hrs',
-      days: 'days',
-      weeks: 'wks', 
-      months: 'mos'
-    };
-    return shortLabels[unit];
-  };
-
   const handleAssignmentSubmission = (week: number, assignment: PredefinedCourseAssignment) => {
     setSelectedAssignment({ week, assignment });
     setShowAssignmentModal(true);
@@ -731,6 +495,13 @@ const Dashboard = () => {
       console.error('Error submitting assignment:', error);
       alert('Error submitting assignment. Please try again.');
     }
+  };
+
+  const toggleTopic = (weekIndex: number) => {
+    setExpandedTopics(prev => ({
+      ...prev,
+      [weekIndex]: !prev[weekIndex]
+    }));
   };
 
   return (

@@ -12,3 +12,4 @@ server/.next/
 .env.*.local
 .env.production
 .env.development
+node_modules
