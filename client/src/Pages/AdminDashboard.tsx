@@ -10,7 +10,8 @@ import {
   FileText,
   Calendar,
   ExternalLink,
-  Trash2
+  Trash2,
+  BookOpen
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import api from '../utils/axios';
@@ -80,11 +81,12 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterScore, setFilterScore] = useState<'all' | 'high' | 'scholarship'>('all');
-  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'tests' | 'counselling'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'tests' | 'courses' | 'sessions' | 'counselling'>('overview');
   
   // Counselling and feedback state
-  const [upcomingSessions] = useState<UpcomingSession[]>([]);
+  const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
   const [studentFeedback, setStudentFeedback] = useState<StudentFeedback[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [sessionForm, setSessionForm] = useState({
     title: '',
@@ -117,10 +119,22 @@ const AdminDashboard = () => {
       const feedbackResponse = await api.get('/api/admin/student-feedback', {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      // Fetch courses
+      const coursesResponse = await api.get('/api/predefined-courses/admin/predefined-courses', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Fetch upcoming sessions
+      const sessionsResponse = await api.get('/api/admin/upcoming-sessions', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       
       setTestResults(testsResponse.data);
       setStudents(studentsResponse.data);
       setStudentFeedback(feedbackResponse.data);
+      setCourses(coursesResponse.data);
+      setUpcomingSessions(sessionsResponse.data);
     } catch (error) {
       console.error('Error fetching admin data:', error);
     } finally {
@@ -248,6 +262,28 @@ const AdminDashboard = () => {
             >
               <FileText className="w-4 h-4 inline mr-2" />
               Test Results
+            </button>
+            <button
+              onClick={() => setActiveTab('courses')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'courses'
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <BookOpen className="w-4 h-4 inline mr-2" />
+              Courses
+            </button>
+            <button
+              onClick={() => setActiveTab('sessions')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'sessions'
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Calendar className="w-4 h-4 inline mr-2" />
+              Sessions
             </button>
             <button
               onClick={() => setActiveTab('counselling')}
@@ -463,6 +499,118 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {/* Courses Tab */}
+          {activeTab === 'courses' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Management</h3>
+                <div className="grid gap-4">
+                  {courses.map((course) => (
+                    <div key={course._id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h4 className="font-medium text-gray-900">{course.displayName || course.courseName}</h4>
+                          <p className="text-sm text-gray-500">{course.courseDescription}</p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {course.durationWeeks} weeks • {course.liveClassesPerWeek} classes/week
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          course.isActive 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {course.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                        <div className="flex space-x-2">
+                          <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                            View Details
+                          </button>
+                          <button className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700">
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sessions Tab */}
+          {activeTab === 'sessions' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-900">Upcoming Sessions Management</h2>
+                <button
+                  onClick={() => setShowSessionModal(true)}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Schedule New Session
+                </button>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">All Sessions</h4>
+                <div className="space-y-3">
+                  {upcomingSessions.map(session => (
+                    <div key={session._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div>
+                        <h5 className="font-medium text-gray-900">{session.title}</h5>
+                        <p className="text-sm text-gray-500">{session.description}</p>
+                        <p className="text-sm text-gray-500">{session.date} at {session.time}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          session.isActive 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {session.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                        <a
+                          href={session.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 flex items-center"
+                        >
+                          <ExternalLink className="w-3 h-3 mr-1" />
+                          Join
+                        </a>
+                        <button
+                          onClick={async () => {
+                            if (confirm('Are you sure you want to delete this session?')) {
+                              try {
+                                const token = await getToken();
+                                await api.delete(`/api/admin/upcoming-sessions/${session._id}`, {
+                                  headers: { Authorization: `Bearer ${token}` }
+                                });
+                                setUpcomingSessions(upcomingSessions.filter(s => s._id !== session._id));
+                              } catch (error) {
+                                console.error('Error deleting session:', error);
+                                alert('Error deleting session');
+                              }
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {upcomingSessions.length === 0 && (
+                    <p className="text-gray-500 text-center py-8">No sessions scheduled yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Counselling Tab */}
           {activeTab === 'counselling' && (
             <div className="space-y-6">
@@ -484,39 +632,6 @@ const AdminDashboard = () => {
                   {students.filter(student => student.plan === 'premium').map(student => 
                     premiumStudentCard(student)
                   )}
-                </div>
-              </div>
-
-              {/* Upcoming Sessions */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Sessions</h4>
-                <div className="space-y-3">
-                  {upcomingSessions.map(session => (
-                    <div key={session._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div>
-                        <h5 className="font-medium text-gray-900">{session.title}</h5>
-                        <p className="text-sm text-gray-500">{session.description}</p>
-                        <p className="text-sm text-gray-500">{session.date} at {session.time}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <a
-                          href={session.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 flex items-center"
-                        >
-                          <ExternalLink className="w-3 h-3 mr-1" />
-                          Join
-                        </a>
-                        <button
-                          onClick={() => {/* handleDeleteSession(session._id) */}}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
 
@@ -566,9 +681,10 @@ const AdminDashboard = () => {
               e.preventDefault();
               try {
                 const token = await getToken();
-                await api.post('/api/admin/upcoming-sessions', sessionForm, {
+                const response = await api.post('/api/admin/upcoming-sessions', sessionForm, {
                   headers: { Authorization: `Bearer ${token}` }
                 });
+                setUpcomingSessions([...upcomingSessions, response.data]);
                 setShowSessionModal(false);
                 setSessionForm({ title: '', description: '', date: '', time: '', link: '' });
                 alert('Session scheduled successfully!');
