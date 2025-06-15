@@ -518,6 +518,59 @@ router.get('/student/assignments', verifyAuth, async (req, res) => {
   }
 });
 
+// Get student's own assignment submissions with detailed info
+router.get('/student/my-submissions', verifyAuth, async (req, res) => {
+  try {
+    const userId = req.auth?.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const student = await User.findOne({ clerkId: userId });
+    if (!student || student.userType !== 'student') {
+      return res.status(403).json({ message: 'Access denied. Student privileges required.' });
+    }
+
+    const submissions = await AssignmentSubmission.find({
+      studentId: userId
+    }).sort({ submittedAt: -1 }).lean();
+
+    // Enhance submissions with assignment details
+    const enhancedSubmissions = await Promise.all(
+      submissions.map(async (submission) => {
+        // Find the course and assignment details
+        const course = await PredefinedCourse.findById(submission.courseId);
+        if (course) {
+          const weekModule = course.weeklyRoadmap.find(w => w.week === submission.week);
+          if (weekModule) {
+            const assignment = weekModule.assignments?.find(a => a._id?.toString() === submission.assignmentId);
+            if (assignment) {
+              return {
+                ...submission,
+                assignmentTitle: assignment.title,
+                assignmentDescription: assignment.description,
+                maxScore: assignment.maxScore,
+                courseName: course.courseName,
+                displayName: course.displayName || course.courseName,
+                isGraded: submission.status === 'graded' && submission.score !== undefined
+              };
+            }
+          }
+        }
+        return {
+          ...submission,
+          isGraded: submission.status === 'graded' && submission.score !== undefined
+        };
+      })
+    );
+
+    res.json(enhancedSubmissions);
+  } catch (error) {
+    console.error('Error fetching student submissions:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get all assignment submissions for a course (admin only)
 router.get('/admin/assignments/:courseId', verifyAuth, verifyAdmin, async (req, res) => {
   try {
@@ -556,7 +609,7 @@ router.get('/admin/assignments/:courseId', verifyAuth, verifyAdmin, async (req, 
 router.put('/admin/assignments/:submissionId/grade', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { submissionId } = req.params;
-    const { score, feedback, status, revisionNotes } = req.body;
+    const { score, feedback, isGraded } = req.body;
     const adminId = req.auth?.userId;
 
     const submission = await AssignmentSubmission.findById(submissionId);
@@ -564,16 +617,12 @@ router.put('/admin/assignments/:submissionId/grade', verifyAuth, verifyAdmin, as
       return res.status(404).json({ message: 'Submission not found' });
     }
 
+    // Update submission with grading information
     submission.score = score;
     submission.feedback = feedback;
-    submission.status = status || 'graded';
-    submission.gradedBy = adminId;
-    submission.gradedAt = new Date();
-    
-    if (status === 'needs_revision') {
-      submission.revisionRequested = true;
-      submission.revisionNotes = revisionNotes;
-    }
+    submission.status = isGraded ? 'graded' : 'pending';
+    submission.gradedBy = isGraded ? adminId : undefined;
+    submission.gradedAt = isGraded ? new Date() : undefined;
 
     await submission.save();
 

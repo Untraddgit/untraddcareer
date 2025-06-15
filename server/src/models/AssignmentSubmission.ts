@@ -7,7 +7,7 @@ export interface IAssignmentSubmission extends Document {
   assignmentId: string;
   submissionLink: string;
   submittedAt: Date;
-  status?: 'pending' | 'approved' | 'rejected';
+  status?: 'pending' | 'approved' | 'rejected' | 'graded';
   feedback?: string;
   updatedAt?: Date;
   score?: number;
@@ -48,7 +48,7 @@ const AssignmentSubmissionSchema = new Schema<IAssignmentSubmission>({
   },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['pending', 'approved', 'rejected', 'graded'],
     default: 'pending'
   },
   feedback: {

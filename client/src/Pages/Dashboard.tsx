@@ -274,9 +274,10 @@ const Dashboard = () => {
   const [predefinedCourseData, setPredefinedCourseData] = useState<PredefinedCourseData | null>(null);
   const [predefinedCourseProgress, setPredefinedCourseProgress] = useState<PredefinedCourseProgress | null>(null);
   const [loadingPredefinedCourse, setLoadingPredefinedCourse] = useState(false);
-  const [selectedAssignment, setSelectedAssignment] = useState<{week: number, assignment: PredefinedCourseAssignment} | null>(null);
+  const [selectedAssignment, setSelectedAssignment] = useState<{ week: number; assignment: PredefinedCourseAssignment } | null>(null);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [assignmentLink, setAssignmentLink] = useState('');
+  const [assignmentSubmissions, setAssignmentSubmissions] = useState<any[]>([]);
   
   // Collapsible state management
   const [expandedTopics, setExpandedTopics] = useState<{ [key: number]: boolean }>({});
@@ -293,6 +294,13 @@ const Dashboard = () => {
     fetchUpcomingSessions();
     fetchStudentFeedback();
   }, [isLoaded, user]);
+
+  useEffect(() => {
+    if (userData && userData.course) {
+      fetchPredefinedCourseData();
+      fetchAssignmentSubmissions();
+    }
+  }, [userData]);
 
   const fetchUserData = async () => {
     try {
@@ -349,6 +357,20 @@ const Dashboard = () => {
       setStudentFeedback(response.data);
     } catch (error) {
       console.error('Error fetching student feedback:', error);
+    }
+  };
+
+  const fetchAssignmentSubmissions = async () => {
+    if (!userData || !userData.course) return;
+    
+    try {
+      const token = await getToken();
+      const response = await api.get('/api/predefined-courses/student/my-submissions', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAssignmentSubmissions(response.data);
+    } catch (error) {
+      console.error('Error fetching assignment submissions:', error);
     }
   };
 
@@ -477,13 +499,17 @@ const Dashboard = () => {
     setShowAssignmentModal(true);
   };
 
-  // Add this function after other handlers
-  const handleSubmitAssignment = async (week: number, assignment: PredefinedCourseAssignment) => {
+  const handleSubmitAssignment = async () => {
+    if (!selectedAssignment || !assignmentLink.trim()) {
+      alert('Please provide a valid assignment link');
+      return;
+    }
+
     try {
       const token = await getToken();
-      await api.post(`/api/predefined-courses/student/assignments/${week}`, {
-        assignmentId: assignment._id,
-        submissionLink: assignmentLink
+      await api.post(`/api/predefined-courses/student/assignments/${selectedAssignment.week}`, {
+        assignmentId: selectedAssignment.assignment._id,
+        submissionLink: assignmentLink.trim()
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -491,6 +517,10 @@ const Dashboard = () => {
       setShowAssignmentModal(false);
       setAssignmentLink('');
       alert('Assignment submitted successfully!');
+      
+      // Refresh course data and assignment submissions to update status
+      await fetchPredefinedCourseData();
+      await fetchAssignmentSubmissions();
     } catch (error) {
       console.error('Error submitting assignment:', error);
       alert('Error submitting assignment. Please try again.');
@@ -1024,27 +1054,67 @@ const Dashboard = () => {
                                    <div className="mb-4">
                                      <h6 className="text-sm font-medium text-gray-700 mb-2">📝 Assignments:</h6>
                                      <div className="space-y-2">
-                                       {week.assignments.map((assignment, assignmentIndex) => (
-                                         <div key={assignmentIndex} className="bg-green-50 rounded p-3">
-                                           <div className="flex justify-between items-start">
-                                             <div>
-                                               <h6 className="text-sm font-medium text-green-800">{assignment.title}</h6>
-                                               <p className="text-xs text-green-700 mt-1">{assignment.description}</p>
-                                               {assignment.dueDate && (
-                                                 <p className="text-xs text-green-600 mt-1">
-                                                   Due: {new Date(assignment.dueDate).toLocaleDateString()}
-                                                 </p>
+                                       {week.assignments.map((assignment, assignmentIndex) => {
+                                         const submission = assignmentSubmissions.find(
+                                           s => s.assignmentId === assignment._id && s.week === week.week
+                                         );
+                                         
+                                         return (
+                                           <div key={assignmentIndex} className="bg-green-50 rounded p-3">
+                                             <div className="flex justify-between items-start">
+                                               <div className="flex-1">
+                                                 <h6 className="text-sm font-medium text-green-800">{assignment.title}</h6>
+                                                 <p className="text-xs text-green-700 mt-1">{assignment.description}</p>
+                                                 {assignment.dueDate && (
+                                                   <p className="text-xs text-green-600 mt-1">
+                                                     Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                                                   </p>
+                                                 )}
+                                                 
+                                                 {/* Submission Status */}
+                                                 {submission && (
+                                                   <div className="mt-2 p-2 bg-white rounded border">
+                                                     <div className="flex items-center justify-between text-xs">
+                                                       <span className={`px-2 py-1 rounded font-medium ${
+                                                         submission.isGraded 
+                                                           ? 'bg-blue-100 text-blue-800' 
+                                                           : 'bg-yellow-100 text-yellow-800'
+                                                       }`}>
+                                                         {submission.isGraded ? 'Graded' : 'Submitted - Pending Review'}
+                                                       </span>
+                                                       {submission.isGraded && (
+                                                         <span className="font-medium text-green-600">
+                                                           Score: {submission.score}/{assignment.maxScore}
+                                                         </span>
+                                                       )}
+                                                     </div>
+                                                     
+                                                     {submission.feedback && (
+                                                       <div className="mt-2">
+                                                         <p className="text-xs text-gray-600 font-medium">Feedback:</p>
+                                                         <p className="text-xs text-gray-700 mt-1">{submission.feedback}</p>
+                                                       </div>
+                                                     )}
+                                                     
+                                                     <div className="mt-1 text-xs text-gray-500">
+                                                       Submitted: {new Date(submission.submittedAt).toLocaleDateString()}
+                                                     </div>
+                                                   </div>
+                                                 )}
+                                               </div>
+                                               
+                                               {!submission && (
+                                                 <button
+                                                   onClick={() => handleAssignmentSubmission(week.week, assignment)}
+                                                   className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors"
+                                                 >
+                                                   Submit
+                                                 </button>
                                                )}
                                              </div>
-                                             <button
-                                               onClick={() => handleAssignmentSubmission(week.week, assignment)}
-                                               className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors"
-                                             >
-                                               Submit
-                                             </button>
                                            </div>
-                                         </div>
-                                       ))}
+                                         );
+                                       })}
                                      </div>
                                    </div>
                                  )}
@@ -1619,11 +1689,9 @@ const Dashboard = () => {
                   Cancel
                 </button>
                 <button
-              onClick={() => {
-                const assignment = selectedAssignment as { week: number; assignment: PredefinedCourseAssignment };
-                handleSubmitAssignment(assignment.week, assignment.assignment);
-              }}
+                  onClick={handleSubmitAssignment}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  disabled={!assignmentLink.trim()}
                 >
                   Submit
                 </button>
