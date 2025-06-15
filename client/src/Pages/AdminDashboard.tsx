@@ -104,7 +104,7 @@ const AdminDashboard = () => {
       const token = await getToken();
       
       // Fetch test results
-      const testsResponse = await api.get('/api/quiz-results/admin/all', {
+      const testsResponse = await api.get('/api/admin/test-results', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
