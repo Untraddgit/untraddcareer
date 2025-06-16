@@ -79,8 +79,9 @@ router.get('/admin/predefined-courses', verifyAuth, verifyAdmin, async (req, res
 router.get('/admin/predefined-courses/:courseName', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { courseName } = req.params;
+    const decodedCourseName = decodeURIComponent(courseName);
     const course = await PredefinedCourse.findOne({ 
-      courseName: courseName.toLowerCase(),
+      courseName: decodedCourseName.toLowerCase(),
       isActive: true 
     });
 
@@ -99,10 +100,11 @@ router.get('/admin/predefined-courses/:courseName', verifyAuth, verifyAdmin, asy
 router.get('/admin/predefined-courses/:courseName/students', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { courseName } = req.params;
+    const decodedCourseName = decodeURIComponent(courseName);
     
     // Get all students enrolled in this course
     const students = await User.find({ 
-      course: courseName.toLowerCase(),
+      course: decodedCourseName.toLowerCase(),
       userType: 'student'
     }).select('clerkId email firstName lastName course').lean();
 
@@ -111,7 +113,7 @@ router.get('/admin/predefined-courses/:courseName/students', verifyAuth, verifyA
       students.map(async (student) => {
         const progress = await PredefinedCourseProgress.findOne({
           studentId: student.clerkId,
-          courseName: courseName.toLowerCase()
+          courseName: decodedCourseName.toLowerCase()
         });
 
         return {
@@ -134,6 +136,7 @@ router.put('/admin/predefined-courses/:courseName/students/:studentId/modules/:w
     const { courseName, studentId, week } = req.params;
     const { isCompleted, notes } = req.body;
     const adminId = req.auth?.userId;
+    const decodedCourseName = decodeURIComponent(courseName);
 
     const weekNumber = parseInt(week);
     if (isNaN(weekNumber) || weekNumber < 1) {
@@ -143,13 +146,13 @@ router.put('/admin/predefined-courses/:courseName/students/:studentId/modules/:w
     // Find or create progress record
     let progress = await PredefinedCourseProgress.findOne({
       studentId,
-      courseName: courseName.toLowerCase()
+      courseName: decodedCourseName.toLowerCase()
     });
 
     if (!progress) {
       // Initialize progress if it doesn't exist
       const course = await PredefinedCourse.findOne({ 
-        courseName: courseName.toLowerCase(),
+        courseName: decodedCourseName.toLowerCase(),
         isActive: true 
       });
 
@@ -273,10 +276,11 @@ router.get('/student/predefined-course-materials', verifyAuth, async (req, res) 
 router.get('/admin/predefined-courses/:courseName/students/:studentId/materials', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { courseName, studentId } = req.params;
+    const decodedCourseName = decodeURIComponent(courseName);
 
     // Get predefined course details
     const course = await PredefinedCourse.findOne({ 
-      courseName: courseName.toLowerCase(),
+      courseName: decodedCourseName.toLowerCase(),
       isActive: true 
     });
 
@@ -287,7 +291,7 @@ router.get('/admin/predefined-courses/:courseName/students/:studentId/materials'
     // Get student progress
     let progress = await PredefinedCourseProgress.findOne({ 
       studentId, 
-      courseName: courseName.toLowerCase() 
+      courseName: decodedCourseName.toLowerCase() 
     });
 
     if (!progress) {
@@ -334,9 +338,10 @@ router.put('/admin/predefined-courses/:courseName', verifyAuth, verifyAdmin, asy
   try {
     const { courseName } = req.params;
     const updateData = req.body;
+    const decodedCourseName = decodeURIComponent(courseName);
 
     const course = await PredefinedCourse.findOneAndUpdate(
-      { courseName: courseName.toLowerCase(), isActive: true },
+      { courseName: decodedCourseName.toLowerCase(), isActive: true },
       updateData,
       { new: true, runValidators: true }
     );
@@ -357,6 +362,7 @@ router.post('/admin/predefined-courses/:courseName/weeks/:week/resources', verif
   try {
     const { courseName, week } = req.params;
     const { title, url, type } = req.body;
+    const decodedCourseName = decodeURIComponent(courseName);
 
     const weekNumber = parseInt(week);
     if (isNaN(weekNumber) || weekNumber < 1) {
@@ -364,7 +370,7 @@ router.post('/admin/predefined-courses/:courseName/weeks/:week/resources', verif
     }
 
     const course = await PredefinedCourse.findOne({ 
-      courseName: courseName.toLowerCase(),
+      courseName: decodedCourseName.toLowerCase(),
       isActive: true 
     });
 
@@ -396,6 +402,7 @@ router.post('/admin/predefined-courses/:courseName/weeks/:week/assignments', ver
   try {
     const { courseName, week } = req.params;
     const { title, description, dueDate, maxScore, instructions } = req.body;
+    const decodedCourseName = decodeURIComponent(courseName);
 
     const weekNumber = parseInt(week);
     if (isNaN(weekNumber) || weekNumber < 1) {
@@ -403,7 +410,7 @@ router.post('/admin/predefined-courses/:courseName/weeks/:week/assignments', ver
     }
 
     const course = await PredefinedCourse.findOne({ 
-      courseName: courseName.toLowerCase(),
+      courseName: decodedCourseName.toLowerCase(),
       isActive: true 
     });
 
@@ -637,10 +644,11 @@ router.put('/admin/assignments/:submissionId/grade', verifyAuth, verifyAdmin, as
 router.get('/admin/predefined-courses/:courseName/students/:studentId/submissions', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { courseName, studentId } = req.params;
+    const decodedCourseName = decodeURIComponent(courseName);
 
     const submissions = await AssignmentSubmission.find({
       studentId,
-      courseName: courseName.toLowerCase()
+      courseName: decodedCourseName.toLowerCase()
     }).sort({ submittedAt: -1 });
 
     res.json(submissions);

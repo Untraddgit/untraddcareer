@@ -278,7 +278,7 @@ const AdminDashboard = () => {
       const token = await getToken();
       if (editingCourse) {
         // Update existing course
-        const response = await api.put(`/api/predefined-courses/admin/predefined-courses/${editingCourse.courseName}`, courseForm, {
+        const response = await api.put(`/api/predefined-courses/admin/predefined-courses/${encodeURIComponent(editingCourse.courseName)}`, courseForm, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCourses(courses.map(c => c._id === editingCourse._id ? response.data : c));
@@ -388,7 +388,7 @@ const AdminDashboard = () => {
   const viewCourseDetails = async (course: any) => {
     try {
       const token = await getToken();
-      const response = await api.get(`/api/predefined-courses/admin/predefined-courses/${course.courseName}`, {
+      const response = await api.get(`/api/predefined-courses/admin/predefined-courses/${encodeURIComponent(course.courseName)}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSelectedCourse(response.data);
@@ -414,7 +414,7 @@ const AdminDashboard = () => {
   const addResource = async () => {
     try {
       const token = await getToken();
-      await api.post(`/api/predefined-courses/admin/predefined-courses/${selectedCourse.courseName}/weeks/${selectedWeek}/resources`, resourceForm, {
+      await api.post(`/api/predefined-courses/admin/predefined-courses/${encodeURIComponent(selectedCourse.courseName)}/weeks/${selectedWeek}/resources`, resourceForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -431,7 +431,7 @@ const AdminDashboard = () => {
   const addAssignment = async () => {
     try {
       const token = await getToken();
-      await api.post(`/api/predefined-courses/admin/predefined-courses/${selectedCourse.courseName}/weeks/${selectedWeek}/assignments`, assignmentForm, {
+      await api.post(`/api/predefined-courses/admin/predefined-courses/${encodeURIComponent(selectedCourse.courseName)}/weeks/${selectedWeek}/assignments`, assignmentForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -911,7 +911,7 @@ const AdminDashboard = () => {
                               if (confirm('Are you sure you want to delete this course?')) {
                                 try {
                                   const token = await getToken();
-                                  await api.delete(`/api/predefined-courses/admin/predefined-courses/${course.courseName}`, {
+                                  await api.delete(`/api/predefined-courses/admin/predefined-courses/${encodeURIComponent(course.courseName)}`, {
                                     headers: { Authorization: `Bearer ${token}` }
                                   });
                                   setCourses(courses.filter(c => c._id !== course._id));

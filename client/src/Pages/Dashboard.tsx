@@ -276,7 +276,6 @@ const Dashboard = () => {
   const [loadingPredefinedCourse, setLoadingPredefinedCourse] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<{ week: number; assignment: PredefinedCourseAssignment } | null>(null);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
-  const [assignmentLink, setAssignmentLink] = useState('');
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<any[]>([]);
   
   // Collapsible state management
@@ -284,6 +283,14 @@ const Dashboard = () => {
   const [showSyllabus, setShowSyllabus] = useState(false);
   const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
   const [studentFeedback, setStudentFeedback] = useState<StudentFeedback | null>(null);
+
+  // New assignment form state
+  const [assignmentForm, setAssignmentForm] = useState({
+    studentName: '',
+    submissionLink: '',
+    description: '',
+    notes: ''
+  });
 
   // Initial data fetch
   useEffect(() => {
@@ -495,12 +502,20 @@ const Dashboard = () => {
   };
 
   const handleAssignmentSubmission = (week: number, assignment: PredefinedCourseAssignment) => {
+    console.log('Assignment submission clicked:', { week, assignment });
     setSelectedAssignment({ week, assignment });
+    setAssignmentForm({
+      studentName: user?.firstName + ' ' + (user?.lastName || ''),
+      submissionLink: '',
+      description: '',
+      notes: ''
+    });
     setShowAssignmentModal(true);
+    console.log('Modal should be showing now');
   };
 
   const handleSubmitAssignment = async () => {
-    if (!selectedAssignment || !assignmentLink.trim()) {
+    if (!selectedAssignment || !assignmentForm.submissionLink.trim()) {
       alert('Please provide a valid assignment link');
       return;
     }
@@ -509,13 +524,20 @@ const Dashboard = () => {
       const token = await getToken();
       await api.post(`/api/predefined-courses/student/assignments/${selectedAssignment.week}`, {
         assignmentId: selectedAssignment.assignment._id,
-        submissionLink: assignmentLink.trim()
+        submissionLink: assignmentForm.submissionLink.trim(),
+        description: assignmentForm.description,
+        notes: assignmentForm.notes
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       setShowAssignmentModal(false);
-      setAssignmentLink('');
+      setAssignmentForm({
+        studentName: '',
+        submissionLink: '',
+        description: '',
+        notes: ''
+      });
       alert('Assignment submitted successfully!');
       
       // Refresh course data and assignment submissions to update status
@@ -1646,16 +1668,21 @@ const Dashboard = () => {
   // Assignment Modal
       {showAssignmentModal && selectedAssignment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
-              Submit Assignment: {(selectedAssignment as { assignment: { title: string } }).assignment.title}
+                  Submit Assignment: {(selectedAssignment as { assignment: { title: string } }).assignment.title}
                 </h3>
                 <button
                   onClick={() => {
                     setShowAssignmentModal(false);
-                    setAssignmentLink('');
+                    setAssignmentForm({
+                      studentName: '',
+                      submissionLink: '',
+                      description: '',
+                      notes: ''
+                    });
                   }}
                   className="text-gray-400 hover:text-gray-600"
                 >
@@ -1665,35 +1692,103 @@ const Dashboard = () => {
             </div>
             
             <div className="p-6">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Assignment Link
-                </label>
-                <input
-                  type="url"
-                  value={assignmentLink}
-                  onChange={(e) => setAssignmentLink(e.target.value)}
-                  placeholder="Paste your assignment submission link here"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+              <div className="space-y-4">
+                {/* Student Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Student Name
+                  </label>
+                  <input
+                    type="text"
+                    value={assignmentForm.studentName}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, studentName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Your full name"
+                  />
+                </div>
+
+                {/* Assignment Link */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Assignment Submission Link *
+                  </label>
+                  <input
+                    type="url"
+                    value={assignmentForm.submissionLink}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, submissionLink: e.target.value })}
+                    placeholder="Paste your assignment submission link here (Google Drive, GitHub, etc.)"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Assignment Description
+                  </label>
+                  <textarea
+                    value={assignmentForm.description}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, description: e.target.value })}
+                    placeholder="Briefly describe your assignment submission..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                  />
+                </div>
+
+                {/* Additional Notes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Additional Notes (Optional)
+                  </label>
+                  <textarea
+                    value={assignmentForm.notes}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, notes: e.target.value })}
+                    placeholder="Any additional notes or comments for your instructor..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={2}
+                  />
+                </div>
+
+                {/* Assignment Details */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">Assignment Details</h4>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <strong>Week:</strong> {selectedAssignment?.week}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <strong>Title:</strong> {selectedAssignment?.assignment.title}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <strong>Description:</strong> {selectedAssignment?.assignment.description}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <strong>Max Score:</strong> {selectedAssignment?.assignment.maxScore} points
+                  </p>
+                </div>
               </div>
               
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => {
                     setShowAssignmentModal(false);
-                    setAssignmentLink('');
+                    setAssignmentForm({
+                      studentName: '',
+                      submissionLink: '',
+                      description: '',
+                      notes: ''
+                    });
                   }}
-                  className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                  className="px-4 py-2 text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmitAssignment}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  disabled={!assignmentLink.trim()}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!assignmentForm.submissionLink.trim()}
                 >
-                  Submit
+                  Submit Assignment
                 </button>
               </div>
             </div>
