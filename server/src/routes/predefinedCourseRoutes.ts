@@ -220,6 +220,60 @@ router.put('/admin/predefined-courses/:courseName/students/:studentId/modules/:w
   }
 });
 
+// Get foundation training course for premium students (student only)
+router.get('/student/foundation-course', verifyAuth, async (req, res) => {
+  try {
+    const userId = req.auth?.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Get student details
+    const student = await User.findOne({ clerkId: userId });
+    if (!student || student.userType !== 'student') {
+      return res.status(403).json({ message: 'Access denied. Student privileges required.' });
+    }
+
+    // Check if student has premium plan
+    if (student.plan !== 'premium') {
+      return res.status(403).json({ message: 'Access denied. Premium plan required.' });
+    }
+
+    // Get the specific foundation training course
+    const course = await PredefinedCourse.findOne({ 
+      courseName: 'foundationtraining',
+      isActive: true 
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: 'Foundation training course not found' });
+    }
+
+    // Get or create student progress for this course
+    let progress = await PredefinedCourseProgress.findOne({
+      studentId: userId,
+      courseName: 'foundationtraining'
+    });
+
+    if (!progress) {
+      progress = await initializePredefinedCourseProgress(userId, course);
+    } else {
+      // Update last accessed time
+      progress.lastAccessedAt = new Date();
+      await progress.save();
+    }
+
+    res.json({
+      course,
+      progress
+    });
+  } catch (error) {
+    console.error('Error fetching foundation course:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 // Get student's predefined course materials (student only)
 router.get('/student/predefined-course-materials', verifyAuth, async (req, res) => {
   try {

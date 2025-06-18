@@ -34,17 +34,20 @@ export interface IWeeklyModule {
 }
 
 export interface IToolsAndTechnologies {
-  languages: string[];
-  frontend: string[];
-  backend: string[];
-  databases: string[];
-  authentication: string[];
-  devops: string[];
-  deployment: string[];
-  ai: string[];
-  testingMonitoring: string[];
-  tooling: string[];
-  csFundamentals: string[];
+  languages?: string[];
+  frontend?: string[];
+  backend?: string[];
+  databases?: string[];
+  authentication?: string[];
+  devops?: string[];
+  deployment?: string[];
+  ai?: string[];
+  aiTools?: string[];
+  testingMonitoring?: string[];
+  tooling?: string[];
+  csFundamentals?: string[];
+  softSkills?: string[];
+  platforms?: string[];
 }
 
 export interface IPredefinedCourse extends Document {
@@ -158,9 +161,12 @@ const ToolsAndTechnologiesSchema = new Schema<IToolsAndTechnologies>({
   devops: [String],
   deployment: [String],
   ai: [String],
+  aiTools: [String],
   testingMonitoring: [String],
   tooling: [String],
-  csFundamentals: [String]
+  csFundamentals: [String],
+  softSkills: [String],
+  platforms: [String]
 });
 
 const PredefinedCourseSchema = new Schema<IPredefinedCourse>({
