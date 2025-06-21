@@ -4,7 +4,6 @@ import QuizResult from '../models/QuizResult';
 import User from '../models/User';
 import CounsellingSession from '../models/CounsellingSession';
 import StudentFeedback from '../models/StudentFeedback';
-
 const router = express.Router();
 
 // Middleware to check if user is admin
@@ -210,5 +209,6 @@ router.post('/student-feedback', verifyAuth, verifyAdmin, async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 export default router; 
