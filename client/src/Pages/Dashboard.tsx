@@ -594,9 +594,7 @@ const Dashboard = () => {
       description: "",
       notes: "",
     });
-    setShowAssignmentModal((prev) => {
-      return true;
-    });
+    setShowAssignmentModal(true)
     // console.log("Modal state after update:", showAssignmentModal);
   };
 
