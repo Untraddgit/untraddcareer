@@ -4,6 +4,9 @@ export interface IAssignmentSubmission extends Document {
   studentId: string;
   courseId: mongoose.Types.ObjectId;
   week: number;
+  module:string,
+  maxScore:number,
+  title:string,
   assignmentId: string;
   submissionLink: string;
   submittedAt: Date;
@@ -32,6 +35,15 @@ const AssignmentSubmissionSchema = new Schema<IAssignmentSubmission>({
   week: {
     type: Number,
     required: true
+  },
+  module: {
+    type: String,
+  },
+  maxScore:{
+    type:Number,
+  },
+  title: {
+    type: String,
   },
   assignmentId: {
     type: String,

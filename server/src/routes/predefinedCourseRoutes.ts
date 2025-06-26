@@ -501,7 +501,7 @@ router.post('/admin/predefined-courses/:courseName/weeks/:week/assignments', ver
 router.post('/student/assignments/:week', verifyAuth, async (req, res) => {
   try {
     const { week } = req.params;
-    const { assignmentId, submissionLink } = req.body;
+    const { assignmentId, submissionLink,module,maxScore,title,} = req.body;
     const studentId = req.auth?.userId;
 
     if (!studentId) {
@@ -538,7 +538,10 @@ router.post('/student/assignments/:week', verifyAuth, async (req, res) => {
         studentId,
         courseId: course._id,
         week: parseInt(week),
-        assignmentId
+        assignmentId,
+        module,
+        maxScore,
+        title,
       },
       {
         submissionLink,

@@ -4,6 +4,7 @@ import QuizResult from '../models/QuizResult';
 import User from '../models/User';
 import CounsellingSession from '../models/CounsellingSession';
 import StudentFeedback from '../models/StudentFeedback';
+import AssignmentSubmission from '../models/AssignmentSubmission';
 
 const router = express.Router();
 
@@ -210,5 +211,73 @@ router.post('/student-feedback', verifyAuth, verifyAdmin, async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
+router.post('/grade-assignment',verifyAuth,verifyAdmin,async (req, res) => {
+  try {
+    const { studentId, courseId, assignmentId, week, score, feedback, gradedBy } = req.body;
+
+    const updated = await AssignmentSubmission.findOneAndUpdate(
+      { studentId, courseId, assignmentId, week },
+      {
+        score,
+        feedback,
+        status: 'graded',
+        gradedAt: new Date(),
+        gradedBy
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: 'Submission not found.' });
+    }
+
+    res.json({ message: 'Assignment graded successfully', submission: updated });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error grading assignment' });
+  }
+});
+
+ //all-students-performance
+router.get('/all-students-performance',verifyAuth,verifyAdmin, async (req, res) => {
+  try {
+    const submissions = await AssignmentSubmission.find()
+      .populate('courseId') // From PredefinedCourse
+      .lean();
+
+    const grouped = submissions.reduce((acc, submission) => {
+      const key = submission.studentId;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(submission);
+      return acc;
+    }, {} as Record<string, any[]>);
+
+    // console.log("grouped:-",grouped)
+    res.json(grouped);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch performance' });
+  }
+});
+
+//student/my-performance/:studentId
+router.get('/student/my-performance/:studentId',verifyAuth,verifyAdmin,async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const submissions = await AssignmentSubmission.find({ studentId })
+      .populate('courseId')
+      .sort({ week: 1 });
+
+    res.json(submissions);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching performance' });
+  }
+});
+
+
+
+
 
 export default router; 

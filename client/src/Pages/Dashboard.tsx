@@ -32,137 +32,22 @@ import Navbar from "../components/Navbar";
 import CounselingFeedbackTab from "../components/CounselingFeedbackTab";
 import api from "../utils/axios";
 import axios from "axios";
+// types
+import { StudentFeedback } from "@/types/studentfeedback";
+import { TestResult } from "@/types/testresult";
+import { User } from "@/types/user";
+import {
+  PredefinedCourseAssignment,
+  PredefinedCourseProject,
+  PredefinedCourseData,
+  PredefinedCourseModuleProgress,
+  PredefinedCourseProgress,
+  PredefinedCourseResource,
+  PredefinedCourseToolsAndTechnologies,
+  PredefinedCourseWeek,
+} from "@/types/predefinedcourses";
 
-interface User {
-  clerkId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  userType: "student" | "admin";
-  course?: string;
-  plan?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
-interface TestResult {
-  score: number;
-  completedAt: string;
-  timeSpent: number;
-}
-
-// New interfaces for predefined courses
-interface PredefinedCourseProject {
-  title: string;
-  description?: string;
-}
-
-interface PredefinedCourseResource {
-  title: string;
-  url: string;
-  type: "video" | "article" | "document" | "tool" | "other";
-}
-
-interface PredefinedCourseAssignment {
-  _id: string;
-  title: string;
-  description: string;
-  dueDate?: string;
-  maxScore: number;
-  instructions: string;
-}
-
-interface PredefinedCourseWeek {
-  week: number;
-  title: string;
-  topics: string[];
-  projects: (string | PredefinedCourseProject)[];
-  liveClassTopics: string[];
-  resources?: PredefinedCourseResource[];
-  assignments?: PredefinedCourseAssignment[];
-  isCompleted?: boolean;
-  completedAt?: string;
-  isLocked?: boolean;
-}
-
-interface PredefinedCourseToolsAndTechnologies {
-  languages?: string[];
-  frontend?: string[];
-  backend?: string[];
-  databases?: string[];
-  authentication?: string[];
-  devops?: string[];
-  deployment?: string[];
-  ai?: string[];
-  aiTools?: string[];
-  testingMonitoring?: string[];
-  tooling?: string[];
-  csFundamentals?: string[];
-  softSkills?: string[];
-  platforms?: string[];
-}
-
-interface PredefinedCourseData {
-  _id: string;
-  courseName: string;
-  displayName?: string;
-  durationWeeks: number;
-  effortPerWeek: string;
-  liveClassesPerWeek: number;
-  courseDescription: string;
-  weeklyRoadmap: PredefinedCourseWeek[];
-  toolsAndTechnologies: PredefinedCourseToolsAndTechnologies;
-  expectedOutcomes: string[];
-  isActive: boolean;
-}
-
-interface PredefinedCourseModuleProgress {
-  week: number;
-  isCompleted: boolean;
-  completedAt?: string;
-  isLocked: boolean;
-  completedBy?: string;
-  notes?: string;
-}
-
-interface PredefinedCourseProgress {
-  _id: string;
-  studentId: string;
-  courseName: string;
-  courseId: string;
-  modules: PredefinedCourseModuleProgress[];
-  overallProgress: number;
-  currentWeek: number;
-  startedAt: string;
-  lastAccessedAt: string;
-  completedAt?: string;
-  totalTimeSpent: number;
-}
-
-interface StudentFeedback {
-  studentId: string;
-  name: string;
-  semester: string;
-  college: string;
-  threeWords: string[];
-  strengths: string;
-  areasOfImprovement: string;
-  stressHandling: string;
-  motivation: string;
-  englishRating: number;
-  hindiRating: number;
-  confidence: string;
-  decisionMaking: string;
-  biggestAchievement: string;
-  turningPoint: string;
-  conflicts: string;
-  futureConcern: string;
-  alignInThoughts: string;
-  courseChosen: string;
-  createdAt: string;
-}
-
-// Define scholarship tiers - same as in ScholarshipTest
 const SCHOLARSHIP_TIERS = [
   { minScore: 80, discount: 15 },
   { minScore: 70, discount: 10 },
@@ -295,9 +180,10 @@ const Dashboard = () => {
   }>({});
   const [showFoundationSyllabus, setShowFoundationSyllabus] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<{
-    week: number;
+    week: PredefinedCourseWeek;
     assignment: PredefinedCourseAssignment;
   } | null>(null);
+  
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<any[]>([]);
 
@@ -581,9 +467,8 @@ const Dashboard = () => {
     setModalType("community"); // Reset to default value instead of null
   };
 
-
   const handleAssignmentSubmission = (
-    week: number,
+    week: PredefinedCourseWeek,
     assignment: PredefinedCourseAssignment
   ) => {
     setSelectedAssignment({ week, assignment });
@@ -606,11 +491,14 @@ const Dashboard = () => {
 
     try {
       const token = await getToken();
-      await api.post(
-        `/api/predefined-courses/student/assignments/${selectedAssignment.week}`,
+     const res =  await api.post(
+        `/api/predefined-courses/student/assignments/${selectedAssignment.week.week}`,
         {
           assignmentId: selectedAssignment.assignment._id,
           submissionLink: assignmentForm.submissionLink.trim(),
+          module:selectedAssignment.week.title,
+          maxScore:selectedAssignment.assignment.maxScore,
+          title:selectedAssignment.assignment.title,
           description: assignmentForm.description,
           notes: assignmentForm.notes,
         },
@@ -619,6 +507,7 @@ const Dashboard = () => {
         }
       );
 
+      console.log("form:-",res)
       setShowAssignmentModal(false);
       setAssignmentForm({
         studentName: "",
@@ -1468,7 +1357,7 @@ const Dashboard = () => {
                                                     <button
                                                       onClick={() =>
                                                         handleAssignmentSubmission(
-                                                          week.week,
+                                                          week,
                                                           assignment
                                                         )
                                                       }
@@ -2561,7 +2450,10 @@ const Dashboard = () => {
                     Assignment Details
                   </h4>
                   <p className="text-sm text-gray-600 mb-1">
-                    <strong>Week:</strong> {selectedAssignment?.week}
+                    <strong>Module:</strong> {selectedAssignment?.week?.title}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <strong>Week:</strong> {selectedAssignment?.week?.week}
                   </p>
                   <p className="text-sm text-gray-600 mb-1">
                     <strong>Title:</strong>{" "}
