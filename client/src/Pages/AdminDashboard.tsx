@@ -90,11 +90,7 @@ const AdminDashboard = () => {
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<any[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   const [showGradingModal, setShowGradingModal] = useState(false);
-  const [gradingForm, setGradingForm] = useState({
-    score: 0,
-    feedback: "",
-    status: false,
-  });
+  
 
   // Feedback editing state
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -136,13 +132,6 @@ const AdminDashboard = () => {
     fetchStudents();
   }, []);
 
-  const handleGradeClick = (submission: AssignmentSubmission) => {
-    setSelectedSubmission(submission);
-    setScoreInput(
-      submission.score !== undefined ? String(submission.score) : ""
-    );
-    setFeedbackInput(submission.feedback || "");
-  };
 
   // student-performance
  const fetchSubmissions = async () => {
@@ -524,45 +513,10 @@ const fetchStudents = async () => {
 
   const openGradingModal = (submission: any) => {
     setSelectedSubmission(submission);
-    setGradingForm({
-      score: submission.score || 0,
-      feedback: submission.feedback || "",
-      status: submission.status || false,
-    });
+    
     setShowGradingModal(true);
   };
-
-  const saveGrading = async () => {
-    if (!selectedSubmission) return;
-
-    try {
-      const token = await getToken();
-      await api.put(
-        `/api/predefined-courses/admin/assignments/${selectedSubmission._id}/grade`,
-        {
-          score: gradingForm.score,
-          feedback: gradingForm.feedback,
-          status: gradingForm.status,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setShowGradingModal(false);
-      setGradingForm({ score: 0, feedback: "", status: false });
-      setSelectedSubmission(null);
-      alert("Grade saved successfully!");
-
-      // Refresh assignment submissions to show updated status
-      if (selectedCourse) {
-        await viewAssignmentSubmissions(selectedCourse);
-      }
-    } catch (error) {
-      console.error("Error saving grade:", error);
-      alert("Error saving grade. Please try again.");
-    }
-  };
+  
 
   const premiumStudentCard = (student: StudentData) => (
     <div

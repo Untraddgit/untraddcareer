@@ -38,12 +38,8 @@ import { TestResult } from "@/types/testresult";
 import { User } from "@/types/user";
 import {
   PredefinedCourseAssignment,
-  PredefinedCourseProject,
   PredefinedCourseData,
-  PredefinedCourseModuleProgress,
   PredefinedCourseProgress,
-  PredefinedCourseResource,
-  PredefinedCourseToolsAndTechnologies,
   PredefinedCourseWeek,
 } from "@/types/predefinedcourses";
 
