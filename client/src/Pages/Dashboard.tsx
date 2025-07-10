@@ -43,6 +43,32 @@ import {
   PredefinedCourseWeek,
 } from "@/types/predefinedcourses";
 
+//Graphql
+import { motion } from "framer-motion";
+import { useQuery, gql } from "@apollo/client";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartOptions,
+  PointElement,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  // add new
+  PointElement
+);
 
 const SCHOLARSHIP_TIERS = [
   { minScore: 80, discount: 15 },
@@ -139,6 +165,134 @@ interface UpcomingSession {
   link: string;
 }
 
+type CoursePerformance = {
+  courseId: string;
+  courseName: string;
+  totalAssignments: number;
+  submittedAssignments: number;
+  averageGrade: number | null;
+};
+
+interface OverallPerformanceChartProps {
+  data: CoursePerformance[];
+}
+
+const OverallPerformanceChart: React.FC<OverallPerformanceChartProps> = ({
+  data,
+}) => {
+  if (!data?.length)
+    return (
+      <p className="text-center text-sm text-gray-500 py-4">
+        No performance data available.
+      </p>
+    );
+
+  const labels = data.map((item) => item.courseName);
+  const averages = data.map((item) => item.averageGrade ?? 0);
+  const totalAssignments = data.map((item) => item.totalAssignments ?? 0);
+  const submittedAssignments = data.map(
+    (item) => item.submittedAssignments ?? 0
+  );
+
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: "Average Grade (%)",
+        data: averages,
+        backgroundColor: "#3B82F6", // Blue
+        borderColor: "#3B82F6",
+        borderWidth: 1,
+        barThickness: 60, // Thinner bars for mobile
+      },
+      {
+        label: "Total Assignments",
+        data: totalAssignments,
+        backgroundColor: "#FF6384", // Pink
+        borderColor: "#FF6384",
+        borderWidth: 1,
+        barThickness: 60,
+      },
+      {
+        label: "Submitted Assignments",
+        data: submittedAssignments,
+        backgroundColor: "#FFCE56", // Yellow
+        borderColor: "#FFCE56",
+        borderWidth: 1,
+        barThickness: 60,
+      },
+    ],
+  };
+
+  const options: ChartOptions<"bar"> = {
+    responsive: true,
+    maintainAspectRatio: false, // Important for responsive resizing
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          boxWidth: 12,
+          padding: 10,
+          font: { size: 10 },
+        },
+      },
+      title: {
+        display: true,
+        text: "Overall Course Performance",
+        font: { size: 14, weight: "bold" },
+        padding: { top: 10, bottom: 20 },
+      },
+      tooltip: {
+        padding: 8,
+        bodyFont: { size: 12 },
+        callbacks: {
+          title: (tooltipItems) => {
+            // Show full course name in tooltip title
+            const index = tooltipItems[0].dataIndex;
+            return labels[index] || "";
+          },
+          label: (context) => `${context.dataset.label}: ${context.raw ?? 0}`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: "rgba(0,0,0,0.1)" },
+        ticks: {
+          font: { size: 10 },
+          padding: 4,
+        },
+        title: {
+          display: true,
+          text: "Values",
+          font: { size: 12 },
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: {
+          font: { size: 10 },
+          padding: 4,
+          callback: function (value) {
+            const label = this.getLabelForValue(value as number);
+            return label.length > 8 ? label.slice(0, 8) + "…" : label;
+          },
+          maxRotation: 0,
+          minRotation: 0,
+        },
+        title: {
+          display: true,
+          text: "Courses",
+          font: { size: 12 },
+        },
+      },
+    },
+  };
+
+  return <Bar data={chartData} options={options} />;
+};
+
 const Dashboard = () => {
   const { user } = useUser();
   const { getToken, isLoaded } = useAuth();
@@ -179,7 +333,7 @@ const Dashboard = () => {
     week: PredefinedCourseWeek;
     assignment: PredefinedCourseAssignment;
   } | null>(null);
-  
+
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<any[]>([]);
 
@@ -201,6 +355,46 @@ const Dashboard = () => {
     description: "",
     notes: "",
   });
+
+  // GraphQL query
+
+  // get student overall performance on course
+  const GET_OVERALL_PERFORMANCE = gql`
+    query GetStudentOverallPerformance($studentId: ID!, $courseId: ID) {
+      getStudentOverallPerformance(studentId: $studentId, courseId: $courseId) {
+        courseId
+        courseName
+        totalAssignments
+        submittedAssignments
+        averageGrade
+      }
+    }
+  `;
+
+  // get student module performance
+  const GET_MODULE_PERFORMANCE = gql`
+    query GetStudentModulePerformance($studentId: ID!, $courseId: ID) {
+      getStudentModulePerformance(studentId: $studentId, courseId: $courseId) {
+        week
+        module
+        grade
+      }
+    }
+  `;
+
+  // get student all submission details
+  const GET_ALL_SUBMISSIONS = gql`
+    query GetAllSubmissions($studentId: ID!, $courseId: ID) {
+      getStudentAllSubmissions(studentId: $studentId, courseId: $courseId) {
+        week
+        module
+        title
+        score
+        maxScore
+        status
+      }
+    }
+  `;
 
   // Initial data fetch
   useEffect(() => {
@@ -275,7 +469,7 @@ const Dashboard = () => {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
       );
-      console.log("foundation-course:-", response.data);
+      // console.log("foundation-course:-", response.data);
       setFoundationCourseData(response.data.course);
       setFoundationCourseProgress(response.data.progress);
     } catch (error) {
@@ -487,14 +681,14 @@ const Dashboard = () => {
 
     try {
       const token = await getToken();
-     const res =  await api.post(
+      const res = await api.post(
         `/api/predefined-courses/student/assignments/${selectedAssignment.week.week}`,
         {
           assignmentId: selectedAssignment.assignment._id,
           submissionLink: assignmentForm.submissionLink.trim(),
-          module:selectedAssignment.week.title,
-          maxScore:selectedAssignment.assignment.maxScore,
-          title:selectedAssignment.assignment.title,
+          module: selectedAssignment.week.title,
+          maxScore: selectedAssignment.assignment.maxScore,
+          title: selectedAssignment.assignment.title,
           description: assignmentForm.description,
           notes: assignmentForm.notes,
         },
@@ -503,7 +697,7 @@ const Dashboard = () => {
         }
       );
 
-      console.log("form:-",res)
+      console.log("form:-", res);
       setShowAssignmentModal(false);
       setAssignmentForm({
         studentName: "",
@@ -534,6 +728,172 @@ const Dashboard = () => {
       ...prev,
       [weekIndex]: !prev[weekIndex],
     }));
+  };
+
+  const { data: overallData, loading: loadingOverall } = useQuery(
+    GET_OVERALL_PERFORMANCE,
+    {
+      variables: { studentId: user?.id },
+      skip: !user?.id,
+    }
+  );
+  const overallPerformance = overallData?.getStudentOverallPerformance || [];
+
+  const { data: groupedData, loading: loadingGrouped } = useQuery<{
+    getStudentModulePerformance: {
+      week: number;
+      module: string;
+      grade: number;
+    }[];
+  }>(GET_MODULE_PERFORMANCE, {
+    variables: { studentId: user?.id },
+    skip: !user?.id,
+  });
+
+  const { data: allSubsData, loading: loadingAll } = useQuery<{
+    getStudentAllSubmissions: {
+      week: number;
+      module: string;
+      title: string;
+      score?: number;
+      maxScore?: number;
+      status: string;
+    }[];
+  }>(GET_ALL_SUBMISSIONS, {
+    variables: { studentId: user?.id },
+    skip: !user?.id,
+  });
+
+  // const generateGradient = (ctx: any) => {
+  //   const chart = ctx.chart;
+  //   const { ctx: context, chartArea } = chart;
+  //   if (!chartArea) return;
+  //   const gradient = context.createLinearGradient(
+  //     0,
+  //     chartArea.bottom,
+  //     0,
+  //     chartArea.top
+  //   );
+  //   gradient.addColorStop(0, "#3b82f6");
+  //   gradient.addColorStop(1, "#60a5fa");
+  //   return gradient;
+  // };
+  const chartLabels =
+    groupedData?.getStudentModulePerformance.map(
+      (item) => `Week ${item.week} - ${item.module}`
+    ) || [];
+  const chartGrades =
+    groupedData?.getStudentModulePerformance.map((item) => item.grade) || [];
+
+  const scores =
+    allSubsData?.getStudentAllSubmissions?.map((sc: any) => sc.score) || [];
+  const maxScores =
+    allSubsData?.getStudentAllSubmissions?.map((sc: any) => sc.maxScore) || [];
+
+  //  Color function based on score % of maxScore
+  function getScoreColor(score: number, maxScore: number): string {
+    if (
+      typeof score !== "number" ||
+      typeof maxScore !== "number" ||
+      maxScore === 0
+    ) {
+      return "#9ca3af"; // Gray for invalid values
+    }
+
+    const percentage = (score / maxScore) * 100;
+
+    if (percentage >= 75) {
+      return "#22c55e"; // Green
+    } else if (percentage >= 50) {
+      return "#eab308"; // Yellow
+    } else {
+      return "#ef4444"; // Red
+    }
+  }
+
+  // Map scores and maxScores to background colors
+  const backgroundColors = scores.map((score: number, index: number) =>
+    getScoreColor(score, maxScores[index])
+  );
+
+  const chartData = {
+    labels: chartLabels,
+    datasets: [
+      {
+        label: "Average Grade",
+        data: chartGrades,
+        fill: true,
+        // borderColor: "#3b82f6",
+        // backgroundColor: (ctx: any) => generateGradient(ctx),
+        backgroundColor: backgroundColors,
+        tension: 0.4,
+        pointRadius: 3, // Smaller points
+        pointBackgroundColor: "#3b82f6",
+        borderWidth: 2, // Thinner line
+        barThickness: 60,
+      },
+    ],
+  };
+
+  const chartOptions: ChartOptions<"bar"> = {
+    responsive: true,
+    maintainAspectRatio: false, // Allow custom dimensions
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: {
+          boxWidth: 12, // Smaller legend box
+          padding: 10,
+        },
+      },
+      title: {
+        display: true,
+        text: "Modules Performance",
+        font: { size: 14, weight: "bold" }, // Smaller title font
+        padding: { top: 10, bottom: 20 },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => ` Grade: ${context.raw ?? 0}%`,
+        },
+        padding: 8,
+        bodyFont: { size: 12 },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: {
+          font: { size: 10 },
+          padding: 5,
+          callback: function (value) {
+            const label = this.getLabelForValue(value as number);
+            return label.length > 8 ? label.slice(0, 8) + "…" : label;
+          },
+          maxRotation: 0,
+          minRotation: 0,
+        },
+      },
+      y: {
+        grid: { color: "rgba(0, 0, 0, 0.1)" }, // Lighter y-axis grid lines
+        ticks: {
+          font: { size: 10 }, // Smaller y-axis labels
+          padding: 5,
+        },
+      },
+    },
+    onClick: (evt: any, elements) => {
+      if (elements.length > 0) {
+        // const index = elements[0].index;
+        // const label = chartLabels[index];
+        // const [weekText, moduleName] = label.split(" - ");
+        // const weekNumber = parseInt(weekText.replace("Week ", ""));
+        // navigate(
+        //   `/student/performance/week/${weekNumber}/module/${moduleName}`
+        // );
+        console.log("Ctrl key pressed:", evt.ctrlKey);
+      }
+    },
   };
 
   return (
@@ -841,26 +1201,112 @@ const Dashboard = () => {
                     </button>
                   </div>
                 )}
-
-                {/* <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center mb-3">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <Users className="text-green-600 w-5 h-5" />
-                      </div>
-                      <h3 className="ml-3 font-medium text-gray-900">Alumni Community</h3>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      Connect with peers, alumni, and mentors in your field of study.
-                    </p>
-                    <button
-                      onClick={() => openModal('community')}
-                      className="w-full border border-green-600 text-green-600 py-2 px-4 rounded-lg hover:bg-green-50 flex items-center justify-center"
-                    >
-                      Join Community
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </button>
-                  </div> */}
               </div>
+
+              {userData?.plan === "premium" && (
+                <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+                  {/* Charts Section: Responsive Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Overall Performance Chart */}
+                    <div className="bg-white p-4 rounded-2xl shadow border">
+                      <motion.div
+                        className="p-4 bg-white rounded-2xl shadow"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        <h3 className="text-base md:text-lg font-semibold mb-4 text-gray-900">
+                          Overall Performance Chart
+                        </h3>
+                        <div className="w-full h-60 md:h-72 border border-gray-100 rounded-lg overflow-x-auto">
+                          {loadingOverall ? (
+                            <p className="text-center text-gray-600 py-4 text-sm md:text-base">
+                              Loading chart...
+                            </p>
+                          ) : (
+                            <OverallPerformanceChart
+                              data={overallPerformance}
+                            />
+                          )}
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    {/* Modules Performance Chart */}
+                    <div className="bg-white p-4 rounded-2xl shadow border">
+                      <motion.div
+                        className="p-4 bg-white rounded-2xl shadow"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                      >
+                        <h3 className="text-base md:text-lg font-semibold mb-4 text-gray-900">
+                          Modules Performance Chart
+                        </h3>
+                        <div className="w-full h-60 md:h-72 border border-gray-100 rounded-lg overflow-x-auto">
+                          {loadingGrouped ? (
+                            <p className="text-center text-gray-600 py-4 text-sm md:text-base">
+                              Loading chart...
+                            </p>
+                          ) : (
+                            <Bar data={chartData} options={chartOptions} />
+                          )}
+                        </div>
+                      </motion.div>
+                    </div>
+                  </div>
+
+                  {/* Submission Details Table */}
+                  <div className="bg-white p-4 rounded-2xl shadow border">
+                    <h3 className="text-base md:text-lg font-semibold mb-4 text-gray-900">
+                      Submission Details
+                    </h3>
+                    {loadingAll ? (
+                      <p className="text-center text-gray-600 py-4 text-sm md:text-base">
+                        Loading submissions...
+                      </p>
+                    ) : (
+                      <div className="overflow-x-auto rounded-lg border border-gray-100">
+                        <table className="min-w-[600px] w-full text-sm md:text-base">
+                          <thead>
+                            <tr className="border-b bg-gray-50">
+                              <th className="text-left py-2 px-3">Week</th>
+                              <th className="text-left py-2 px-3">Module</th>
+                              <th className="text-left py-2 px-3">Title</th>
+                              <th className="text-left py-2 px-3">Score</th>
+                              <th className="text-left py-2 px-3">Max</th>
+                              <th className="text-left py-2 px-3">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {allSubsData?.getStudentAllSubmissions.map(
+                              (sub, idx) => (
+                                <tr
+                                  key={idx}
+                                  className="border-b hover:bg-gray-50 transition"
+                                >
+                                  <td className="py-2 px-3">{sub.week}</td>
+                                  <td className="py-2 px-3">{sub.module}</td>
+                                  <td className="py-2 px-3">{sub.title}</td>
+                                  <td className="py-2 px-3">
+                                    {sub.score ?? "-"}
+                                  </td>
+                                  <td className="py-2 px-3">
+                                    {sub.maxScore ?? "-"}
+                                  </td>
+                                  <td className="py-2 px-3 capitalize">
+                                    {sub.status}
+                                  </td>
+                                </tr>
+                              )
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

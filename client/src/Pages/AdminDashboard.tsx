@@ -23,7 +23,6 @@ import { TestResult } from "@/types/testresult";
 import { UpcomingSession } from "@/types/upcommingsession";
 import { StudentFeedback } from "@/types/studentfeedback";
 
-
 const AdminDashboard = () => {
   const { getToken } = useAuth();
 
@@ -90,7 +89,6 @@ const AdminDashboard = () => {
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<any[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   const [showGradingModal, setShowGradingModal] = useState(false);
-  
 
   // Feedback editing state
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -132,9 +130,8 @@ const AdminDashboard = () => {
     fetchStudents();
   }, []);
 
-
   // student-performance
- const fetchSubmissions = async () => {
+  const fetchSubmissions = async () => {
     try {
       const token = await getToken();
       const res = await api.get("/api/admin/all-students-performance", {
@@ -152,22 +149,21 @@ const AdminDashboard = () => {
     }
   };
 
-const fetchStudents = async () => {
-  try {
-    const res = await api.get("/api/admin/students");
-    console.log("resallstudent:-",res)
-    const map: Record<string, string> = {};
+  const fetchStudents = async () => {
+    try {
+      const res = await api.get("/api/admin/students");
+      console.log("resallstudent:-", res);
+      const map: Record<string, string> = {};
 
-    (res.data as StudentData[]).forEach((student: StudentData) => {
-      map[student.clerkId] = `${student.firstName} ${student.lastName}`;
-    });
+      (res.data as StudentData[]).forEach((student: StudentData) => {
+        map[student.clerkId] = `${student.firstName} ${student.lastName}`;
+      });
 
-    setStudentsMap(map);
-  } catch (err) {
-    console.error("Failed to load students", err);
-  }
-};
-
+      setStudentsMap(map);
+    } catch (err) {
+      console.error("Failed to load students", err);
+    }
+  };
 
   const fetchAdminData = async () => {
     try {
@@ -501,7 +497,7 @@ const fetchStudents = async () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("response:-",response)
+      console.log("response:-", response);
       setAssignmentSubmissions(response.data);
       setSelectedCourse(course);
       setShowSubmissions(true);
@@ -513,10 +509,9 @@ const fetchStudents = async () => {
 
   const openGradingModal = (submission: any) => {
     setSelectedSubmission(submission);
-    
+
     setShowGradingModal(true);
   };
-  
 
   const premiumStudentCard = (student: StudentData) => (
     <div
@@ -559,6 +554,27 @@ const fetchStudents = async () => {
         </div>
       </div>
     );
+  }
+
+  // student score color
+  function getScoreColor(score: any, maxScore: any) {
+    if (
+      typeof score !== "number" ||
+      typeof maxScore !== "number" ||
+      maxScore === 0
+    ) {
+      return "gray"; // fallback if no valid score or maxScore
+    }
+
+    const percentage = (score / maxScore) * 100;
+
+    if (percentage >= 75) {
+      return "green";
+    } else if (percentage >= 50) {
+      return "yellow";
+    } else {
+      return "red";
+    }
   }
 
   return (
@@ -751,13 +767,12 @@ const fetchStudents = async () => {
                             Score
                           </th>
 
-                          {/* <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Status
-                          </th>
                           <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            MaxScore
+                          </th>
+                          {/* <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Action
                           </th> */}
-
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -783,11 +798,16 @@ const fetchStudents = async () => {
                                 {s.score !== undefined ? (
                                   <span
                                     className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                                      s.score >= 75
+                                      getScoreColor(s.score, s.maxScore) ===
+                                      "green"
                                         ? "bg-green-100 text-green-800"
-                                        : s.score >= 50
+                                        : getScoreColor(s.score, s.maxScore) ===
+                                          "yellow"
                                         ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-red-100 text-red-800"
+                                        : getScoreColor(s.score, s.maxScore) ===
+                                          "red"
+                                        ? "bg-red-100 text-red-800"
+                                        : "bg-gray-100 text-gray-500"
                                     }`}
                                   >
                                     {s.score}
@@ -796,6 +816,10 @@ const fetchStudents = async () => {
                                   <span className="text-gray-400">—</span>
                                 )}
                               </td>
+                              <td className="px-4 py-2 text-gray-700">
+                                {s.maxScore}
+                              </td>
+                          
                             </tr>
                           ))
                         )}
@@ -1123,7 +1147,7 @@ const fetchStudents = async () => {
               </div>
             </div>
           )}
-          
+
           {/* Course Details View */}
           {activeTab === "courses" && showCourseDetails && selectedCourse && (
             <div className="space-y-6">
@@ -1332,7 +1356,7 @@ const fetchStudents = async () => {
                             <p className="text-sm text-gray-500">
                               Week: {submission.week}
                             </p>
-                             <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-500">
                               Moule: {submission.module}
                             </p>
                           </div>
@@ -1349,7 +1373,8 @@ const fetchStudents = async () => {
                               </span>
                               {submission.status && (
                                 <span className="text-sm font-medium text-gray-900">
-                                  Score: {submission.score}/{submission.maxScore}
+                                  Score: {submission.score}/
+                                  {submission.maxScore}
                                 </span>
                               )}
                             </div>
@@ -1604,7 +1629,6 @@ const fetchStudents = async () => {
               </div>
             </div>
           )}
-
         </div>
       </div>
 
@@ -2295,7 +2319,6 @@ const fetchStudents = async () => {
         </div>
       )}
 
-
       {/* Grade Modal second*/}
       {showGradingModal && selectedSubmission && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -2356,7 +2379,6 @@ const fetchStudents = async () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
