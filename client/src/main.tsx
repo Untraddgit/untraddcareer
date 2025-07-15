@@ -1,27 +1,34 @@
 console.log("Force rebuild");
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { ClerkProvider } from '@clerk/clerk-react'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+// clerk
+import { ClerkProvider } from "@clerk/clerk-react";
+
+// Graphql
+import { ApolloProvider } from "@apollo/client";
+import { client } from "./graphql/client";
 
 // Import your Publishable Key
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing Publishable Key')
+  throw new Error("Missing Publishable Key");
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ClerkProvider 
-      publishableKey={PUBLISHABLE_KEY} 
+    <ClerkProvider
+      publishableKey={PUBLISHABLE_KEY}
       afterSignInUrl="/dashboard"
       afterSignUpUrl="/dashboard"
       afterSignOutUrl="/"
     >
-      <App />
+      <ApolloProvider client={client}>
+        <App />
+      </ApolloProvider>
     </ClerkProvider>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

@@ -2,17 +2,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import {
   Users,
-  Award,
-  TrendingUp,
-  Search,
   GraduationCap,
   LayoutDashboard,
   FileText,
   Calendar,
-  ExternalLink,
-  Trash2,
   BookOpen,
-  MessageCircle,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import api from "../utils/axios";
@@ -23,6 +17,15 @@ import { TestResult } from "@/types/testresult";
 import { UpcomingSession } from "@/types/upcommingsession";
 import { StudentFeedback } from "@/types/studentfeedback";
 
+// components
+import OverviewTab from "@/components/AdminDashboard/OverviewTab";
+import StudentsTab from "@/components/AdminDashboard/StudentsTab";
+import TestResultsTab from "@/components/AdminDashboard/TestResultsTab";
+import CoursesTab from "@/components/AdminDashboard/CoursesTab";
+import CourseDetailsTab from "@/components/AdminDashboard/CourseDetailsTab";
+import SubmissionsTab from "@/components/AdminDashboard/SubmissionsTab";
+import SessionsTab from "@/components/AdminDashboard/SessionsTan";
+import CounselingFeedbackTab from "@/components/AdminDashboard/CounsellingFeedbackTab";
 
 const AdminDashboard = () => {
   const { getToken } = useAuth();
@@ -90,7 +93,6 @@ const AdminDashboard = () => {
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<any[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   const [showGradingModal, setShowGradingModal] = useState(false);
-  
 
   // Feedback editing state
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -132,9 +134,8 @@ const AdminDashboard = () => {
     fetchStudents();
   }, []);
 
-
   // student-performance
- const fetchSubmissions = async () => {
+  const fetchSubmissions = async () => {
     try {
       const token = await getToken();
       const res = await api.get("/api/admin/all-students-performance", {
@@ -152,22 +153,21 @@ const AdminDashboard = () => {
     }
   };
 
-const fetchStudents = async () => {
-  try {
-    const res = await api.get("/api/admin/students");
-    console.log("resallstudent:-",res)
-    const map: Record<string, string> = {};
+  const fetchStudents = async () => {
+    try {
+      const res = await api.get("/api/admin/students");
+      console.log("resallstudent:-", res);
+      const map: Record<string, string> = {};
 
-    (res.data as StudentData[]).forEach((student: StudentData) => {
-      map[student.clerkId] = `${student.firstName} ${student.lastName}`;
-    });
+      (res.data as StudentData[]).forEach((student: StudentData) => {
+        map[student.clerkId] = `${student.firstName} ${student.lastName}`;
+      });
 
-    setStudentsMap(map);
-  } catch (err) {
-    console.error("Failed to load students", err);
-  }
-};
-
+      setStudentsMap(map);
+    } catch (err) {
+      console.error("Failed to load students", err);
+    }
+  };
 
   const fetchAdminData = async () => {
     try {
@@ -501,7 +501,7 @@ const fetchStudents = async () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("response:-",response)
+      console.log("response:-", response);
       setAssignmentSubmissions(response.data);
       setSelectedCourse(course);
       setShowSubmissions(true);
@@ -513,39 +513,8 @@ const fetchStudents = async () => {
 
   const openGradingModal = (submission: any) => {
     setSelectedSubmission(submission);
-    
     setShowGradingModal(true);
   };
-  
-
-  const premiumStudentCard = (student: StudentData) => (
-    <div
-      key={student.clerkId}
-      className="border border-gray-200 rounded-lg p-4"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h4 className="font-medium text-gray-900">
-            {student.firstName} {student.lastName}
-          </h4>
-          <p className="text-sm text-gray-500">{student.email}</p>
-        </div>
-        <div className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-600">
-          Premium
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <button
-          onClick={() => openFeedbackModal(student)}
-          className="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors flex items-center justify-center"
-        >
-          <MessageCircle className="w-4 h-4 mr-2" />
-          Edit Feedback
-        </button>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
@@ -559,6 +528,27 @@ const fetchStudents = async () => {
         </div>
       </div>
     );
+  }
+
+  // student score color
+  function getScoreColor(score: any, maxScore: any) {
+    if (
+      typeof score !== "number" ||
+      typeof maxScore !== "number" ||
+      maxScore === 0
+    ) {
+      return "gray"; // fallback if no valid score or maxScore
+    }
+
+    const percentage = (score / maxScore) * 100;
+
+    if (percentage >= 75) {
+      return "green";
+    } else if (percentage >= 50) {
+      return "yellow";
+    } else {
+      return "red";
+    }
   }
 
   return (
@@ -650,961 +640,88 @@ const fetchStudents = async () => {
         <div className="space-y-6">
           {/* Overview Tab */}
           {activeTab === "overview" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Users className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">
-                      Total Students
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {students.length}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <FileText className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">
-                      Tests Taken
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {testResults.length}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
-                    <Award className="w-6 h-6 text-yellow-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">
-                      High Performers
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {testResults.filter((r) => r.score >= 70).length}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">
-                      Premium Students
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {students.filter((s) => s.plan === "premium").length}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* paste  */}
-
-              {/* Performance Table */}
-              <div className="col-span-full bg-white rounded-xl shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Student Module Performance
-                </h2>
-
-                {loading ? (
-                  <p className="text-gray-500">Loading...</p>
-                ) : Object.keys(submissions).length === 0 ? (
-                  <p className="text-gray-500">No submissions yet.</p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 text-sm">
-                      <thead className="bg-gray-100 sticky top-0">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Student
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Course
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Week
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Module
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Assignment
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Score
-                          </th>
-
-                          {/* <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Action
-                          </th> */}
-
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {Object.entries(submissions).map(([studentId, subs]) =>
-                          subs.map((s, idx) => (
-                            <tr key={`${studentId}-${idx}`}>
-                              <td className="px-4 py-2 whitespace-nowrap text-gray-700 max-w-[180px] truncate">
-                                {studentsMap[studentId] || studentId}
-                              </td>
-                              <td className="px-4 py-2 text-gray-700">
-                                {s.courseId?.courseName || "-"}
-                              </td>
-                              <td className="px-4 py-2 text-gray-700">
-                                {s.week}
-                              </td>
-                              <td className="px-4 py-2 text-gray-700">
-                                {s.module}
-                              </td>
-                              <td className="px-4 py-2 text-gray-700">
-                                {s.title}
-                              </td>
-                              <td className="px-4 py-2">
-                                {s.score !== undefined ? (
-                                  <span
-                                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                                      s.score >= 75
-                                        ? "bg-green-100 text-green-800"
-                                        : s.score >= 50
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-red-100 text-red-800"
-                                    }`}
-                                  >
-                                    {s.score}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">—</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
+            <OverviewTab
+              students={students}
+              testResults={testResults}
+              submissions={submissions}
+              studentsMap={studentsMap}
+              getScoreColor={getScoreColor}
+              loading={loading}
+            />
           )}
 
           {/* Students Tab */}
           {activeTab === "students" && (
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  All Students
-                </h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Student
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Plan
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Joined
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {students.map((student) => (
-                      <tr key={student.clerkId}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {student.firstName} {student.lastName}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {student.email}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              student.plan === "premium"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {student.plan || "Free"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(student.createdAt)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => openFeedbackModal(student)}
-                            className="text-indigo-600 hover:text-indigo-900 mr-4"
-                          >
-                            Edit Feedback
-                          </button>
-                          {student.plan === "premium" && (
-                            <span className="text-green-600 text-xs">
-                              Premium Student
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <StudentsTab
+              students={students}
+              formatDate={formatDate}
+              openFeedbackModal={openFeedbackModal}
+            />
           )}
 
           {/* Tests Tab */}
           {activeTab === "tests" && (
-            <div className="space-y-6">
-              {/* Search and Filter */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        type="text"
-                        placeholder="Search by student name or ID..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                  <select
-                    value={filterScore}
-                    onChange={(e) =>
-                      setFilterScore(
-                        e.target.value as "all" | "high" | "scholarship"
-                      )
-                    }
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    <option value="all">All Scores</option>
-                    <option value="high">High Performers (70%+)</option>
-                    <option value="scholarship">
-                      Scholarship Eligible (60%+)
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Test Results */}
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Test Results
-                  </h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Student
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Score
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Scholarship
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Time Spent
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Completed At
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredResults.map((result) => {
-                        const scholarship = getScholarshipLevel(result.score);
-                        return (
-                          <tr key={result._id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {result.studentName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {result.userId}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {result.score}%
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${scholarship.bg} ${scholarship.color}`}
-                              >
-                                {scholarship.level}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {formatTime(result.timeSpent)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {formatDate(result.completedAt)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <TestResultsTab
+              filteredResults={filteredResults}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filterScore={filterScore}
+              setFilterScore={setFilterScore}
+              getScholarshipLevel={getScholarshipLevel}
+              formatDate={formatDate}
+              formatTime={formatTime}
+            />
           )}
 
           {/* Courses Tab */}
           {activeTab === "courses" && !showCourseDetails && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Course Management
-                </h2>
-                <div className="flex space-x-3">
-                  <select
-                    onChange={(e) => {
-                      const course = courses.find(
-                        (c) => c._id === e.target.value
-                      );
-                      if (course) viewCourseDetails(course);
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    defaultValue=""
-                  >
-                    <option value="">Select course to manage details</option>
-                    {courses.map((course) => (
-                      <option key={course._id} value={course._id}>
-                        {course.displayName || course.courseName}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => openCourseModal()}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    Add New Course
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  All Courses
-                </h3>
-                <div className="grid gap-4">
-                  {courses.map((course) => (
-                    <div
-                      key={course._id}
-                      className="border border-gray-200 rounded-lg p-4"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium text-gray-900">
-                            {course.displayName || course.courseName}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            {course.courseDescription}
-                          </p>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {course.durationWeeks} weeks •{" "}
-                          {course.liveClassesPerWeek} classes/week
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            course.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {course.isActive ? "Active" : "Inactive"}
-                        </span>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => viewCourseDetails(course)}
-                            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-                          >
-                            Manage Details
-                          </button>
-                          <button
-                            onClick={() => viewAssignmentSubmissions(course)}
-                            className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
-                          >
-                            View Submissions
-                          </button>
-                          <button
-                            onClick={() => openCourseModal(course)}
-                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                          >
-                            Edit Course
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (
-                                confirm(
-                                  "Are you sure you want to delete this course?"
-                                )
-                              ) {
-                                try {
-                                  const token = await getToken();
-                                  await api.delete(
-                                    `/api/predefined-courses/admin/predefined-courses/${encodeURIComponent(
-                                      course.courseName
-                                    )}`,
-                                    {
-                                      headers: {
-                                        Authorization: `Bearer ${token}`,
-                                      },
-                                    }
-                                  );
-                                  setCourses(
-                                    courses.filter((c) => c._id !== course._id)
-                                  );
-                                  alert("Course deleted successfully!");
-                                } catch (error) {
-                                  console.error(
-                                    "Error deleting course:",
-                                    error
-                                  );
-                                  alert("Error deleting course");
-                                }
-                              }
-                            }}
-                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {courses.length === 0 && (
-                    <p className="text-gray-500 text-center py-8">
-                      No courses available yet.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+            <CoursesTab
+              courses={courses}
+              viewCourseDetails={viewCourseDetails}
+              openCourseModal={openCourseModal}
+              viewAssignmentSubmissions={viewAssignmentSubmissions}
+              setCourses={setCourses}
+            />
           )}
-          
+
           {/* Course Details View */}
           {activeTab === "courses" && showCourseDetails && selectedCourse && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <button
-                    onClick={() => setShowCourseDetails(false)}
-                    className="text-purple-600 hover:text-purple-800 mb-2"
-                  >
-                    ← Back to Courses
-                  </button>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {selectedCourse.displayName || selectedCourse.courseName} -
-                    Detailed Management
-                  </h2>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Course Overview
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Duration</p>
-                    <p className="text-lg font-semibold">
-                      {selectedCourse.durationWeeks} weeks
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Effort/Week</p>
-                    <p className="text-lg font-semibold">
-                      {selectedCourse.effortPerWeek}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Live Classes</p>
-                    <p className="text-lg font-semibold">
-                      {selectedCourse.liveClassesPerWeek}/week
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Status</p>
-                    <p
-                      className={`text-lg font-semibold ${
-                        selectedCourse.isActive
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {selectedCourse.isActive ? "Active" : "Inactive"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-gray-900">
-                    Weekly Modules
-                  </h4>
-                  {selectedCourse.weeklyRoadmap?.map(
-                    (week: any, index: number) => (
-                      <div
-                        key={index}
-                        className="border border-gray-200 rounded-lg p-4"
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h5 className="font-medium text-gray-900">
-                              Week {week.week}: {week.title}
-                            </h5>
-                            <p className="text-sm text-gray-600 mt-1">
-                              Topics:{" "}
-                              {week.topics?.join(", ") || "No topics defined"}
-                            </p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => openResourceModal(week.week)}
-                              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                            >
-                              Add Resource
-                            </button>
-                            <button
-                              onClick={() => openAssignmentModal(week.week)}
-                              className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-                            >
-                              Add Assignment
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Resources */}
-                        {week.resources && week.resources.length > 0 && (
-                          <div className="mb-3">
-                            <h6 className="text-sm font-medium text-gray-700 mb-2">
-                              Resources:
-                            </h6>
-                            <div className="space-y-1">
-                              {week.resources.map(
-                                (resource: any, rIndex: number) => (
-                                  <div
-                                    key={rIndex}
-                                    className="flex items-center justify-between bg-gray-50 p-2 rounded"
-                                  >
-                                    <div className="flex items-center">
-                                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded mr-2">
-                                        {resource.type}
-                                      </span>
-                                      <span className="text-sm">
-                                        {resource.title}
-                                      </span>
-                                    </div>
-                                    <a
-                                      href={resource.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 hover:text-blue-800 text-sm"
-                                    >
-                                      <ExternalLink className="w-4 h-4" />
-                                    </a>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Assignments */}
-                        {week.assignments && week.assignments.length > 0 && (
-                          <div>
-                            <h6 className="text-sm font-medium text-gray-700 mb-2">
-                              Assignments:
-                            </h6>
-                            <div className="space-y-1">
-                              {week.assignments.map(
-                                (assignment: any, aIndex: number) => (
-                                  <div
-                                    key={aIndex}
-                                    className="bg-yellow-50 p-2 rounded"
-                                  >
-                                    <div className="flex justify-between items-start">
-                                      <div>
-                                        <span className="text-sm font-medium">
-                                          {assignment.title}
-                                        </span>
-                                        <p className="text-xs text-gray-600">
-                                          {assignment.description}
-                                        </p>
-                                      </div>
-                                      <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">
-                                        Max: {assignment.maxScore} pts
-                                      </span>
-                                    </div>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
+            <CourseDetailsTab
+              selectedCourse={selectedCourse}
+              setShowCourseDetails={setShowCourseDetails}
+              openResourceModal={openResourceModal}
+              openAssignmentModal={openAssignmentModal}
+            />
           )}
 
           {/* Assignment Submissions View */}
           {activeTab === "courses" && showSubmissions && selectedCourse && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <button
-                    onClick={() => setShowSubmissions(false)}
-                    className="text-purple-600 hover:text-purple-800 mb-2"
-                  >
-                    ← Back to Courses
-                  </button>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    Assignment Submissions -{" "}
-                    {selectedCourse.displayName || selectedCourse.courseName}
-                  </h2>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  All Submissions
-                </h3>
-
-                {assignmentSubmissions.length > 0 ? (
-                  <div className="space-y-4">
-                    {assignmentSubmissions.map((submission) => (
-                      <div
-                        key={submission._id}
-                        className="border border-gray-200 rounded-lg p-4"
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-medium text-gray-900">
-                              {submission.student.firstName}
-                            </h4>
-                            <p className="text-sm text-gray-500">
-                              Assignment: {submission.title}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Week: {submission.week}
-                            </p>
-                             <p className="text-sm text-gray-500">
-                              Moule: {submission.module}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="flex items-center space-x-2">
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  submission.status
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                                }`}
-                              >
-                                {submission.status ? "Graded" : "Pending"}
-                              </span>
-                              {submission.status && (
-                                <span className="text-sm font-medium text-gray-900">
-                                  Score: {submission.score}/{submission.maxScore}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mb-3">
-                          <p className="text-sm text-gray-600 mb-2">
-                            Submission Link:
-                          </p>
-                          <a
-                            href={submission.submissionLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 text-sm break-all flex items-center"
-                          >
-                            {submission.submissionLink}
-                            <ExternalLink className="w-4 h-4 ml-1" />
-                          </a>
-                        </div>
-
-                        <div className="mb-3">
-                          <p className="text-xs text-gray-500">
-                            Submitted:{" "}
-                            {new Date(
-                              submission.submittedAt
-                            ).toLocaleDateString()}{" "}
-                            at{" "}
-                            {new Date(
-                              submission.submittedAt
-                            ).toLocaleTimeString()}
-                          </p>
-                        </div>
-
-                        {submission.feedback && (
-                          <div className="mb-3">
-                            <p className="text-sm text-gray-600 mb-1">
-                              Feedback:
-                            </p>
-                            <p className="text-sm text-gray-800 bg-gray-50 p-2 rounded">
-                              {submission.feedback}
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="flex justify-end space-x-2">
-                          <button
-                            onClick={() => openGradingModal(submission)}
-                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                          >
-                            {submission.status
-                              ? "Edit Grade"
-                              : "Grade Assignment"}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-8">
-                    No assignment submissions yet.
-                  </p>
-                )}
-              </div>
-            </div>
+            <SubmissionsTab
+              selectedCourse={selectedCourse}
+              setShowSubmissions={setShowSubmissions}
+              openGradingModal={openGradingModal}
+              assignmentSubmissions={assignmentSubmissions}
+            />
           )}
 
           {/* Sessions Tab */}
           {activeTab === "sessions" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Upcoming Sessions Management
-                </h2>
-                <button
-                  onClick={() => setShowSessionModal(true)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Schedule New Session
-                </button>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  All Sessions
-                </h4>
-                <div className="space-y-3">
-                  {upcomingSessions.map((session) => (
-                    <div
-                      key={session._id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                    >
-                      <div>
-                        <h5 className="font-medium text-gray-900">
-                          {session.title}
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          {session.description}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {session.date} at {session.time}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            session.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {session.isActive ? "Active" : "Inactive"}
-                        </span>
-                        <a
-                          href={session.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 flex items-center"
-                        >
-                          <ExternalLink className="w-3 h-3 mr-1" />
-                          Join
-                        </a>
-                        <button
-                          onClick={async () => {
-                            if (
-                              confirm(
-                                "Are you sure you want to delete this session?"
-                              )
-                            ) {
-                              try {
-                                const token = await getToken();
-                                await api.delete(
-                                  `/api/admin/upcoming-sessions/${session._id}`,
-                                  {
-                                    headers: {
-                                      Authorization: `Bearer ${token}`,
-                                    },
-                                  }
-                                );
-                                setUpcomingSessions(
-                                  upcomingSessions.filter(
-                                    (s) => s._id !== session._id
-                                  )
-                                );
-                              } catch (error) {
-                                console.error("Error deleting session:", error);
-                                alert("Error deleting session");
-                              }
-                            }
-                          }}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {upcomingSessions.length === 0 && (
-                    <p className="text-gray-500 text-center py-8">
-                      No sessions scheduled yet.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+            <SessionsTab
+              setShowSessionModal={setShowSessionModal}
+              upcomingSessions={upcomingSessions}
+              setUpcomingSessions={setUpcomingSessions}
+            />
           )}
 
           {/* Counselling Tab */}
           {activeTab === "counselling" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Counselling & Feedback
-                </h2>
-                <button
-                  onClick={() => setShowSessionModal(true)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Session
-                </button>
-              </div>
-
-              {/* Premium Students */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  Premium Students
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {students
-                    .filter((student) => student.plan === "premium")
-                    .map((student) => premiumStudentCard(student))}
-                </div>
-              </div>
-
-              {/* Student Feedback */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  Student Feedback
-                </h4>
-                <div className="space-y-4">
-                  {studentFeedback.map((feedback, index) => (
-                    <div
-                      key={index}
-                      className="border border-gray-200 rounded-lg p-4"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h5 className="font-medium text-gray-900">
-                            {feedback.name}
-                          </h5>
-                          <p className="text-sm text-gray-500">
-                            {feedback.college} - {feedback.semester}
-                          </p>
-                        </div>
-                        <span className="text-xs text-gray-500">
-                          {new Date(feedback.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p>
-                            <strong>Course:</strong> {feedback.courseChosen}
-                          </p>
-                          <p>
-                            <strong>Three Words:</strong>{" "}
-                            {feedback.threeWords.join(", ")}
-                          </p>
-                          <p>
-                            <strong>English:</strong> {feedback.englishRating}
-                            /10
-                          </p>
-                          <p>
-                            <strong>Hindi:</strong> {feedback.hindiRating}/10
-                          </p>
-                        </div>
-                        <div>
-                          <p>
-                            <strong>Strengths:</strong> {feedback.strengths}
-                          </p>
-                          <p>
-                            <strong>Areas to Improve:</strong>{" "}
-                            {feedback.areasOfImprovement}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <CounselingFeedbackTab
+              setShowSessionModal={setShowSessionModal}
+              students={students}
+              studentFeedback={studentFeedback}
+              openFeedbackModal={openFeedbackModal}
+            />
           )}
-
         </div>
       </div>
 
@@ -2295,7 +1412,6 @@ const fetchStudents = async () => {
         </div>
       )}
 
-
       {/* Grade Modal second*/}
       {showGradingModal && selectedSubmission && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -2356,7 +1472,6 @@ const fetchStudents = async () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
