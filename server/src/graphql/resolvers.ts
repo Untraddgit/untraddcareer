@@ -1,97 +1,75 @@
-import mongoose, { Query } from "mongoose";
-import PredefinedCourse, {
-  IPredefinedCourse,
-} from "../models/PredefinedCourse";
-import AssignmentSubmission, {
-  IAssignmentSubmission,
-} from "../models/AssignmentSubmission";
-
+import PredefinedCourse from "../models/PredefinedCourse";
+import AssignmentSubmission from "../models/AssignmentSubmission";
 export const resolvers = {
   Query: {
-     getStudentOverallPerformance: async (
+    getStudentOverallPerformance: async (
       _: any,
-      { studentId, courseId }: { studentId: string; courseId?: string }
+      { studentId }: { studentId: string }
     ) => {
-      const courseQuery = courseId
-        ? { _id: new mongoose.Types.ObjectId(courseId) }
-        : {};
-      const courses: IPredefinedCourse[] = await PredefinedCourse.find(
-        courseQuery
-      );
-      const results: any[] = [];
+      const submissions = await AssignmentSubmission.find({
+        studentId,
+        status: { $in: ["submitted", "graded"] },
+      });
 
-      for (const course of courses) {
-        const submissions = await AssignmentSubmission.find({
-          studentId,
-          courseId: course._id,
-        });
+      const courseMap = new Map();
 
-        if (submissions.length === 0) continue;
+      for (const sub of submissions) {
+        const key = sub.courseId.toString();
 
-        const gradedSubmissions = submissions.filter(
-          (s) => s.status === "graded"
-        );
+        if (!courseMap.has(key)) {
+          courseMap.set(key, {
+            submittedAssignments: 0,
+            completedModulesSet: new Set(),
+          });
+        }
+
+        const courseEntry = courseMap.get(key);
+        courseEntry.submittedAssignments += 1;
+        courseEntry.completedModulesSet.add(`${sub.week}-${sub.module}`);
+      }
+
+      const result = [];
+
+      for (const [courseId, data] of courseMap.entries()) {
+        const course = await PredefinedCourse.findById(courseId);
+        if (!course) continue;
+
+        const totalModules = course.weeklyRoadmap.length;
+        // Count completed modules (unique week-module combos)
+        const completedModuleSet = new Set();
+        let totalScore = 0;
+        let maxScore = 0;
+
+        for (const sub of submissions) {
+          completedModuleSet.add(`${sub.week}-${sub.module}`);
+          if (
+            typeof sub.score === "number" &&
+            typeof sub.maxScore === "number"
+          ) {
+            totalScore += sub.score;
+            maxScore += sub.maxScore;
+          }
+        }
+
+        const totalAssignments = course.weeklyRoadmap.reduce((sum, week) => {
+          return sum + (week.assignments?.length || 0);
+        }, 0);
+
         const averageGrade =
-          gradedSubmissions.length > 0
-            ? gradedSubmissions.reduce(
-                (sum, sub) => sum + (sub.score || 0),
-                0
-              ) / gradedSubmissions.length
-            : null;
+          maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : null;
 
-        results.push({
-          courseId: course._id,
-          courseName: course.courseName,
-          totalAssignments: submissions.length,
-          submittedAssignments: gradedSubmissions.length,
+        result.push({
+          courseId,
+          courseName: course.displayName,
+          totalModules,
+          completedModules: data.completedModulesSet.size,
+          totalAssignments,
+          submittedAssignments: data.submittedAssignments,
           averageGrade,
         });
       }
 
-      return results;
+      return result;
     },
-
-
-        // Resolver 1: Grouped Average Grade (for Chart)
-    getStudentModulePerformance: async (_:any, { studentId, courseId }:{studentId:string,courseId:string}) => {
-      const matchStage = { studentId, status: 'graded' };
-      // if (courseId) matchStage.courseId = courseId;
-      const results = await AssignmentSubmission.aggregate([
-        { $match: matchStage },
-        {
-          $group: {
-            _id: { week: "$week", module: "$module" },
-            averageGrade: { $avg: "$score" },
-          },
-        },
-        {
-          $project: {
-            week: "$_id.week",
-            module: "$_id.module",
-            grade: { $round: ["$averageGrade", 2] },
-            _id: 0,
-          },
-        },
-        { $sort: { week: 1 } },
-      ]);
-
-      return results;
-    },
-
-    // Resolver 2: All Graded Submissions (for Table)
-    getStudentAllSubmissions: async (_:any, { studentId, courseId }:{studentId:string;courseId:string}) => {
-      const filter = { studentId, status: 'graded' };
-      // if (courseId) filter.courseId = courseId;
-
-      const submissions = await AssignmentSubmission.find(filter)
-        .select('week module title score maxScore status')
-        .sort({ week: 1 })
-        .lean();
-
-      return submissions;
-    },
-
   },
 };
-
-

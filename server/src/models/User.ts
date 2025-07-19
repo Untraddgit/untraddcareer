@@ -1,57 +1,62 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from "mongoose";
+// import Course from "./Course";
+import PredefinedCourse from "./PredefinedCourse";
 
 export interface IUser extends Document {
   clerkId: string;
   email: string;
   firstName: string;
   lastName: string;
-  userType: 'student' | 'admin';
+  userType: "student" | "admin";
   course?: string;
   plan?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const UserSchema = new Schema<IUser>({
-  clerkId: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
+const UserSchema = new Schema<IUser>(
+  {
+    clerkId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+      default: "User",
+    },
+    lastName: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    userType: {
+      type: String,
+      enum: ["student", "admin"],
+      default: "student",
+    },
+    course: {
+      type: String,
+      required: false,
+    },
+    plan: {
+      type: String,
+      required: false,
+    },
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  firstName: {
-    type: String,
-    required: true,
-    default: 'User'
-  },
-  lastName: {
-    type: String,
-    required: false,
-    default: ''
-  },
-  userType: {
-    type: String,
-    enum: ['student', 'admin'],
-    default: 'student'
-  },
-  course: {
-    type: String,
-    required: false
-  },
-  plan: {
-    type: String,
-    required: false
+  {
+    timestamps: true,
+    collection: "users", // Explicitly set collection name
   }
-}, {
-  timestamps: true,
-  collection: 'users' // Explicitly set collection name
-});
+);
 
 // Create indexes for better query performance
 UserSchema.index({ clerkId: 1 });
@@ -60,4 +65,4 @@ UserSchema.index({ email: 1 });
 // Add a compound index for name searches
 UserSchema.index({ firstName: 1, lastName: 1 });
 
-export default mongoose.model<IUser>('User', UserSchema); 
+export default mongoose.model<IUser>("User", UserSchema);
